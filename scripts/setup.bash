@@ -8,7 +8,6 @@ RL_TYPE=Release
 
 # Declare directory variables
 PROJECT_DIR=$(pwd)/..
-LIB_ROOT_DIR=/
 SRC_DIR=$PROJECT_DIR/src
 BUILD_DIR=$PROJECT_DIR/build
 DB_DIR=$BUILD_DIR/$(echo ${DB_TYPE,,})
@@ -30,7 +29,7 @@ if [ $RETURN -ne 0 ]; then
 fi
 
 cd "$DB_DIR"
-cmake -G "Eclipse CDT4 - Unix Makefiles" -DLIBRARY_ROOT_DIR="$LIB_ROOT_DIR" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
+cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
 RETURN=$?
 if [ $RETURN -ne 0 ]; then
     printf "\nSetup failed. Quit.\n\n"
@@ -38,7 +37,7 @@ if [ $RETURN -ne 0 ]; then
 fi
 
 cd "$RL_DIR"
-cmake -G "Eclipse CDT4 - Unix Makefiles" -DLIBRARY_ROOT_DIR="$LIB_ROOT_DIR" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
+cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
 RETURN=$?
 if [ $RETURN -ne 0 ]; then
     printf "\nSetup failed. Quit.\n\n"

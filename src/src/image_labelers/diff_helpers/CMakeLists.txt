@@ -1,3 +1,2 @@
-add_library(difference SHARED
-            angle_diff.cpp
-            line_dist_diff.cpp)
+# Add libraries
+add_library(difference SHARED angle_diff.cpp line_dist_diff.cpp)
