@@ -37,7 +37,7 @@ const cv::Point ANCHOR_CENTER = cv::Point(-1, -1);
 const int SAME_OUTPUT_TYPE = -1;
 
 void
-DepthGroundRemover::OnNewObjectReceived(const Cloud &cloud, const int sender_id)
+DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int sender_id)
 {
 	// this can be done even faster if we switch to column-major implementation
 	// thus allowing us to load whole row in L1 cache
@@ -60,8 +60,8 @@ DepthGroundRemover::OnNewObjectReceived(const Cloud &cloud, const int sender_id)
 }
 
 Mat
-DepthGroundRemover::ZeroOutGround(const cv::Mat &image, const cv::Mat &angle_image,
-		const Radians &threshold) const
+DepthGroundRemover::ZeroOutGround(const cv::Mat& image, const cv::Mat& angle_image,
+		const Radians& threshold) const
 {
 	// TODO(igor): test if its enough to remove only values starting from the
 	// botom pixel. I don't like removing all values based on a threshold.
@@ -81,8 +81,8 @@ DepthGroundRemover::ZeroOutGround(const cv::Mat &image, const cv::Mat &angle_ima
 }
 
 Mat
-DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat &image, const cv::Mat &angle_image,
-		const Radians &threshold, int kernel_size) const
+DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_image,
+		const Radians& threshold, int kernel_size) const
 {
 	Mat res = cv::Mat::zeros(image.size(), CV_32F);
 	LinearImageLabeler<> image_labeler(image, _params, threshold);
@@ -135,7 +135,7 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat &image, const cv::Mat &angle_
 }
 
 Mat
-DepthGroundRemover::RepairDepth(const Mat &no_ground_image, int step, float depth_threshold)
+DepthGroundRemover::RepairDepth(const Mat& no_ground_image, int step, float depth_threshold)
 {
 	Mat inpainted_depth = no_ground_image.clone();
 	for (int c = 0; c < inpainted_depth.cols; ++c)
@@ -179,7 +179,7 @@ DepthGroundRemover::RepairDepth(const Mat &no_ground_image, int step, float dept
 }
 
 Mat
-DepthGroundRemover::RepairDepth(const Mat &depth_image)
+DepthGroundRemover::RepairDepth(const Mat& depth_image)
 {
 	Mat kernel = GetUniformKernel(5);
 	Mat inpainted_depth;  // init an empty smoothed image
@@ -191,7 +191,7 @@ DepthGroundRemover::RepairDepth(const Mat &depth_image)
 }
 
 Mat
-DepthGroundRemover::CreateAngleImage(const Mat &depth_image)
+DepthGroundRemover::CreateAngleImage(const Mat& depth_image)
 {
 	Mat angle_image = Mat::zeros(depth_image.size(), DataType<float>::type);
 	Mat x_mat = Mat::zeros(depth_image.size(), DataType<float>::type);
@@ -299,7 +299,7 @@ DepthGroundRemover::GetUniformKernel(int window_size, int type) const
 }
 
 Mat
-DepthGroundRemover::ApplySavitskyGolaySmoothing(const Mat &image, int window_size)
+DepthGroundRemover::ApplySavitskyGolaySmoothing(const Mat& image, int window_size)
 {
 	Mat kernel = GetSavitskyGolayKernel(window_size);
 
@@ -310,7 +310,7 @@ DepthGroundRemover::ApplySavitskyGolaySmoothing(const Mat &image, int window_siz
 }
 
 Radians
-DepthGroundRemover::GetLineAngle(const Mat &depth_image, int col, int row_curr, int row_neigh)
+DepthGroundRemover::GetLineAngle(const Mat& depth_image, int col, int row_curr, int row_neigh)
 {
 	// compute inclination angle of the line given the depth of two pixels and
 	// their position in the image. We use config to determine the needed angles

@@ -44,7 +44,7 @@ class DepthGroundRemover: public AbstractClient<Cloud>, public AbstractSender<Cl
 
 public:
 	explicit
-	DepthGroundRemover(const ProjectionParams &params, const Radians &ground_remove_angle,
+	DepthGroundRemover(const ProjectionParams& params, const Radians& ground_remove_angle,
 			int window_size = 5) :
 			ClientT
 			{ }, SenderT
@@ -68,7 +68,7 @@ public:
 	 * @param      sender_id    id of the sender
 	 */
 	void
-	OnNewObjectReceived(const Cloud &cloud, const int sender_id) override;
+	OnNewObjectReceived(const Cloud& cloud, const int sender_id) override;
 
 protected:
 	/**
@@ -81,10 +81,10 @@ protected:
 	 * @return     depth image with 0 instead of ground pixels
 	 */
 	cv::Mat
-	ZeroOutGround(const cv::Mat &image, const cv::Mat &angle_image, const Radians &threshold) const;
+	ZeroOutGround(const cv::Mat& image, const cv::Mat& angle_image, const Radians& threshold) const;
 
 	cv::Mat
-	ZeroOutGroundBFS(const cv::Mat &image, const cv::Mat &angle_image, const Radians &threshold,
+	ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_image, const Radians& threshold,
 			int kernel_size) const;
 
 	/**
@@ -96,7 +96,7 @@ protected:
 	 *             pixel]
 	 */
 	cv::Mat
-	CreateAngleImage(const cv::Mat &depth_image);
+	CreateAngleImage(const cv::Mat& depth_image);
 
 	/**
 	 * @brief      Get kernel for Savitsky-Golay filter
@@ -118,7 +118,7 @@ protected:
 	 */
 
 	cv::Mat
-	ApplySavitskyGolaySmoothing(const cv::Mat &column, int window_size);
+	ApplySavitskyGolaySmoothing(const cv::Mat& column, int window_size);
 	/**
 	 * @brief      Get line angle
 	 * @details    Given two depth values and their angles compute the angle of
@@ -131,7 +131,7 @@ protected:
 	 * @return     [angle of the line]
 	 */
 	Radians
-	GetLineAngle(const cv::Mat &depth_image, int col, int row_curr, int row_neigh);
+	GetLineAngle(const cv::Mat& depth_image, int col, int row_curr, int row_neigh);
 
 	/**
 	 * @brief      Repair zeros in the depth image
@@ -141,10 +141,10 @@ protected:
 	 * @return     depth image with repaired values
 	 */
 	cv::Mat
-	RepairDepth(const cv::Mat &no_ground_image, int step, float depth_threshold);
+	RepairDepth(const cv::Mat& no_ground_image, int step, float depth_threshold);
 
 	cv::Mat
-	RepairDepth(const cv::Mat &depth_image);
+	RepairDepth(const cv::Mat& depth_image);
 
 	ProjectionParams _params;
 	int _window_size = 5;
