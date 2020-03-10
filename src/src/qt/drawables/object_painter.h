@@ -20,32 +20,43 @@
 
 #include <opencv2/imgproc.hpp>
 
-namespace depth_clustering {
+namespace depth_clustering
+{
 
-class ObjectPainter
-    : public depth_clustering::AbstractClient<
-          std::unordered_map<uint16_t, depth_clustering::Cloud>> {
-  using Cloud = depth_clustering::Cloud;
-  using Timer = depth_clustering::time_utils::Timer;
+class ObjectPainter: public depth_clustering::AbstractClient<
+		std::unordered_map<uint16_t, depth_clustering::Cloud>>
+{
+	using Cloud = depth_clustering::Cloud;
+	using Timer = depth_clustering::time_utils::Timer;
 
- public:
-  enum class OutlineType { kBox, kPolygon3d };
+public:
+	enum class OutlineType
+	{
+		kBox, kPolygon3d
+	};
 
-  explicit ObjectPainter(Viewer* viewer, OutlineType outline_type)
-      : viewer_{viewer}, outline_type_{outline_type} {}
+	explicit
+	ObjectPainter(Viewer* viewer, OutlineType outline_type) :
+			viewer_
+			{ viewer }, outline_type_
+			{ outline_type }
+	{
+	}
 
-  void OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds,
-                           int id) override;
+	void
+	OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int id) override;
 
- private:
-  static Drawable::UniquePtr CreateDrawableCube(
-      const depth_clustering::Cloud& cloud);
+private:
+	static Drawable::UniquePtr
+	CreateDrawableCube(const depth_clustering::Cloud& cloud);
 
-  static Drawable::UniquePtr CreateDrawablePolygon3d(
-      const depth_clustering::Cloud& cloud);
+	static Drawable::UniquePtr
+	CreateDrawablePolygon3d(const depth_clustering::Cloud& cloud);
 
-  Viewer* viewer_{nullptr};
-  OutlineType outline_type_{OutlineType::kBox};
+	Viewer *viewer_
+	{ nullptr };
+	OutlineType outline_type_
+	{ OutlineType::kBox };
 };
 
 }  // namespace depth_clustering
