@@ -38,7 +38,6 @@
 
 namespace depth_clustering
 {
-
 /**
  * @brief      Class for image based clusterer.
  *
@@ -48,8 +47,8 @@ template<typename LabelerT>
 class ImageBasedClusterer: public AbstractClusterer
 {
 public:
-	using Receiver = AbstractClient<Cloud>;
-	using Sender = AbstractSender<std::unordered_map<uint16_t, Cloud>>;
+	using Receiver = AbstractClient<NamedCloud>;
+	using Sender = AbstractSender<NamedCluster>;
 
 	/**
 	 * @brief      Construct an image-based clusterer.
@@ -101,9 +100,11 @@ public:
 	 * @param[in]  sender_id  The sender identifier
 	 */
 	void
-	OnNewObjectReceived(const Cloud& cloud, int) override
+	OnNewObjectReceived(const NamedCloud& named_cloud, int) override
 	{
 		// generate a projection from a point cloud
+		const Cloud &cloud = named_cloud.second;
+
 		if (!cloud.projection_ptr())
 		{
 			fprintf(stderr, "ERROR: projection not initialized in cloud.\n");
@@ -169,7 +170,7 @@ public:
 
 		fprintf(stderr, "INFO: prepared clusters in: %lu us\n", timer.measure());
 
-		this->ShareDataWithAllClients(clusters);
+		this->ShareDataWithAllClients(std::make_pair(named_cloud.first, clusters));
 		fprintf(stderr, "INFO: clusters shared: %lu us\n", timer.measure());
 	}
 

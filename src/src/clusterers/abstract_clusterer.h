@@ -19,22 +19,23 @@
 #include <unordered_map>
 #include <vector>
 
+#include "ground_removal/depth_ground_remover.h"
 #include "communication/abstract_client.h"
 #include "communication/abstract_sender.h"
 #include "utils/cloud.h"
 
 namespace depth_clustering
 {
+using NamedCluster = std::pair<std::string, std::unordered_map<uint16_t, Cloud>>;
 
 /**
  * @brief      Class for abstract clusterer.
  */
-class AbstractClusterer: public AbstractClient<Cloud>, public AbstractSender<
-		std::unordered_map<uint16_t, Cloud>>
+class AbstractClusterer: public AbstractClient<NamedCloud>, public AbstractSender<NamedCluster>
 {
 public:
-	using Receiver = AbstractClient<Cloud>;
-	using Sender = AbstractSender<std::unordered_map<uint16_t, Cloud>>;
+	using Receiver = AbstractClient<NamedCloud>;
+	using Sender = AbstractSender<NamedCluster>;
 
 	/**
 	 * @brief      Construct a clusterer.

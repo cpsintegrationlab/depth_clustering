@@ -2,19 +2,21 @@
 // In case of any problems with the code please contact me.
 // Email: igor.bogoslavskyi@uni-bonn.de.
 
+#include <iostream>
 #include "./object_painter.h"
 
 namespace depth_clustering
 {
 
 void
-ObjectPainter::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int)
+ObjectPainter::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 {
 	if (!viewer_)
 	{
 		return;
 	}
 	Timer timer;
+	const auto &clouds = named_cluster.second;
 	for (const auto &kv : clouds)
 	{
 		const auto &cluster = kv.second;
@@ -23,10 +25,10 @@ ObjectPainter::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& cl
 		switch (outline_type_)
 		{
 		case OutlineType::kBox:
-			drawable = CreateDrawableCube(cluster);
+			drawable = CreateDrawableCube(std::make_pair(named_cluster.first, cluster));
 			break;
 		case OutlineType::kPolygon3d:
-			drawable = CreateDrawablePolygon3d(cluster);
+			drawable = CreateDrawablePolygon3d(std::make_pair(named_cluster.first, cluster));
 			break;
 		}
 		if (drawable)
@@ -40,8 +42,9 @@ ObjectPainter::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& cl
 }
 
 Drawable::UniquePtr
-ObjectPainter::CreateDrawableCube(const depth_clustering::Cloud& cloud)
+ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
 {
+	const auto &cloud = named_cloud.second;
 	Eigen::Vector3f center = Eigen::Vector3f::Zero();
 	Eigen::Vector3f extent = Eigen::Vector3f::Zero();
 	Eigen::Vector3f max_point(std::numeric_limits<float>::lowest(),
@@ -61,12 +64,14 @@ ObjectPainter::CreateDrawableCube(const depth_clustering::Cloud& cloud)
 	{
 		extent = max_point - min_point;
 	}
+	logObject(named_cloud.first, center, extent);
 	return DrawableCube::Create(center, extent);
 }
 
 Drawable::UniquePtr
-ObjectPainter::CreateDrawablePolygon3d(const depth_clustering::Cloud& cloud)
+ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 {
+	const auto &cloud = named_cloud.second;
 	float min_z
 	{ std::numeric_limits<float>::max() };
 	float max_z
@@ -94,7 +99,27 @@ ObjectPainter::CreateDrawablePolygon3d(const depth_clustering::Cloud& cloud)
 	{
 		return nullptr;
 	}
+	logObject(named_cloud.first, hull, diff_z);
 	return DrawablePolygon3d::Create(hull, diff_z);
+}
+
+void
+ObjectPainter::logObject(const std::string& file_name, const Eigen::Vector3f& center,
+		const Eigen::Vector3f& extent)
+{
+	std::cout << "[INFO]: object file name: " << file_name << std::endl;
+	std::cout << "[INFO]: object center: " << center << std::endl;
+	std::cout << "[INFO]: object extent: " << extent << std::endl;
+	std::cout << std::endl;
+}
+
+void
+ObjectPainter::logObject(const std::string& file_name,
+		const DrawablePolygon3d::AlignedEigenVectors& hull, const float& diff_z)
+{
+	std::cout << "[INFO]: object file name: " << file_name << std::endl;
+	std::cout << "[INFO]: object z-difference: " << diff_z << std::endl;
+	std::cout << std::endl;
 }
 
 }  // namespace depth_clustering

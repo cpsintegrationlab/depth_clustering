@@ -37,10 +37,12 @@ const cv::Point ANCHOR_CENTER = cv::Point(-1, -1);
 const int SAME_OUTPUT_TYPE = -1;
 
 void
-DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int sender_id)
+DepthGroundRemover::OnNewObjectReceived(const NamedCloud& named_cloud, const int sender_id)
 {
 	// this can be done even faster if we switch to column-major implementation
 	// thus allowing us to load whole row in L1 cache
+	const Cloud& cloud = named_cloud.second;
+
 	if (!cloud.projection_ptr())
 	{
 		fprintf(stderr, "No projection in cloud. Skipping ground removal.\n");
@@ -55,7 +57,7 @@ DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int sender_id)
 			_window_size);
 	fprintf(stderr, "INFO: Ground removed in %lu us\n", total_timer.measure());
 	cloud_copy.projection_ptr()->depth_image() = no_ground_image;
-	this->ShareDataWithAllClients(cloud_copy);
+	this->ShareDataWithAllClients(std::make_pair(named_cloud.first, cloud_copy));
 	_counter++;
 }
 

@@ -28,6 +28,7 @@
 
 namespace depth_clustering
 {
+using NamedCloud = std::pair<std::string, Cloud>;
 
 /**
  * @brief      A class to remove ground based upon depth image
@@ -37,10 +38,10 @@ namespace depth_clustering
  *
  * @param      params  projection params
  */
-class DepthGroundRemover: public AbstractClient<Cloud>, public AbstractSender<Cloud>
+class DepthGroundRemover: public AbstractClient<NamedCloud>, public AbstractSender<NamedCloud>
 {
-	using ClientT = AbstractClient<Cloud>;
-	using SenderT = AbstractSender<Cloud>;
+	using ClientT = AbstractClient<NamedCloud>;
+	using SenderT = AbstractSender<NamedCloud>;
 
 public:
 	explicit
@@ -68,7 +69,7 @@ public:
 	 * @param      sender_id    id of the sender
 	 */
 	void
-	OnNewObjectReceived(const Cloud& cloud, const int sender_id) override;
+	OnNewObjectReceived(const NamedCloud& named_cloud, const int sender_id) override;
 
 protected:
 	/**

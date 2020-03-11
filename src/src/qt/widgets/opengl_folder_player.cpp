@@ -99,7 +99,7 @@ OpenGlFolderPlayer::OpenGlFolderPlayer(QWidget *parent)
                                  QPainter::SmoothPixmapTransform);
 
   _painter.reset(
-      new ObjectPainter{_viewer, ObjectPainter::OutlineType::kPolygon3d});
+      new ObjectPainter{_viewer, ObjectPainter::OutlineType::kBox});
   this->onSegmentationParamUpdate();
 }
 
@@ -266,7 +266,7 @@ void OpenGlFolderPlayer::onSliderMovedTo(int cloud_number) {
           timer.measure(Timer::Units::Micro));
 
   // label cloud and show labels
-  _ground_rem->OnNewObjectReceived(*_cloud, 0);
+  _ground_rem->OnNewObjectReceived(std::make_pair(file_name, *_cloud), 0);
 
   fprintf(stderr, "[TIMER]: full segmentation took %lu milliseconds\n",
           timer.measure(Timer::Units::Milli));
