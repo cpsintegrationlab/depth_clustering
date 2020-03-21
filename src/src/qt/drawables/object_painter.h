@@ -22,6 +22,8 @@
 
 #include <opencv2/imgproc.hpp>
 
+#include <boost/property_tree/ptree.hpp>
+
 namespace depth_clustering
 {
 
@@ -31,6 +33,7 @@ class ObjectPainter: public depth_clustering::AbstractClient<NamedCluster>
 	using Timer = depth_clustering::time_utils::Timer;
 
 public:
+
 	enum class OutlineType
 	{
 		kBox, kPolygon3d
@@ -38,9 +41,7 @@ public:
 
 	explicit
 	ObjectPainter(Viewer* viewer, OutlineType outline_type) :
-			viewer_
-			{ viewer }, outline_type_
-			{ outline_type }
+			viewer_(viewer), outline_type_(outline_type)
 	{
 	}
 
@@ -48,24 +49,33 @@ public:
 	OnNewObjectReceived(const NamedCluster& named_cluster, int id) override;
 
 private:
-	static Drawable::UniquePtr
+
+	Drawable::UniquePtr
 	CreateDrawableCube(const NamedCloud& named_cloud);
 
-	static Drawable::UniquePtr
+	Drawable::UniquePtr
 	CreateDrawablePolygon3d(const NamedCloud& named_cloud);
 
-	static void
+	void
 	logObject(const std::string& file_name, const Eigen::Vector3f& center,
 			const Eigen::Vector3f& extent);
 
-	static void
+	void
 	logObject(const std::string& file_name, const DrawablePolygon3d::AlignedEigenVectors& hull,
 			const float& diff_z);
 
-	Viewer *viewer_
-	{ nullptr };
-	OutlineType outline_type_
-	{ OutlineType::kBox };
+	void
+	openLogFile(const std::string& file_name);
+
+	Viewer *viewer_ = nullptr;
+	OutlineType outline_type_ = OutlineType::kBox;
+
+	bool log_ = true;
+	std::ofstream log_file_;
+	std::string log_file_path_ = "";
+	const std::string log_file_name_ = "object.json";
+
+	boost::property_tree::ptree tree_;
 };
 
 }  // namespace depth_clustering

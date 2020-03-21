@@ -5,6 +5,8 @@
 #include <iostream>
 #include "./object_painter.h"
 
+#include <boost/property_tree/json_parser.hpp>
+
 namespace depth_clustering
 {
 
@@ -64,7 +66,12 @@ ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
 	{
 		extent = max_point - min_point;
 	}
-	logObject(named_cloud.first, center, extent);
+
+	if (log_)
+	{
+		logObject(named_cloud.first, center, extent);
+	}
+
 	return DrawableCube::Create(center, extent);
 }
 
@@ -99,7 +106,12 @@ ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 	{
 		return nullptr;
 	}
-	logObject(named_cloud.first, hull, diff_z);
+
+	if (log_)
+	{
+		logObject(named_cloud.first, hull, diff_z);
+	}
+
 	return DrawablePolygon3d::Create(hull, diff_z);
 }
 
@@ -107,10 +119,23 @@ void
 ObjectPainter::logObject(const std::string& file_name, const Eigen::Vector3f& center,
 		const Eigen::Vector3f& extent)
 {
-	std::cout << "[INFO]: object file name: " << file_name << std::endl;
-	std::cout << "[INFO]: object center: " << center << std::endl;
-	std::cout << "[INFO]: object extent: " << extent << std::endl;
-	std::cout << std::endl;
+	if (!log_file_.is_open())
+	{
+		openLogFile(file_name);
+
+		if (!log_file_.is_open())
+		{
+			std::cout << "[WARN]: failed to open log file '" << log_file_path_ + log_file_name_
+					<< "'." << std::endl;
+			return;
+		}
+
+		tree_.clear();
+		boost::property_tree::write_json(log_file_, tree_);
+
+		std::cout << "[INFO]: opened log file '" << log_file_path_ + log_file_name_ << "'."
+				<< std::endl;
+	}
 }
 
 void
@@ -120,6 +145,37 @@ ObjectPainter::logObject(const std::string& file_name,
 	std::cout << "[INFO]: object file name: " << file_name << std::endl;
 	std::cout << "[INFO]: object z-difference: " << diff_z << std::endl;
 	std::cout << std::endl;
+}
+
+void
+ObjectPainter::openLogFile(const std::string& file_name)
+{
+	char log_file_path_delim = '/';
+	std::string log_file_path = "";
+	std::string log_file_path_portion = "";
+	std::vector<std::string> log_file_path_portions;
+	std::istringstream ss(file_name);
+
+	while (log_file_path_portion != std::string(1, log_file_path_delim))
+	{
+		log_file_path_portion = std::string(1, log_file_path_delim);
+		getline(ss, log_file_path_portion, log_file_path_delim);
+		log_file_path_portions.push_back(log_file_path_portion);
+	}
+
+	log_file_path_portions.pop_back();
+	log_file_path_portions.pop_back();
+
+	for (const auto &portion : log_file_path_portions)
+	{
+		log_file_path += portion;
+		log_file_path += std::string(1, log_file_path_delim);
+	}
+
+	log_file_path_ = log_file_path;
+
+	log_file_.close();
+	log_file_.open(log_file_path_ + log_file_name_, std::fstream::out | std::fstream::trunc);
 }
 
 }  // namespace depth_clustering
