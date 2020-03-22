@@ -48,6 +48,9 @@ public:
 	void
 	OnNewObjectReceived(const NamedCluster& named_cluster, int id) override;
 
+	void
+	writeLog();
+
 private:
 
 	Drawable::UniquePtr
@@ -74,8 +77,7 @@ private:
 	std::ofstream log_file_;
 	std::string log_file_path_ = "";
 	const std::string log_file_name_ = "object.json";
-
-	boost::property_tree::ptree tree_;
+	boost::property_tree::ptree log_file_tree_;
 };
 
 }  // namespace depth_clustering

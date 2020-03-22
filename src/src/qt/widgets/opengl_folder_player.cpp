@@ -106,6 +106,9 @@ OpenGlFolderPlayer::onPlayAllClouds()
 		ui->gl_widget->update();
 		QApplication::processEvents();
 	}
+
+	_painter->writeLog();
+
 	qDebug() << "All clouds shown!";
 }
 

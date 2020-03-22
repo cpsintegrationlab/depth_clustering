@@ -43,6 +43,17 @@ ObjectPainter::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 	fprintf(stderr, "[TIMING]: Viewer updated in %lu us\n", timer.measure(Timer::Units::Micro));
 }
 
+void
+ObjectPainter::writeLog()
+{
+	boost::property_tree::write_json(log_file_, log_file_tree_);
+
+	std::cout << "[INFO]: wrote to log file '" << log_file_path_ + log_file_name_ << "'."
+			<< std::endl;
+
+	log_file_.close();
+}
+
 Drawable::UniquePtr
 ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
 {
@@ -130,11 +141,50 @@ ObjectPainter::logObject(const std::string& file_name, const Eigen::Vector3f& ce
 			return;
 		}
 
-		tree_.clear();
-		boost::property_tree::write_json(log_file_, tree_);
-
 		std::cout << "[INFO]: opened log file '" << log_file_path_ + log_file_name_ << "'."
 				<< std::endl;
+	}
+
+	boost::property_tree::ptree cloud_object_array_value;
+	boost::property_tree::ptree cloud_object_array;
+	std::string cloud_file_name = file_name;
+
+	cloud_object_array_value.put_value(center.x());
+	cloud_object_array.push_back(std::make_pair("", cloud_object_array_value));
+
+	cloud_object_array_value.put_value(center.y());
+	cloud_object_array.push_back(std::make_pair("", cloud_object_array_value));
+
+	cloud_object_array_value.put_value(center.z());
+	cloud_object_array.push_back(std::make_pair("", cloud_object_array_value));
+
+	cloud_object_array_value.put_value(extent.x());
+	cloud_object_array.push_back(std::make_pair("", cloud_object_array_value));
+
+	cloud_object_array_value.put_value(extent.y());
+	cloud_object_array.push_back(std::make_pair("", cloud_object_array_value));
+
+	cloud_object_array_value.put_value(extent.z());
+	cloud_object_array.push_back(std::make_pair("", cloud_object_array_value));
+
+	cloud_file_name.erase(cloud_file_name.find(log_file_path_), log_file_path_.length());
+	auto cloud_file_array_optional = log_file_tree_.get_child_optional(
+			boost::property_tree::ptree::path_type(cloud_file_name, '/'));
+
+	if (!cloud_file_array_optional)
+	{
+		log_file_tree_.add_child(boost::property_tree::ptree::path_type(cloud_file_name, '/'),
+				boost::property_tree::ptree());
+		auto &cloud_file_array = log_file_tree_.get_child(
+				boost::property_tree::ptree::path_type(cloud_file_name, '/'));
+
+		cloud_file_array.push_back(std::make_pair("", cloud_object_array));
+	}
+	else
+	{
+		auto &cloud_file_array = *cloud_file_array_optional;
+
+		cloud_file_array.push_back(std::make_pair("", cloud_object_array));
 	}
 }
 
@@ -142,9 +192,68 @@ void
 ObjectPainter::logObject(const std::string& file_name,
 		const DrawablePolygon3d::AlignedEigenVectors& hull, const float& diff_z)
 {
-	std::cout << "[INFO]: object file name: " << file_name << std::endl;
-	std::cout << "[INFO]: object z-difference: " << diff_z << std::endl;
-	std::cout << std::endl;
+	if (!log_file_.is_open())
+	{
+		openLogFile(file_name);
+
+		if (!log_file_.is_open())
+		{
+			std::cout << "[WARN]: failed to open log file '" << log_file_path_ + log_file_name_
+					<< "'." << std::endl;
+			return;
+		}
+
+		std::cout << "[INFO]: opened log file '" << log_file_path_ + log_file_name_ << "'."
+				<< std::endl;
+	}
+
+	boost::property_tree::ptree cloud_object_array_value;
+	boost::property_tree::ptree cloud_object_array;
+	boost::property_tree::ptree cloud_hull_vector_array_value;
+	boost::property_tree::ptree cloud_hull_vector_array;
+	boost::property_tree::ptree cloud_hull_array;
+	std::string cloud_file_name = file_name;
+
+	for (const auto &hull_vector : hull)
+	{
+		cloud_hull_vector_array_value.put_value(hull_vector.x());
+		cloud_hull_vector_array.push_back(std::make_pair("", cloud_hull_vector_array_value));
+
+		cloud_hull_vector_array_value.put_value(hull_vector.y());
+		cloud_hull_vector_array.push_back(std::make_pair("", cloud_hull_vector_array_value));
+
+		cloud_hull_vector_array_value.put_value(hull_vector.z());
+		cloud_hull_vector_array.push_back(std::make_pair("", cloud_hull_vector_array_value));
+
+		cloud_hull_array.push_back(std::make_pair("", cloud_hull_vector_array));
+
+		cloud_hull_vector_array.clear();
+	}
+
+	cloud_object_array.push_back(std::make_pair("", cloud_hull_array));
+
+	cloud_object_array_value.put_value(diff_z);
+	cloud_object_array.push_back(std::make_pair("", cloud_object_array_value));
+
+	cloud_file_name.erase(cloud_file_name.find(log_file_path_), log_file_path_.length());
+	auto cloud_file_array_optional = log_file_tree_.get_child_optional(
+			boost::property_tree::ptree::path_type(cloud_file_name, '/'));
+
+	if (!cloud_file_array_optional)
+	{
+		log_file_tree_.add_child(boost::property_tree::ptree::path_type(cloud_file_name, '/'),
+				boost::property_tree::ptree());
+		auto &cloud_file_array = log_file_tree_.get_child(
+				boost::property_tree::ptree::path_type(cloud_file_name, '/'));
+
+		cloud_file_array.push_back(std::make_pair("", cloud_object_array));
+	}
+	else
+	{
+		auto &cloud_file_array = *cloud_file_array_optional;
+
+		cloud_file_array.push_back(std::make_pair("", cloud_object_array));
+	}
 }
 
 void
