@@ -25,50 +25,58 @@
 #include "projections/spherical_projection.h"
 #include "utils/cloud.h"
 
-namespace Ui {
+namespace Ui
+{
 class OpenGlFolderPlayer;
 }
 
-class OpenGlFolderPlayer : public BaseViewerWidget,
-                           public depth_clustering::AbstractClient<cv::Mat> {
-  Q_OBJECT
+class OpenGlFolderPlayer: public BaseViewerWidget, public depth_clustering::AbstractClient<cv::Mat>
+{
+Q_OBJECT
 
- public:
-  explicit OpenGlFolderPlayer(QWidget *parent = 0);
-  void OnNewObjectReceived(const cv::Mat &labels, int client_id = 0) override;
-  virtual ~OpenGlFolderPlayer();
+public:
+	explicit
+	OpenGlFolderPlayer(QWidget* parent = 0);
+	void
+	OnNewObjectReceived(const cv::Mat& labels, int client_id = 0) override;
+	virtual
+	~OpenGlFolderPlayer();
 
- protected:
-  void keyPressEvent(QKeyEvent *event) override;
+protected:
+	void
+	keyPressEvent(QKeyEvent* event) override;
 
- private slots:
-  void onOpenFolderToRead();
-  void onPlayAllClouds();
-  void onSegmentationParamUpdate();
-  void onSliderMovedTo(int cloud_number);
+private slots:
+	void
+	onOpenFolderToRead();
+	void
+	onPlayAllClouds();
+	void
+	onSegmentationParamUpdate();
+	void
+	onSliderMovedTo(int cloud_number);
 
- private:
-  // we cannot allocate anything now as this is an incomplete type
-  std::unique_ptr<Ui::OpenGlFolderPlayer> ui;
+private:
+	// we cannot allocate anything now as this is an incomplete type
+	std::unique_ptr<Ui::OpenGlFolderPlayer> ui;
 
-  std::unique_ptr<QGraphicsScene> _scene = nullptr;
-  std::unique_ptr<QGraphicsScene> _scene_labels = nullptr;
-  std::unique_ptr<depth_clustering::ProjectionParams> _proj_params = nullptr;
+	std::unique_ptr<QGraphicsScene> _scene = nullptr;
+	std::unique_ptr<QGraphicsScene> _scene_labels = nullptr;
+	std::unique_ptr<depth_clustering::ProjectionParams> _proj_params = nullptr;
 
-  std::unique_ptr<depth_clustering::ImageBasedClusterer<
-      depth_clustering::LinearImageLabeler<>>>
-      _clusterer = nullptr;
-  std::unique_ptr<depth_clustering::DepthGroundRemover> _ground_rem = nullptr;
+	std::unique_ptr<depth_clustering::ImageBasedClusterer<depth_clustering::LinearImageLabeler<>>> _clusterer =
+			nullptr;
+	std::unique_ptr<depth_clustering::DepthGroundRemover> _ground_rem = nullptr;
 
-  std::unique_ptr<depth_clustering::ObjectPainter> _painter = nullptr;
+	std::unique_ptr<depth_clustering::ObjectPainter> _painter = nullptr;
 
-  cv::Mat _current_full_depth_image;
-  depth_clustering::Cloud::Ptr _cloud;
-  std::vector<std::string> _file_names;
+	cv::Mat _current_full_depth_image;
+	depth_clustering::Cloud::Ptr _cloud;
+	std::vector<std::string> _file_names;
 
-  int _current_coloring_mode = 0;
+	int _current_coloring_mode = 0;
 
-  std::vector<std::string> _current_object_labels;
+	std::vector<std::string> _current_object_labels;
 };
 
 #endif  // SRC_QT_PCL_FOLDER_PLAYER_H_
