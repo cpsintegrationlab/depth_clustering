@@ -267,6 +267,13 @@ public:
 	static std::unique_ptr<ProjectionParams>
 	HDL_64_EQUAL();
 	/**
+	 * @brief      Parameters for Waymo
+	 *
+	 * @return     A pointer to parameters
+	 */
+	static std::unique_ptr<ProjectionParams>
+	WAYMO();
+	/**
 	 * @brief      Default parameters for Velodyne from config file
 	 *
 	 * @return     A pointer to parameters

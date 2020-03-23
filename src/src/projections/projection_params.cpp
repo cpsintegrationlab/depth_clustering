@@ -244,6 +244,26 @@ ProjectionParams::HDL_64()
 }
 
 std::unique_ptr<ProjectionParams>
+ProjectionParams::WAYMO()
+{
+	auto params = ProjectionParams();
+	params.SetSpan(SpanParams(-180_deg, 180_deg, 2650), SpanParams::Direction::HORIZONTAL);
+	SpanParams span_top(2.21_deg, 0.035_deg, 14);
+	SpanParams span_bottom(-0.14_deg, -17.74_deg, 50);
+	vector<SpanParams> spans =
+	{
+	{ span_top, span_bottom } };
+	params.SetSpan(spans, SpanParams::Direction::VERTICAL);
+	params.FillCosSin();
+	if (!params.valid())
+	{
+		fprintf(stderr, "ERROR: params are not valid!\n");
+		return nullptr;
+	}
+	return mem_utils::make_unique<ProjectionParams>(params);
+}
+
+std::unique_ptr<ProjectionParams>
 ProjectionParams::FullSphere(const Radians& discretization)
 {
 	auto params = ProjectionParams();
