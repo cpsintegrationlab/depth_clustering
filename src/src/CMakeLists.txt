@@ -1,4 +1,5 @@
 # Add subdirectories
+add_subdirectory(api)
 add_subdirectory(communication)
 add_subdirectory(ground_removal)
 add_subdirectory(image_labelers)
