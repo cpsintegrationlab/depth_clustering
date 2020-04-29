@@ -17,30 +17,54 @@ ObjectPainter::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 	{
 		return;
 	}
+
 	Timer timer;
+	OutputBoxFrame output_box_frame;
+	OutputPolygonFrame output_polygon_frame;
+	std::vector<OutputBox> outputs_box;
+	std::vector<OutputPolygon> outputs_polygon;
 	const auto &clouds = named_cluster.second;
+
 	for (const auto &kv : clouds)
 	{
 		const auto &cluster = kv.second;
 		Drawable::UniquePtr drawable
 		{ nullptr };
+
 		switch (outline_type_)
 		{
 		case OutlineType::kBox:
-			drawable = CreateDrawableCube(std::make_pair(named_cluster.first, cluster));
+			drawable = CreateDrawableCube(std::make_pair(named_cluster.first, cluster),
+					outputs_box);
 			break;
 		case OutlineType::kPolygon3d:
-			drawable = CreateDrawablePolygon3d(std::make_pair(named_cluster.first, cluster));
+			drawable = CreateDrawablePolygon3d(std::make_pair(named_cluster.first, cluster),
+					outputs_polygon);
 			break;
 		}
+
 		if (drawable)
 		{
 			viewer_->AddDrawable(std::move(drawable));
 		}
 	}
+
 	fprintf(stderr, "[TIMING]: Adding all boxes took %lu us\n", timer.measure(Timer::Units::Micro));
 	viewer_->update();
 	fprintf(stderr, "[TIMING]: Viewer updated in %lu us\n", timer.measure(Timer::Units::Micro));
+
+	output_box_frame = std::make_pair(named_cluster.first, outputs_box);
+	output_polygon_frame = std::make_pair(named_cluster.first, outputs_polygon);
+
+	if (outputs_box_frame_)
+	{
+		outputs_box_frame_->push(output_box_frame);
+	}
+
+	if (outputs_polygon_frame_)
+	{
+		outputs_polygon_frame_->push(output_polygon_frame);
+	}
 }
 
 void
@@ -55,7 +79,8 @@ ObjectPainter::writeLog()
 }
 
 Drawable::UniquePtr
-ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
+ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud,
+		std::vector<OutputBox>& outputs_box)
 {
 	const auto &cloud = named_cloud.second;
 	Eigen::Vector3f center = Eigen::Vector3f::Zero();
@@ -83,11 +108,14 @@ ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
 		logObject(named_cloud.first, center, extent);
 	}
 
+	outputs_box.push_back(std::make_pair(center, extent));
+
 	return DrawableCube::Create(center, extent);
 }
 
 Drawable::UniquePtr
-ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
+ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud,
+		std::vector<OutputPolygon>& outputs_polygon)
 {
 	const auto &cloud = named_cloud.second;
 	float min_z
@@ -122,6 +150,8 @@ ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 	{
 		logObject(named_cloud.first, hull, diff_z);
 	}
+
+	outputs_polygon.push_back(std::make_pair(hull, diff_z));
 
 	return DrawablePolygon3d::Create(hull, diff_z);
 }

@@ -12,9 +12,10 @@
 #include <thread>
 #include <string>
 
-#include "/usr/include/c++/7/string"
+#include "qt/drawables/object_painter.h"
 #include "utils/radians.h"
 
+using depth_clustering::ObjectPainter;
 using depth_clustering::Radians;
 
 class QApplication;
@@ -29,10 +30,16 @@ public:
 	~DepthClustering();
 
 	void
-	process();
+	process_frame_box();
 
 	void
-	process(const std::string& data_folder);
+	process_frame_polygon();
+
+	std::queue<ObjectPainter::OutputBoxFrame>
+	process_data_box(const std::string& data_folder);
+
+	std::queue<ObjectPainter::OutputPolygonFrame>
+	process_data_polygon(const std::string& data_folder);
 
 private:
 

@@ -34,14 +34,22 @@ class ObjectPainter: public depth_clustering::AbstractClient<NamedCluster>
 
 public:
 
+	using OutputBox = std::pair<Eigen::Vector3f, Eigen::Vector3f>;
+	using OutputPolygon = std::pair<DrawablePolygon3d::AlignedEigenVectors, float>;
+	using OutputBoxFrame = std::pair<std::string, std::vector<OutputBox>>;
+	using OutputPolygonFrame = std::pair<std::string, std::vector<OutputPolygon>>;
+
 	enum class OutlineType
 	{
 		kBox, kPolygon3d
 	};
 
 	explicit
-	ObjectPainter(Viewer* viewer, OutlineType outline_type) :
-			viewer_(viewer), outline_type_(outline_type)
+	ObjectPainter(Viewer* viewer, OutlineType outline_type,
+			std::queue<OutputBoxFrame>* outputs_box_frame,
+			std::queue<OutputPolygonFrame>* outputs_polygon_frame) :
+			viewer_(viewer), outline_type_(outline_type), outputs_box_frame_(outputs_box_frame), outputs_polygon_frame_(
+					outputs_polygon_frame)
 	{
 	}
 
@@ -54,10 +62,11 @@ public:
 private:
 
 	Drawable::UniquePtr
-	CreateDrawableCube(const NamedCloud& named_cloud);
+	CreateDrawableCube(const NamedCloud& named_cloud, std::vector<OutputBox>& outputs_box);
 
 	Drawable::UniquePtr
-	CreateDrawablePolygon3d(const NamedCloud& named_cloud);
+	CreateDrawablePolygon3d(const NamedCloud& named_cloud,
+			std::vector<OutputPolygon>& outputs_polygon);
 
 	void
 	logObject(const std::string& file_name, const Eigen::Vector3f& center,
@@ -72,6 +81,8 @@ private:
 
 	Viewer *viewer_ = nullptr;
 	OutlineType outline_type_ = OutlineType::kBox;
+	std::queue<OutputBoxFrame> *outputs_box_frame_ = nullptr;
+	std::queue<OutputPolygonFrame> *outputs_polygon_frame_ = nullptr;
 
 	bool log_ = true;
 	std::ofstream log_file_;

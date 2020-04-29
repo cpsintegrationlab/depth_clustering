@@ -14,7 +14,6 @@
 #include "image_labelers/linear_image_labeler.h"
 #include "projections/projection_params.h"
 #include "qt/drawables/drawable_cloud.h"
-#include "qt/drawables/object_painter.h"
 #include "qt/viewer/viewer.h"
 #include "utils/cloud.h"
 #include "utils/folder_reader.h"
@@ -27,7 +26,6 @@ using depth_clustering::FolderReader;
 using depth_clustering::ImageBasedClusterer;
 using depth_clustering::LinearImageLabeler;
 using depth_clustering::MatFromDepthPng;
-using depth_clustering::ObjectPainter;
 using depth_clustering::ProjectionParams;
 
 DepthClustering::DepthClustering()
@@ -48,9 +46,11 @@ DepthClustering::~DepthClustering()
 	viewer_thread_.join();
 }
 
-void
-DepthClustering::process(const std::string& data_folder)
+std::queue<ObjectPainter::OutputBoxFrame>
+DepthClustering::process_data_box(const std::string& data_folder)
 {
+	std::queue<ObjectPainter::OutputBoxFrame> outputs_box_frame;
+
 	auto folder_reader_data = FolderReader(data_folder, ".png", FolderReader::Order::SORTED);
 	auto folder_reader_config = FolderReader(data_folder, "img.cfg");
 	auto projection_parameter = ProjectionParams::FromConfigFile(
@@ -64,7 +64,7 @@ DepthClustering::process(const std::string& data_folder)
 	clusterer.SetDiffType(DiffFactory::DiffType::ANGLES);
 
 	ObjectPainter object_painter
-	{ viewer_.get(), ObjectPainter::OutlineType::kPolygon3d };
+	{ viewer_.get(), ObjectPainter::OutlineType::kBox, &outputs_box_frame, nullptr };
 
 	depth_ground_remover.AddClient(&clusterer);
 	clusterer.AddClient(&object_painter);
@@ -73,10 +73,51 @@ DepthClustering::process(const std::string& data_folder)
 	{
 		auto depth_image = MatFromDepthPng(path);
 		auto cloud = Cloud::FromImage(depth_image, *projection_parameter);
+
 		viewer_->Clear();
 		viewer_->AddDrawable(DrawableCloud::FromCloud(cloud));
+
 		depth_ground_remover.OnNewObjectReceived(std::make_pair(path, *cloud), 0);
 	}
+
+	return outputs_box_frame;
+}
+
+std::queue<ObjectPainter::OutputPolygonFrame>
+DepthClustering::process_data_polygon(const std::string& data_folder)
+{
+	std::queue<ObjectPainter::OutputPolygonFrame> outputs_polygon_frame;
+
+	auto folder_reader_data = FolderReader(data_folder, ".png", FolderReader::Order::SORTED);
+	auto folder_reader_config = FolderReader(data_folder, "img.cfg");
+	auto projection_parameter = ProjectionParams::FromConfigFile(
+			folder_reader_config.GetNextFilePath());
+	auto depth_ground_remover = DepthGroundRemover(*projection_parameter, angle_ground_removal_,
+			size_smooth_window_);
+
+	ImageBasedClusterer<LinearImageLabeler<>> clusterer(angle_clustering_, size_cluster_min_,
+			size_cluster_max_);
+
+	clusterer.SetDiffType(DiffFactory::DiffType::ANGLES);
+
+	ObjectPainter object_painter
+	{ viewer_.get(), ObjectPainter::OutlineType::kPolygon3d, nullptr, &outputs_polygon_frame };
+
+	depth_ground_remover.AddClient(&clusterer);
+	clusterer.AddClient(&object_painter);
+
+	for (const auto &path : folder_reader_data.GetAllFilePaths())
+	{
+		auto depth_image = MatFromDepthPng(path);
+		auto cloud = Cloud::FromImage(depth_image, *projection_parameter);
+
+		viewer_->Clear();
+		viewer_->AddDrawable(DrawableCloud::FromCloud(cloud));
+
+		depth_ground_remover.OnNewObjectReceived(std::make_pair(path, *cloud), 0);
+	}
+
+	return outputs_polygon_frame;
 }
 
 void
