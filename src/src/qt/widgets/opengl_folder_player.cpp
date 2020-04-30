@@ -93,7 +93,7 @@ OpenGlFolderPlayer::OpenGlFolderPlayer(QWidget* parent) :
 	ui->gfx_labels->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
 	_painter.reset(new ObjectPainter
-	{ _viewer, ObjectPainter::OutlineType::kBox, nullptr, nullptr});
+	{ _viewer, ObjectPainter::OutlineType::kBox, nullptr, nullptr, true});
 	this->onSegmentationParamUpdate();
 }
 

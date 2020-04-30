@@ -36,8 +36,8 @@ public:
 
 	using OutputBox = std::pair<Eigen::Vector3f, Eigen::Vector3f>;
 	using OutputPolygon = std::pair<DrawablePolygon3d::AlignedEigenVectors, float>;
-	using OutputBoxFrame = std::pair<std::string, std::vector<OutputBox>>;
-	using OutputPolygonFrame = std::pair<std::string, std::vector<OutputPolygon>>;
+	using OutputBoxFrame = std::vector<OutputBox>;
+	using OutputPolygonFrame = std::vector<OutputPolygon>;
 
 	enum class OutlineType
 	{
@@ -45,11 +45,10 @@ public:
 	};
 
 	explicit
-	ObjectPainter(Viewer* viewer, OutlineType outline_type,
-			std::queue<OutputBoxFrame>* outputs_box_frame,
-			std::queue<OutputPolygonFrame>* outputs_polygon_frame) :
-			viewer_(viewer), outline_type_(outline_type), outputs_box_frame_(outputs_box_frame), outputs_polygon_frame_(
-					outputs_polygon_frame)
+	ObjectPainter(Viewer* viewer, OutlineType outline_type, OutputBoxFrame* output_box_frame,
+			OutputPolygonFrame* output_polygon_frame, bool log) :
+			viewer_(viewer), outline_type_(outline_type), output_box_frame_(output_box_frame), output_polygon_frame_(
+					output_polygon_frame), log_(log)
 	{
 	}
 
@@ -62,11 +61,10 @@ public:
 private:
 
 	Drawable::UniquePtr
-	CreateDrawableCube(const NamedCloud& named_cloud, std::vector<OutputBox>& outputs_box);
+	CreateDrawableCube(const NamedCloud& named_cloud);
 
 	Drawable::UniquePtr
-	CreateDrawablePolygon3d(const NamedCloud& named_cloud,
-			std::vector<OutputPolygon>& outputs_polygon);
+	CreateDrawablePolygon3d(const NamedCloud& named_cloud);
 
 	void
 	logObject(const std::string& file_name, const Eigen::Vector3f& center,
@@ -81,8 +79,8 @@ private:
 
 	Viewer *viewer_ = nullptr;
 	OutlineType outline_type_ = OutlineType::kBox;
-	std::queue<OutputBoxFrame> *outputs_box_frame_ = nullptr;
-	std::queue<OutputPolygonFrame> *outputs_polygon_frame_ = nullptr;
+	OutputBoxFrame *output_box_frame_ = nullptr;
+	OutputPolygonFrame *output_polygon_frame_ = nullptr;
 
 	bool log_ = true;
 	std::ofstream log_file_;
