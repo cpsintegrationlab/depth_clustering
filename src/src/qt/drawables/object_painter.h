@@ -8,9 +8,6 @@
 #include "ground_removal/depth_ground_remover.h"
 #include "clusterers/abstract_clusterer.h"
 #include "communication/abstract_client.h"
-#include "qt/drawables/drawable_cube.h"
-#include "qt/drawables/drawable_polygon3d.h"
-#include "qt/viewer/viewer.h"
 
 #include <utils/cloud.h>
 #include <utils/timer.h>
@@ -19,8 +16,6 @@
 #include <limits>
 #include <unordered_map>
 #include <vector>
-
-#include <opencv2/imgproc.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -34,8 +29,10 @@ class ObjectPainter: public depth_clustering::AbstractClient<NamedCluster>
 
 public:
 
+	using AlignedEigenVectors =
+	std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>>;
 	using OutputBox = std::pair<Eigen::Vector3f, Eigen::Vector3f>;
-	using OutputPolygon = std::pair<DrawablePolygon3d::AlignedEigenVectors, float>;
+	using OutputPolygon = std::pair<AlignedEigenVectors, float>;
 	using OutputBoxFrame = std::vector<OutputBox>;
 	using OutputPolygonFrame = std::vector<OutputPolygon>;
 
@@ -45,9 +42,9 @@ public:
 	};
 
 	explicit
-	ObjectPainter(Viewer* viewer, OutlineType outline_type, OutputBoxFrame* output_box_frame,
+	ObjectPainter(OutlineType outline_type, OutputBoxFrame* output_box_frame,
 			OutputPolygonFrame* output_polygon_frame, bool log) :
-			viewer_(viewer), outline_type_(outline_type), output_box_frame_(output_box_frame), output_polygon_frame_(
+			outline_type_(outline_type), output_box_frame_(output_box_frame), output_polygon_frame_(
 					output_polygon_frame), log_(log)
 	{
 	}
@@ -60,10 +57,10 @@ public:
 
 private:
 
-	Drawable::UniquePtr
+	void
 	CreateDrawableCube(const NamedCloud& named_cloud);
 
-	Drawable::UniquePtr
+	void
 	CreateDrawablePolygon3d(const NamedCloud& named_cloud);
 
 	void
@@ -71,13 +68,12 @@ private:
 			const Eigen::Vector3f& extent);
 
 	void
-	logObject(const std::string& file_name, const DrawablePolygon3d::AlignedEigenVectors& hull,
+	logObject(const std::string& file_name, const AlignedEigenVectors& hull,
 			const float& diff_z);
 
 	void
 	openLogFile(const std::string& file_name);
 
-	Viewer *viewer_ = nullptr;
 	OutlineType outline_type_ = OutlineType::kBox;
 	OutputBoxFrame *output_box_frame_ = nullptr;
 	OutputPolygonFrame *output_polygon_frame_ = nullptr;

@@ -13,39 +13,25 @@ namespace depth_clustering
 void
 ObjectPainter::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 {
-	if (!viewer_)
-	{
-		return;
-	}
-
 	Timer timer;
 	const auto &clouds = named_cluster.second;
 
 	for (const auto &kv : clouds)
 	{
 		const auto &cluster = kv.second;
-		Drawable::UniquePtr drawable
-		{ nullptr };
 
 		switch (outline_type_)
 		{
 		case OutlineType::kBox:
-			drawable = CreateDrawableCube(std::make_pair(named_cluster.first, cluster));
+			CreateDrawableCube(std::make_pair(named_cluster.first, cluster));
 			break;
 		case OutlineType::kPolygon3d:
-			drawable = CreateDrawablePolygon3d(std::make_pair(named_cluster.first, cluster));
+			CreateDrawablePolygon3d(std::make_pair(named_cluster.first, cluster));
 			break;
-		}
-
-		if (drawable)
-		{
-			viewer_->AddDrawable(std::move(drawable));
 		}
 	}
 
 	fprintf(stderr, "[TIMING]: Adding all boxes took %lu us\n", timer.measure(Timer::Units::Micro));
-	viewer_->update();
-	fprintf(stderr, "[TIMING]: Viewer updated in %lu us\n", timer.measure(Timer::Units::Micro));
 }
 
 void
@@ -59,7 +45,7 @@ ObjectPainter::writeLog()
 	log_file_.close();
 }
 
-Drawable::UniquePtr
+void
 ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
 {
 	const auto &cloud = named_cloud.second;
@@ -89,11 +75,9 @@ ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
 	}
 
 	output_box_frame_->push_back(std::make_pair(center, extent));
-
-	return DrawableCube::Create(center, extent);
 }
 
-Drawable::UniquePtr
+void
 ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 {
 	const auto &cloud = named_cloud.second;
@@ -112,7 +96,7 @@ ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 		max_z = std::max(max_z, point.z());
 	}
 	cv::convexHull(cv_points, hull_indices);
-	DrawablePolygon3d::AlignedEigenVectors hull;
+	AlignedEigenVectors hull;
 	hull.reserve(cloud.size());
 	for (int index : hull_indices)
 	{
@@ -122,7 +106,7 @@ ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 	const float diff_z = max_z - min_z;
 	if (diff_z < 0.3)
 	{
-		return nullptr;
+		return;
 	}
 
 	if (log_)
@@ -131,8 +115,6 @@ ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 	}
 
 	output_polygon_frame_->push_back(std::make_pair(hull, diff_z));
-
-	return DrawablePolygon3d::Create(hull, diff_z);
 }
 
 void
@@ -199,7 +181,7 @@ ObjectPainter::logObject(const std::string& file_name, const Eigen::Vector3f& ce
 
 void
 ObjectPainter::logObject(const std::string& file_name,
-		const DrawablePolygon3d::AlignedEigenVectors& hull, const float& diff_z)
+		const AlignedEigenVectors& hull, const float& diff_z)
 {
 	if (!log_file_.is_open())
 	{

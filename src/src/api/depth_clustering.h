@@ -16,13 +16,11 @@
 #include "ground_removal/depth_ground_remover.h"
 #include "image_labelers/linear_image_labeler.h"
 #include "projections/projection_params.h"
-#include "qt/drawables/drawable_polygon3d.h"
 #include "qt/drawables/object_painter.h"
 #include "utils/folder_reader.h"
 #include "utils/radians.h"
 
 using depth_clustering::DepthGroundRemover;
-using depth_clustering::DrawablePolygon3d;
 using depth_clustering::FolderReader;
 using depth_clustering::ImageBasedClusterer;
 using depth_clustering::LinearImageLabeler;
@@ -38,8 +36,6 @@ class DepthClustering
 public:
 
 	DepthClustering();
-
-	~DepthClustering();
 
 	void
 	init_apollo_box();
@@ -57,7 +53,7 @@ public:
 	process_apollo_box(const std::string& frame_name,
 			const std::vector<Eigen::Vector3f>& point_cloud);
 
-	std::vector<std::pair<DrawablePolygon3d::AlignedEigenVectors, float>>
+	std::vector<std::pair<ObjectPainter::AlignedEigenVectors, float>>
 	process_apollo_polygon(const std::string& frame_name,
 			const std::vector<Eigen::Vector3f>& point_cloud);
 
@@ -69,17 +65,11 @@ public:
 
 private:
 
-	void
-	viewerThread();
-
 	Radians angle_clustering_;
 	Radians angle_ground_removal_;
 	int size_cluster_min_;
 	int size_cluster_max_;
 	int size_smooth_window_;
-
-	std::shared_ptr<Viewer> viewer_;
-	std::thread viewer_thread_;
 
 	std::shared_ptr<FolderReader> folder_reader_data_;
 	std::shared_ptr<FolderReader> folder_reader_config_;
