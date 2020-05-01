@@ -81,7 +81,7 @@ OpenGlFolderPlayer::OpenGlFolderPlayer(QWidget* parent) :
 	// setup viewer
 	_cloud.reset(new Cloud);
 
-	_proj_params = ProjectionParams::WAYMO();
+	_proj_params = ProjectionParams::HDL_64();
 
 	ui->gfx_projection_view->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->gfx_projection_view->setCacheMode(QGraphicsView::CacheBackground);
