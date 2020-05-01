@@ -12,6 +12,7 @@
 #include <utils/cloud.h>
 #include <utils/timer.h>
 
+#include <fstream>
 #include <algorithm>
 #include <limits>
 #include <unordered_map>
