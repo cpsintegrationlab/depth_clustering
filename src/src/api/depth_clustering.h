@@ -63,6 +63,9 @@ public:
 	std::vector<ObjectPainter::OutputPolygonFrame>
 	process_data_polygon();
 
+	void
+	finish();
+
 private:
 
 	Radians angle_clustering_;
@@ -70,6 +73,7 @@ private:
 	int size_cluster_min_;
 	int size_cluster_max_;
 	int size_smooth_window_;
+	bool log_;
 
 	std::shared_ptr<FolderReader> folder_reader_data_;
 	std::shared_ptr<FolderReader> folder_reader_config_;

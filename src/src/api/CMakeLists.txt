@@ -17,7 +17,7 @@ target_link_libraries(
 )
 
 # Add executables
-add_executable(depth_clustering_bin test.cpp)
+add_executable(depth_clustering_bin main.cpp)
 
 # Set library link targets
 target_link_libraries(depth_clustering_bin depth_clustering)

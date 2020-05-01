@@ -1,5 +1,5 @@
 /*
- * test.cpp
+ * main.cpp
  *
  *  Created on: Apr 28, 2020
  *      Author: simonyu
@@ -40,4 +40,6 @@ main(int argc, char* argv[])
 		std::cout << std::endl;
 		std::cout << "size of outputs_box_frame: " << outputs_box_frame.size() << std::endl;
 	}
+
+	depth_clustering.finish();
 }
