@@ -88,7 +88,10 @@ ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
 		logObject(named_cloud.first, center, extent);
 	}
 
-	output_box_frame_->push_back(std::make_pair(center, extent));
+	if (output_box_frame_)
+	{
+		output_box_frame_->push_back(std::make_pair(center, extent));
+	}
 
 	return DrawableCube::Create(center, extent);
 }
@@ -130,7 +133,10 @@ ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 		logObject(named_cloud.first, hull, diff_z);
 	}
 
-	output_polygon_frame_->push_back(std::make_pair(hull, diff_z));
+	if (output_polygon_frame_)
+	{
+		output_polygon_frame_->push_back(std::make_pair(hull, diff_z));
+	}
 
 	return DrawablePolygon3d::Create(hull, diff_z);
 }
