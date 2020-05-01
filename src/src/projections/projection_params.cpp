@@ -282,8 +282,6 @@ ProjectionParams::FullSphere(const Radians& discretization)
 std::unique_ptr<ProjectionParams>
 ProjectionParams::FromConfigFile(const std::string& path)
 {
-	fprintf(stderr, "INFO: Set en_US.UTF-8 locale.\n");
-	std::locale::global(std::locale("en_US.UTF-8"));
 	fprintf(stderr, "INFO: Reading config.\n");
 	ProjectionParams params;
 	// we need to fill this thing. Parsing text files again. Is that what PhD in
