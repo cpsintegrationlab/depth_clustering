@@ -18,8 +18,8 @@ using depth_clustering::RichPoint;
 
 DepthClustering::DepthClustering()
 {
-	size_cluster_min_ = 20;
-	size_cluster_max_ = 100000;
+	size_cluster_min_ = 10;
+	size_cluster_max_ = 10000;
 	size_smooth_window_ = 5;
 	angle_clustering_ = 10_deg;
 	angle_ground_removal_ = 9_deg;
@@ -68,8 +68,7 @@ DepthClustering::init_data_box(const std::string& data_folder)
 	folder_reader_data_ = std::make_shared<FolderReader>(data_folder, ".png",
 			FolderReader::Order::SORTED);
 	folder_reader_config_ = std::make_shared<FolderReader>(data_folder, "img.cfg");
-	projection_parameter_ = ProjectionParams::FromConfigFile(
-			folder_reader_config_->GetNextFilePath());
+	projection_parameter_ = ProjectionParams::HDL_64();
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			angle_ground_removal_, size_smooth_window_);
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,
@@ -77,7 +76,7 @@ DepthClustering::init_data_box(const std::string& data_folder)
 	object_painter_.reset(new ObjectPainter
 	{ ObjectPainter::OutlineType::kBox, &output_box_frame_, nullptr, log_ });
 
-	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
+	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES_PRECOMPUTED);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
 	clusterer_->AddClient(object_painter_.get());
@@ -89,8 +88,7 @@ DepthClustering::init_data_polygon(const std::string& data_folder)
 	folder_reader_data_ = std::make_shared<FolderReader>(data_folder, ".png",
 			FolderReader::Order::SORTED);
 	folder_reader_config_ = std::make_shared<FolderReader>(data_folder, "img.cfg");
-	projection_parameter_ = ProjectionParams::FromConfigFile(
-			folder_reader_config_->GetNextFilePath());
+	projection_parameter_ = ProjectionParams::HDL_64();
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			angle_ground_removal_, size_smooth_window_);
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,
@@ -100,7 +98,7 @@ DepthClustering::init_data_polygon(const std::string& data_folder)
 			{ ObjectPainter::OutlineType::kPolygon3d, nullptr,
 					&output_polygon_frame_, log_ });
 
-	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
+	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES_PRECOMPUTED);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
 	clusterer_->AddClient(object_painter_.get());
