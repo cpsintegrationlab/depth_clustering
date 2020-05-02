@@ -274,6 +274,13 @@ public:
 	static std::unique_ptr<ProjectionParams>
 	WAYMO();
 	/**
+	 * @brief      Parameters for Apollo
+	 *
+	 * @return     A pointer to parameters
+	 */
+	static std::unique_ptr<ProjectionParams>
+	APOLLO();
+	/**
 	 * @brief      Default parameters for Velodyne from config file
 	 *
 	 * @return     A pointer to parameters
