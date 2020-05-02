@@ -85,7 +85,7 @@ private:
 	bool log_ = true;
 	std::ofstream log_file_;
 	std::string log_file_path_ = "";
-	const std::string log_file_name_ = "object.json";
+	const std::string log_file_name_ = "detection.json";
 	boost::property_tree::ptree log_file_tree_;
 };
 
