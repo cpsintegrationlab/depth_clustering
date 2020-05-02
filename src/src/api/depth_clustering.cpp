@@ -29,7 +29,7 @@ DepthClustering::DepthClustering()
 void
 DepthClustering::init_apollo_box()
 {
-	projection_parameter_ = ProjectionParams::HDL_32();
+	projection_parameter_ = ProjectionParams::APOLLO();
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			angle_ground_removal_, size_smooth_window_);
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,
@@ -46,7 +46,7 @@ DepthClustering::init_apollo_box()
 void
 DepthClustering::init_apollo_polygon()
 {
-	projection_parameter_ = ProjectionParams::HDL_32();
+	projection_parameter_ = ProjectionParams::APOLLO();
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			angle_ground_removal_, size_smooth_window_);
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,

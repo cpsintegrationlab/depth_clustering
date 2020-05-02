@@ -264,6 +264,21 @@ ProjectionParams::WAYMO()
 }
 
 std::unique_ptr<ProjectionParams>
+ProjectionParams::APOLLO()
+{
+	auto params = ProjectionParams();
+	params.SetSpan(SpanParams(-180_deg, 180_deg, 360), SpanParams::Direction::HORIZONTAL);
+	params.SetSpan(SpanParams(10.665_deg, -30.665_deg, 32), SpanParams::Direction::VERTICAL);
+	params.FillCosSin();
+	if (!params.valid())
+	{
+		fprintf(stderr, "ERROR: params are not valid!\n");
+		return nullptr;
+	}
+	return mem_utils::make_unique<ProjectionParams>(params);
+}
+
+std::unique_ptr<ProjectionParams>
 ProjectionParams::FullSphere(const Radians& discretization)
 {
 	auto params = ProjectionParams();
