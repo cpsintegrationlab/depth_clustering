@@ -37,12 +37,15 @@ ObjectPainter::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 void
 ObjectPainter::writeLog()
 {
-	boost::property_tree::write_json(log_file_, log_file_tree_);
+	if (log_)
+	{
+		boost::property_tree::write_json(log_file_, log_file_tree_);
 
-	std::cout << "[INFO]: wrote to log file '" << log_file_path_ + log_file_name_ << "'."
-			<< std::endl;
+		std::cout << "[INFO]: wrote to log file '" << log_file_path_ + log_file_name_ << "'."
+				<< std::endl;
 
-	log_file_.close();
+		log_file_.close();
+	}
 }
 
 void
