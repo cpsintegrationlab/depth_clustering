@@ -37,6 +37,9 @@ public:
 
 	DepthClustering();
 
+	DepthClustering(int size_cluster_min, int size_cluster_max, int size_smooth_window,
+			float angle_clustering, float angle_ground_removal, bool log_apollo);
+
 	void
 	init_apollo_box();
 

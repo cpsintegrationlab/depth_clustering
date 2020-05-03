@@ -6,14 +6,17 @@
  */
 
 #include "api/depth_clustering.h"
+
 #include "image_labelers/diff_helpers/diff_factory.h"
 #include "utils/cloud.h"
+#include "utils/radians.h"
 #include "utils/rich_point.h"
 #include "utils/velodyne_utils.h"
 
 using depth_clustering::Cloud;
 using depth_clustering::DiffFactory;
 using depth_clustering::MatFromDepthPng;
+using depth_clustering::Radians;
 using depth_clustering::RichPoint;
 
 DepthClustering::DepthClustering()
@@ -25,6 +28,20 @@ DepthClustering::DepthClustering()
 	angle_ground_removal_ = 9_deg;
 	log_apollo_ = false;
 	log_data_ = true;
+}
+
+DepthClustering::DepthClustering(int size_cluster_min, int size_cluster_max, int size_smooth_window,
+		float angle_clustering, float angle_ground_removal, bool log_apollo) :
+		size_cluster_min_(size_cluster_min), size_cluster_max_(size_cluster_max), size_smooth_window_(
+				size_smooth_window), log_apollo_(log_apollo)
+{
+	angle_clustering_ = Radians
+	{ Radians::IsRadians
+	{ }, static_cast<float>(angle_clustering * M_PI / 180.0) };
+	angle_ground_removal_ = Radians
+	{ Radians::IsRadians
+	{ }, static_cast<float>(angle_ground_removal * M_PI / 180.0) };
+	log_data_ = false;
 }
 
 void
@@ -52,10 +69,8 @@ DepthClustering::init_apollo_polygon()
 			angle_ground_removal_, size_smooth_window_);
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,
 			size_cluster_min_, size_cluster_max_);
-	object_painter_.reset(
-			new ObjectPainter
-			{ ObjectPainter::OutlineType::kPolygon3d, nullptr,
-					&output_polygon_frame_, log_apollo_ });
+	object_painter_.reset(new ObjectPainter
+	{ ObjectPainter::OutlineType::kPolygon3d, nullptr, &output_polygon_frame_, log_apollo_ });
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
 
@@ -94,10 +109,8 @@ DepthClustering::init_data_polygon(const std::string& data_folder)
 			angle_ground_removal_, size_smooth_window_);
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,
 			size_cluster_min_, size_cluster_max_);
-	object_painter_.reset(
-			new ObjectPainter
-			{ ObjectPainter::OutlineType::kPolygon3d, nullptr,
-					&output_polygon_frame_, log_data_ });
+	object_painter_.reset(new ObjectPainter
+	{ ObjectPainter::OutlineType::kPolygon3d, nullptr, &output_polygon_frame_, log_data_ });
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES_PRECOMPUTED);
 
