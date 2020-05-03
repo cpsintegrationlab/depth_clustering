@@ -23,7 +23,8 @@ DepthClustering::DepthClustering()
 	size_smooth_window_ = 5;
 	angle_clustering_ = 10_deg;
 	angle_ground_removal_ = 9_deg;
-	log_ = true;
+	log_apollo_ = false;
+	log_data_ = true;
 }
 
 void
@@ -35,7 +36,7 @@ DepthClustering::init_apollo_box()
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,
 			size_cluster_min_, size_cluster_max_);
 	object_painter_.reset(new ObjectPainter
-	{ ObjectPainter::OutlineType::kBox, &output_box_frame_, nullptr, log_ });
+	{ ObjectPainter::OutlineType::kBox, &output_box_frame_, nullptr, log_apollo_ });
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
 
@@ -54,7 +55,7 @@ DepthClustering::init_apollo_polygon()
 	object_painter_.reset(
 			new ObjectPainter
 			{ ObjectPainter::OutlineType::kPolygon3d, nullptr,
-					&output_polygon_frame_, log_ });
+					&output_polygon_frame_, log_apollo_ });
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
 
@@ -74,7 +75,7 @@ DepthClustering::init_data_box(const std::string& data_folder)
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,
 			size_cluster_min_, size_cluster_max_);
 	object_painter_.reset(new ObjectPainter
-	{ ObjectPainter::OutlineType::kBox, &output_box_frame_, nullptr, log_ });
+	{ ObjectPainter::OutlineType::kBox, &output_box_frame_, nullptr, log_data_ });
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES_PRECOMPUTED);
 
@@ -96,7 +97,7 @@ DepthClustering::init_data_polygon(const std::string& data_folder)
 	object_painter_.reset(
 			new ObjectPainter
 			{ ObjectPainter::OutlineType::kPolygon3d, nullptr,
-					&output_polygon_frame_, log_ });
+					&output_polygon_frame_, log_data_ });
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES_PRECOMPUTED);
 

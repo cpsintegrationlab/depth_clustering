@@ -73,7 +73,8 @@ private:
 	int size_cluster_min_;
 	int size_cluster_max_;
 	int size_smooth_window_;
-	bool log_;
+	bool log_apollo_;
+	bool log_data_;
 
 	std::shared_ptr<FolderReader> folder_reader_data_;
 	std::shared_ptr<FolderReader> folder_reader_config_;
