@@ -309,6 +309,15 @@ OpenGlFolderPlayer::onOpenFolderToRead()
 		return;
 	}
 
+	FolderReader config_reader(folder_name.toStdString(), "img.cfg");
+	auto config_file_name = config_reader.GetNextFilePath();
+
+	if (!config_file_name.empty())
+	{
+		_proj_params = ProjectionParams::FromConfigFile(config_file_name);
+		qDebug() << "Using img.cfg";
+	}
+
 	// update the slider
 	ui->sldr_navigate_clouds->setMaximum(_file_names.size() - 1);
 	ui->spnbx_current_cloud->setMaximum(_file_names.size() - 1);
