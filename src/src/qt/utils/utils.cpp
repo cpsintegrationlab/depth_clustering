@@ -15,6 +15,7 @@
 
 using depth_clustering::Cloud;
 using depth_clustering::MatFromDepthPng;
+using depth_clustering::MatFromDepthTiff;
 using depth_clustering::ProjectionParams;
 using depth_clustering::ReadKittiCloud;
 using depth_clustering::ReadKittiCloudTxt;
@@ -64,6 +65,8 @@ Cloud::Ptr CloudFromFile(const std::string &file_name,
 #endif  // PCL_FOUND
   } else if (name.endsWith(".png") || name.endsWith(".exr")) {
     cloud = Cloud::FromImage(MatFromDepthPng(file_name), proj_params);
+  } else if (name.endsWith(".tiff")) {
+    cloud = Cloud::FromImage(MatFromDepthTiff(file_name), proj_params);
   } else if (name.endsWith(".txt")) {
     cloud = ReadKittiCloudTxt(file_name);
     cloud->InitProjection(proj_params);
