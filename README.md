@@ -1,4 +1,4 @@
-# Setting Up the Project
+# Depth Clustering
 
 For Ubuntu 14.04, install the following packages:
 
