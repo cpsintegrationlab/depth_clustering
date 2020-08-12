@@ -18,7 +18,7 @@ main(int argc, char* argv[])
 	}
 
 	DepthClustering depth_clustering;
-	std::string data_folder = "../../data/moosmann/velodyne_slam/scenario_small/";
+	std::string data_folder = "../../data/moosmann/velodyne_slam/scenario_1/";
 
 	if (mode == "polygon")
 	{

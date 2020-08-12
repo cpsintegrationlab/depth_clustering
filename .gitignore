@@ -1,2 +1,3 @@
 build/
 install/
+data/moosmann/velodyne_slam/scenario_1/*.json
