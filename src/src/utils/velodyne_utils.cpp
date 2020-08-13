@@ -114,4 +114,12 @@ cv::Mat MatFromDepthPng(const string& path) {
   return FixKITTIDepth(depth_image);
 }
 
+cv::Mat MatFromDepthTiff(const string& path) {
+  cv::Mat depth_image = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
+  depth_image.convertTo(depth_image, CV_32F);
+  depth_image /= 65535.;
+  depth_image *= 75.;
+  return depth_image;
+}
+
 }  // namespace depth_clustering

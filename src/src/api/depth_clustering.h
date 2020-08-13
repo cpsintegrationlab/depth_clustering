@@ -28,9 +28,6 @@ using depth_clustering::ObjectPainter;
 using depth_clustering::ProjectionParams;
 using depth_clustering::Radians;
 
-class QApplication;
-class Viewer;
-
 class DepthClustering
 {
 public:
@@ -40,17 +37,12 @@ public:
 	DepthClustering(int size_cluster_min, int size_cluster_max, int size_smooth_window,
 			float angle_clustering, float angle_ground_removal, bool log_apollo);
 
-	void
-	init_apollo_box();
+	bool
+	init_apollo(const ObjectPainter::OutlineType& outline_type);
 
-	void
-	init_apollo_polygon();
-
-	void
-	init_data_box(const std::string& data_folder);
-
-	void
-	init_data_polygon(const std::string& data_folder);
+	bool
+	init_data(const std::string& data_folder, const std::string& data_type,
+			const ObjectPainter::OutlineType& outline_type);
 
 	std::vector<std::pair<Eigen::Vector3f, Eigen::Vector3f>>
 	process_apollo_box(const std::string& frame_name,
@@ -71,6 +63,7 @@ public:
 
 private:
 
+	std::string data_type_;
 	Radians angle_clustering_;
 	Radians angle_ground_removal_;
 	int size_cluster_min_;

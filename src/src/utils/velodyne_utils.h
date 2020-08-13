@@ -54,6 +54,7 @@ Cloud::Ptr CloudFromMat(const cv::Mat& image, const ProjectionParams& config);
 Cloud::Ptr ReadKittiCloud(const std::string& path);
 Cloud::Ptr ReadKittiCloudTxt(const std::string& path);
 cv::Mat MatFromDepthPng(const std::string& path);
+cv::Mat MatFromDepthTiff(const std::string& path);
 
 }  // namespace depth_clustering
 
