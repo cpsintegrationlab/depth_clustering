@@ -24,35 +24,26 @@ main(int argc, char* argv[])
 
 	if (mode == "polygon")
 	{
-		std::vector<ObjectPainter::OutputPolygonFrame> outputs_polygon_frame;
-
 		outline_type = ObjectPainter::OutlineType::kPolygon3d;
+	}
 
-		if (!depth_clustering.init_data(data_folder, data_type, outline_type))
-		{
-			std::cout << "Failed to initialize. Quit." << std::endl;
-			return -1;
-		}
+	if (!depth_clustering.init_data(data_folder, data_type, outline_type))
+	{
+		std::cout << "Failed to initialize. Quit." << std::endl;
+		return -1;
+	}
 
-		outputs_polygon_frame = depth_clustering.process_data_polygon();
+	depth_clustering.process_data();
 
-		std::cout << std::endl;
-		std::cout << "Total processed frames: " << outputs_polygon_frame.size() << "." << std::endl;
+	if (mode == "polygon")
+	{
+		auto outputs_frame = depth_clustering.get_output_data_polygon();
+		std::cout << std::endl << "Total processed frames: " << outputs_frame.size() << "." << std::endl;
 	}
 	else
 	{
-		std::vector<ObjectPainter::OutputBoxFrame> outputs_box_frame;
-
-		if (!depth_clustering.init_data(data_folder, data_type, outline_type))
-		{
-			std::cout << "Failed to initialize. Quit." << std::endl;
-			return -1;
-		}
-
-		outputs_box_frame = depth_clustering.process_data_box();
-
-		std::cout << std::endl;
-		std::cout << "Total processed frames: " << outputs_box_frame.size() << "." << std::endl;
+		auto outputs_frame = depth_clustering.get_output_data_box();
+		std::cout << std::endl << "Total processed frames: " << outputs_frame.size() << "." << std::endl;
 	}
 
 	depth_clustering.finish();

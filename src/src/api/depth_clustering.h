@@ -34,8 +34,9 @@ public:
 
 	DepthClustering();
 
-	DepthClustering(int size_cluster_min, int size_cluster_max, int size_smooth_window,
-			float angle_clustering, float angle_ground_removal, bool log_apollo);
+	DepthClustering(std::string data_type, ObjectPainter::OutlineType outline_type,
+			int size_cluster_min, int size_cluster_max, int size_smooth_window,
+			float angle_clustering, float angle_ground_removal, bool log_apollo, bool log_data);
 
 	bool
 	init_apollo(const ObjectPainter::OutlineType& outline_type);
@@ -44,26 +45,41 @@ public:
 	init_data(const std::string& data_folder, const std::string& data_type,
 			const ObjectPainter::OutlineType& outline_type);
 
-	std::vector<std::pair<Eigen::Vector3f, Eigen::Vector3f>>
-	process_apollo_box(const std::string& frame_name,
+	void
+	process_apollo(const std::string& frame_name,
 			const std::vector<Eigen::Vector3f>& point_cloud);
+
+	void
+	process_data();
+
+	std::vector<std::pair<Eigen::Vector3f, Eigen::Vector3f>>
+	get_output_apollo_box() const;
 
 	std::vector<std::pair<ObjectPainter::AlignedEigenVectors, float>>
-	process_apollo_polygon(const std::string& frame_name,
-			const std::vector<Eigen::Vector3f>& point_cloud);
+	get_output_apollo_polygon() const;
 
 	std::vector<ObjectPainter::OutputBoxFrame>
-	process_data_box();
+	get_output_data_box() const;
 
 	std::vector<ObjectPainter::OutputPolygonFrame>
-	process_data_polygon();
+	get_output_data_polygon() const;
 
 	void
 	finish();
 
 private:
 
+	void
+	resetObjectPainter(bool& log);
+
+	void
+	clearOutputFrame();
+
+	void
+	storeOutputFrame();
+
 	std::string data_type_;
+	ObjectPainter::OutlineType outline_type_;
 	Radians angle_clustering_;
 	Radians angle_ground_removal_;
 	int size_cluster_min_;
