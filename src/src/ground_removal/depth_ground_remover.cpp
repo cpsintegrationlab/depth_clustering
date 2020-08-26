@@ -113,7 +113,7 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 		// set the pixel below the top-most valid pixel to be zero
 		if (r < image.rows - 1)
 		{
-			angle_image_zero.at<float>(r + 1, c) = 0;
+			angle_image_zero.at<float>(++ r, c) = 0;
 		}
 
 		auto current_coord = PixelCoord(r, c);
