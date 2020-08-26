@@ -11,14 +11,25 @@ int
 main(int argc, char* argv[])
 {
 	std::string mode = "";
+	std::string data_folder = "../../data/waymo/";
 
 	if (argc > 1)
 	{
-		mode = argv[1];
+		if (std::string(argv[1]) == "-h")
+		{
+			std::cout << std::endl << "usage: " << argv[0] << "[mode] [data folder]" << std::endl << std::endl;
+			return 0;
+		}
+
+		data_folder = argv[1];
+	}
+
+	if (argc > 2)
+	{
+		mode = argv[2];
 	}
 
 	DepthClustering depth_clustering;
-	const std::string data_folder = "../../data/waymo/";
 	const std::string data_type = ".tiff";
 	ObjectPainter::OutlineType outline_type = ObjectPainter::OutlineType::kBox;
 
