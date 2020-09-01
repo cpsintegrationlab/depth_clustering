@@ -33,3 +33,11 @@ Then, run the project as follows:
 cd ../../install/bin
 ./depth_clustering
 ```
+
+To run with specific data, do the following:
+
+```bash
+./depth_clustering data_folder
+```
+
+After execution, the resulting JSON file would be stored under the given data folder above.
