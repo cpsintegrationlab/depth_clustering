@@ -17,7 +17,7 @@ main(int argc, char* argv[])
 	{
 		if (std::string(argv[1]) == "-h")
 		{
-			std::cout << std::endl << "usage: " << argv[0] << "[data folder] [mode]" << std::endl << std::endl;
+			std::cout << std::endl << "usage: " << argv[0] << " [data folder] [mode]" << std::endl << std::endl;
 			return 0;
 		}
 
