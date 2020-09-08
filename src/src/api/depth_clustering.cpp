@@ -26,9 +26,9 @@ DepthClustering::DepthClustering()
 	outline_type_ = ObjectPainter::OutlineType::kBox;
 	size_cluster_min_ = 10;
 	size_cluster_max_ = 20000;
-	size_smooth_window_ = 7;
+	size_smooth_window_ = 5;
 	angle_clustering_ = 10_deg;
-	angle_ground_removal_ = 6_deg;
+	angle_ground_removal_ = 9_deg;
 	log_apollo_ = false;
 	log_data_ = true;
 }
