@@ -90,17 +90,6 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 	LinearImageLabeler<> image_labeler(image, _params, threshold);
 	SimpleDiff simple_diff_helper(&angle_image);
 	Radians start_thresh = 30_deg;
-
-	// Adding a row of zeros at the bottom of angle image
-	Mat angle_image_zero = cv::Mat::zeros(angle_image.rows + 1, angle_image.cols, DataType<float>::type);
-	for (int r = 0; r < angle_image_zero.rows; r ++)
-	{
-		for (int c = 0; c < angle_image_zero.cols; c ++)
-		{
-			angle_image_zero.at<float>(r, c) = (r == angle_image_zero.rows - 1) ? 0 : angle_image.at<float>(r, c);
-		}
-	}
-
 	for (int c = 0; c < image.cols; ++c)
 	{
 		// start at bottom pixels and do bfs
@@ -109,13 +98,6 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 		{
 			--r;
 		}
-
-		// set the pixel below the top-most valid pixel to be zero
-		if (r < image.rows - 1)
-		{
-			angle_image_zero.at<float>(r + 1, c) = 0;
-		}
-
 		auto current_coord = PixelCoord(r, c);
 		uint16_t current_label = image_labeler.LabelAt(current_coord);
 		if (current_label > 0)
@@ -128,9 +110,7 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 		{
 			continue;
 		}
-		SimpleDiff simple_diff_helper_zero(&angle_image_zero);
-//		image_labeler.LabelOneComponent(1, current_coord, &simple_diff_helper);
-		image_labeler.LabelOneComponent(1, current_coord, &simple_diff_helper_zero);
+		image_labeler.LabelOneComponent(1, current_coord, &simple_diff_helper);
 	}
 	auto label_image_ptr = image_labeler.GetLabelImage();
 	if (label_image_ptr->rows != res.rows || label_image_ptr->cols != res.cols)
