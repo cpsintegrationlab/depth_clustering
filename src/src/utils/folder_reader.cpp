@@ -31,11 +31,18 @@ int num_from_string(const std::string& query_str) {
   if (query_str.empty()) {
     return 0;
   }
+
+  // Extract file nam from full path
+  std::stringstream ss(query_str);
+  std::string substring = "";
+  while (std::getline(ss, substring, '/'));
+  const std::string& substring_const = substring;
+
   const char* pattern = "\\d+";
   boost::regex re(pattern);
   boost::match_results<std::string::const_iterator> what;
-  auto start = query_str.begin();
-  auto end = query_str.end();
+  auto start = substring_const.begin();
+  auto end = substring_const.end();
   int found_num = 0;
   while (boost::regex_search(start, end, what, re)) {
     start = what[0].second;

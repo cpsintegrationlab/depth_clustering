@@ -11,7 +11,7 @@ int
 main(int argc, char* argv[])
 {
 	std::string mode = "";
-	std::string data_folder = "../../data/waymo/";
+	std::string data_folder = "../../../data/segment-1022527355599519580_4866_960_4886_960_with_camera_labels/";
 
 	if (argc > 1)
 	{
