@@ -32,21 +32,20 @@ public:
 	using Timer = depth_clustering::time_utils::Timer;
 	using AlignedEigenVectors =
 	std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>>;
-	using OutputBox = std::pair<Eigen::Vector3f, Eigen::Vector3f>;
-	using OutputPolygon = std::pair<AlignedEigenVectors, float>;
-	using OutputBoxFrame = std::vector<OutputBox>;
-	using OutputPolygonFrame = std::vector<OutputPolygon>;
 
-	enum class OutlineType
+	template<typename Type>
+	using Frame = std::vector<Type>;
+	using Cube = std::pair<Eigen::Vector3f, Eigen::Vector3f>;
+	using Polygon = std::pair<AlignedEigenVectors, float>;
+
+	enum class Type
 	{
-		kBox, kPolygon3d
+		Cube, Polygon
 	};
 
 	explicit
-	BoundingBox(OutlineType outline_type, OutputBoxFrame* output_box_frame,
-			OutputPolygonFrame* output_polygon_frame, bool log) :
-			outline_type_(outline_type), output_box_frame_(output_box_frame), output_polygon_frame_(
-					output_polygon_frame), log_(log)
+	BoundingBox(Type type, Frame<Cube>* frame_cube, Frame<Polygon>* frame_polygon, bool log) :
+			type_(type), frame_cube_(frame_cube), frame_polygon_(frame_polygon), log_(log)
 	{
 	}
 
@@ -59,10 +58,10 @@ public:
 private:
 
 	void
-	CreateDrawableCube(const NamedCloud& named_cloud);
+	CreateCubes(const NamedCloud& named_cloud);
 
 	void
-	CreateDrawablePolygon3d(const NamedCloud& named_cloud);
+	CreatePolygons(const NamedCloud& named_cloud);
 
 	void
 	logObject(const std::string& file_name, const Eigen::Vector3f& center,
@@ -74,9 +73,9 @@ private:
 	void
 	openLogFile(const std::string& file_name);
 
-	OutlineType outline_type_ = OutlineType::kBox;
-	OutputBoxFrame *output_box_frame_ = nullptr;
-	OutputPolygonFrame *output_polygon_frame_ = nullptr;
+	Type type_ = Type::Cube;
+	Frame<Cube> *frame_cube_ = nullptr;
+	Frame<Polygon> *frame_polygon_ = nullptr;
 
 	bool log_ = true;
 	std::ofstream log_file_;

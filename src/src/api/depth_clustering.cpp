@@ -23,7 +23,7 @@ using depth_clustering::RichPoint;
 DepthClustering::DepthClustering()
 {
 	data_type_ = ".tiff";
-	outline_type_ = BoundingBox::OutlineType::kBox;
+	bounding_box_type_ = BoundingBox::Type::Cube;
 	size_cluster_min_ = 10;
 	size_cluster_max_ = 20000;
 	size_smooth_window_ = 5;
@@ -33,10 +33,10 @@ DepthClustering::DepthClustering()
 	log_data_ = true;
 }
 
-DepthClustering::DepthClustering(std::string data_type, BoundingBox::OutlineType outline_type,
+DepthClustering::DepthClustering(std::string data_type, BoundingBox::Type bounding_box_type,
 		int size_cluster_min, int size_cluster_max, int size_smooth_window,
 		float angle_clustering, float angle_ground_removal, bool log_apollo, bool log_data) :
-		data_type_(data_type), outline_type_(outline_type), size_cluster_min_(size_cluster_min), size_cluster_max_(
+		data_type_(data_type), bounding_box_type_(bounding_box_type), size_cluster_min_(size_cluster_min), size_cluster_max_(
 				size_cluster_max), size_smooth_window_(size_smooth_window), log_apollo_(log_apollo), log_data_(log_data)
 {
 	angle_clustering_ = Radians
@@ -48,9 +48,9 @@ DepthClustering::DepthClustering(std::string data_type, BoundingBox::OutlineType
 }
 
 bool
-DepthClustering::init_apollo(const BoundingBox::OutlineType& outline_type)
+DepthClustering::init_apollo(const BoundingBox::Type& bounding_box_type)
 {
-	outline_type_ = outline_type;
+	bounding_box_type_ = bounding_box_type;
 	projection_parameter_ = ProjectionParams::APOLLO();
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			angle_ground_removal_, size_smooth_window_);
@@ -69,10 +69,10 @@ DepthClustering::init_apollo(const BoundingBox::OutlineType& outline_type)
 
 bool
 DepthClustering::init_data(const std::string& data_folder, const std::string& data_type,
-		const BoundingBox::OutlineType& outline_type)
+		const BoundingBox::Type& bounding_box_type)
 {
 	data_type_ = data_type;
-	outline_type_ = outline_type;
+	bounding_box_type_ = bounding_box_type;
 	folder_reader_data_ = std::make_shared<FolderReader>(data_folder, data_type_,
 			FolderReader::Order::SORTED);
 	folder_reader_config_ = std::make_shared<FolderReader>(data_folder, "img.cfg");
@@ -160,30 +160,6 @@ DepthClustering::process_data()
 	}
 }
 
-std::vector<std::pair<Eigen::Vector3f, Eigen::Vector3f>>
-DepthClustering::get_output_apollo_box() const
-{
-	return output_box_frame_;
-}
-
-std::vector<std::pair<BoundingBox::AlignedEigenVectors, float>>
-DepthClustering::get_output_apollo_polygon() const
-{
-	return output_polygon_frame_;
-}
-
-std::vector<BoundingBox::OutputBoxFrame>
-DepthClustering::get_output_data_box() const
-{
-	return outputs_box_frame_;
-}
-
-std::vector<BoundingBox::OutputPolygonFrame>
-DepthClustering::get_output_data_polygon() const
-{
-	return outputs_polygon_frame_;
-}
-
 void
 DepthClustering::finish()
 {
@@ -193,26 +169,26 @@ DepthClustering::finish()
 void
 DepthClustering::resetBoundingBox(bool& log)
 {
-	switch (outline_type_)
+	switch (bounding_box_type_)
 	{
-	case BoundingBox::OutlineType::kBox:
+	case BoundingBox::Type::Cube:
 	{
 		bounding_box_.reset(new BoundingBox
-			{ outline_type_, &output_box_frame_, nullptr, log });
+			{ bounding_box_type_, &bounding_box_frame_cube_, nullptr, log });
 
 		break;
 	}
-	case BoundingBox::OutlineType::kPolygon3d:
+	case BoundingBox::Type::Polygon:
 	{
 		bounding_box_.reset(new BoundingBox
-			{ outline_type_, nullptr, &output_polygon_frame_, log });
+			{ bounding_box_type_, nullptr, &bounding_box_frame_polygon_, log });
 
 		break;
 	}
 	default:
 	{
 		bounding_box_.reset(new BoundingBox
-			{ outline_type_, &output_box_frame_, nullptr, log });
+			{ bounding_box_type_, &bounding_box_frame_cube_, nullptr, log });
 
 		break;
 	}
@@ -222,21 +198,21 @@ DepthClustering::resetBoundingBox(bool& log)
 void
 DepthClustering::clearOutputFrame()
 {
-	switch (outline_type_)
+	switch (bounding_box_type_)
 	{
-	case BoundingBox::OutlineType::kBox:
+	case BoundingBox::Type::Cube:
 	{
-		output_box_frame_.clear();
+		bounding_box_frame_cube_.clear();
 		break;
 	}
-	case BoundingBox::OutlineType::kPolygon3d:
+	case BoundingBox::Type::Polygon:
 	{
-		output_polygon_frame_.clear();
+		bounding_box_frame_polygon_.clear();
 		break;
 	}
 	default:
 	{
-		output_box_frame_.clear();
+		bounding_box_frame_cube_.clear();
 		break;
 	}
 	}
@@ -245,21 +221,21 @@ DepthClustering::clearOutputFrame()
 void
 DepthClustering::storeOutputFrame()
 {
-	switch (outline_type_)
+	switch (bounding_box_type_)
 	{
-	case BoundingBox::OutlineType::kBox:
+	case BoundingBox::Type::Cube:
 	{
-		outputs_box_frame_.push_back(output_box_frame_);
+		bounding_box_frames_cube_.push_back(bounding_box_frame_cube_);
 		break;
 	}
-	case BoundingBox::OutlineType::kPolygon3d:
+	case BoundingBox::Type::Polygon:
 	{
-		outputs_polygon_frame_.push_back(output_polygon_frame_);
+		bounding_box_frames_polygon_.push_back(bounding_box_frame_polygon_);
 		break;
 	}
 	default:
 	{
-		outputs_box_frame_.push_back(output_box_frame_);
+		bounding_box_frames_cube_.push_back(bounding_box_frame_cube_);
 		break;
 	}
 	}

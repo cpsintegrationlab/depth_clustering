@@ -34,35 +34,22 @@ public:
 
 	DepthClustering();
 
-	DepthClustering(std::string data_type, BoundingBox::OutlineType outline_type,
+	DepthClustering(std::string data_type, BoundingBox::Type bounding_box_type,
 			int size_cluster_min, int size_cluster_max, int size_smooth_window,
 			float angle_clustering, float angle_ground_removal, bool log_apollo, bool log_data);
 
 	bool
-	init_apollo(const BoundingBox::OutlineType& outline_type);
+	init_apollo(const BoundingBox::Type& bounding_box_type);
 
 	bool
 	init_data(const std::string& data_folder, const std::string& data_type,
-			const BoundingBox::OutlineType& outline_type);
+			const BoundingBox::Type& bounding_box_type);
 
 	void
-	process_apollo(const std::string& frame_name,
-			const std::vector<Eigen::Vector3f>& point_cloud);
+	process_apollo(const std::string& frame_name, const std::vector<Eigen::Vector3f>& point_cloud);
 
 	void
 	process_data();
-
-	std::vector<std::pair<Eigen::Vector3f, Eigen::Vector3f>>
-	get_output_apollo_box() const;
-
-	std::vector<std::pair<BoundingBox::AlignedEigenVectors, float>>
-	get_output_apollo_polygon() const;
-
-	std::vector<BoundingBox::OutputBoxFrame>
-	get_output_data_box() const;
-
-	std::vector<BoundingBox::OutputPolygonFrame>
-	get_output_data_polygon() const;
 
 	void
 	finish();
@@ -79,7 +66,7 @@ private:
 	storeOutputFrame();
 
 	std::string data_type_;
-	BoundingBox::OutlineType outline_type_;
+	BoundingBox::Type bounding_box_type_;
 	Radians angle_clustering_;
 	Radians angle_ground_removal_;
 	int size_cluster_min_;
@@ -95,10 +82,10 @@ private:
 	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>> clusterer_;
 	std::unique_ptr<BoundingBox> bounding_box_;
 
-	BoundingBox::OutputBoxFrame output_box_frame_;
-	BoundingBox::OutputPolygonFrame output_polygon_frame_;
-	std::vector<BoundingBox::OutputBoxFrame> outputs_box_frame_;
-	std::vector<BoundingBox::OutputPolygonFrame> outputs_polygon_frame_;
+	BoundingBox::Frame<BoundingBox::Cube> bounding_box_frame_cube_;
+	BoundingBox::Frame<BoundingBox::Polygon> bounding_box_frame_polygon_;
+	std::vector<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frames_cube_;
+	std::vector<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frames_polygon_;
 };
 
 #endif /* SRC_API_DEPTH_CLUSTERING_H_ */

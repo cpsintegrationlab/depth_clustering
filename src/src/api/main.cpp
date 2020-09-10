@@ -31,31 +31,20 @@ main(int argc, char* argv[])
 
 	DepthClustering depth_clustering;
 	const std::string data_type = ".tiff";
-	BoundingBox::OutlineType outline_type = BoundingBox::OutlineType::kBox;
+	BoundingBox::Type bounding_box_type = BoundingBox::Type::Cube;
 
 	if (mode == "polygon")
 	{
-		outline_type = BoundingBox::OutlineType::kPolygon3d;
+		bounding_box_type = BoundingBox::Type::Polygon;
 	}
 
-	if (!depth_clustering.init_data(data_folder, data_type, outline_type))
+	if (!depth_clustering.init_data(data_folder, data_type, bounding_box_type))
 	{
 		std::cout << "[ERROR]: Failed to initialize. Quit." << std::endl;
 		return -1;
 	}
 
 	depth_clustering.process_data();
-
-	if (mode == "polygon")
-	{
-		auto outputs_frame = depth_clustering.get_output_data_polygon();
-		std::cout << "[INFO]: Total processed frames: " << outputs_frame.size() << "." << std::endl;
-	}
-	else
-	{
-		auto outputs_frame = depth_clustering.get_output_data_box();
-		std::cout << "[INFO]: Total processed frames: " << outputs_frame.size() << "." << std::endl;
-	}
 
 	depth_clustering.finish();
 

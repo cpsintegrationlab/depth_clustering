@@ -23,13 +23,13 @@ BoundingBox::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 	{
 		const auto &cluster = kv.second;
 
-		switch (outline_type_)
+		switch (type_)
 		{
-		case OutlineType::kBox:
-			CreateDrawableCube(std::make_pair(named_cluster.first, cluster));
+		case Type::Cube:
+			CreateCubes(std::make_pair(named_cluster.first, cluster));
 			break;
-		case OutlineType::kPolygon3d:
-			CreateDrawablePolygon3d(std::make_pair(named_cluster.first, cluster));
+		case Type::Polygon:
+			CreatePolygons(std::make_pair(named_cluster.first, cluster));
 			break;
 		}
 	}
@@ -52,7 +52,7 @@ BoundingBox::writeLog()
 }
 
 void
-BoundingBox::CreateDrawableCube(const NamedCloud& named_cloud)
+BoundingBox::CreateCubes(const NamedCloud& named_cloud)
 {
 	const auto &cloud = named_cloud.second;
 	Eigen::Vector3f center = Eigen::Vector3f::Zero();
@@ -80,11 +80,11 @@ BoundingBox::CreateDrawableCube(const NamedCloud& named_cloud)
 		logObject(named_cloud.first, center, extent);
 	}
 
-	output_box_frame_->push_back(std::make_pair(center, extent));
+	frame_cube_->push_back(std::make_pair(center, extent));
 }
 
 void
-BoundingBox::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
+BoundingBox::CreatePolygons(const NamedCloud& named_cloud)
 {
 	const auto &cloud = named_cloud.second;
 	float min_z
@@ -120,7 +120,7 @@ BoundingBox::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 		logObject(named_cloud.first, hull, diff_z);
 	}
 
-	output_polygon_frame_->push_back(std::make_pair(hull, diff_z));
+	frame_polygon_->push_back(std::make_pair(hull, diff_z));
 }
 
 void
