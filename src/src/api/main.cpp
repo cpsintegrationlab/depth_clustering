@@ -38,13 +38,13 @@ main(int argc, char* argv[])
 		bounding_box_type = BoundingBox::Type::Polygon;
 	}
 
-	if (!depth_clustering.init_data(data_folder, data_type, bounding_box_type))
+	if (!depth_clustering.initDataset(data_folder, data_type, bounding_box_type))
 	{
 		std::cout << "[ERROR]: Failed to initialize. Quit." << std::endl;
 		return -1;
 	}
 
-	depth_clustering.process_data();
+	depth_clustering.processDataset();
 
 	depth_clustering.finish();
 

@@ -39,17 +39,17 @@ public:
 			float angle_clustering, float angle_ground_removal, bool log_apollo, bool log_data);
 
 	bool
-	init_apollo(const BoundingBox::Type& bounding_box_type);
+	initApollo(const BoundingBox::Type& bounding_box_type);
 
 	bool
-	init_data(const std::string& data_folder, const std::string& data_type,
+	initDataset(const std::string& data_folder, const std::string& data_type,
 			const BoundingBox::Type& bounding_box_type);
 
 	void
-	process_apollo(const std::string& frame_name, const std::vector<Eigen::Vector3f>& point_cloud);
+	processApollo(const std::string& frame_name, const std::vector<Eigen::Vector3f>& point_cloud);
 
 	void
-	process_data();
+	processDataset();
 
 	void
 	finish();
@@ -60,10 +60,10 @@ private:
 	resetBoundingBox(bool& log);
 
 	void
-	clearOutputFrame();
+	clearBoundingBoxFrame();
 
 	void
-	storeOutputFrame();
+	storeBoundingBoxFrame();
 
 	std::string data_type_;
 	BoundingBox::Type bounding_box_type_;

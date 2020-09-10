@@ -48,7 +48,7 @@ DepthClustering::DepthClustering(std::string data_type, BoundingBox::Type boundi
 }
 
 bool
-DepthClustering::init_apollo(const BoundingBox::Type& bounding_box_type)
+DepthClustering::initApollo(const BoundingBox::Type& bounding_box_type)
 {
 	bounding_box_type_ = bounding_box_type;
 	projection_parameter_ = ProjectionParams::APOLLO();
@@ -68,7 +68,7 @@ DepthClustering::init_apollo(const BoundingBox::Type& bounding_box_type)
 }
 
 bool
-DepthClustering::init_data(const std::string& data_folder, const std::string& data_type,
+DepthClustering::initDataset(const std::string& data_folder, const std::string& data_type,
 		const BoundingBox::Type& bounding_box_type)
 {
 	data_type_ = data_type;
@@ -104,7 +104,7 @@ DepthClustering::init_data(const std::string& data_folder, const std::string& da
 }
 
 void
-DepthClustering::process_apollo(const std::string& frame_name,
+DepthClustering::processApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)
 {
 	Cloud::Ptr cloud(new Cloud);
@@ -122,13 +122,13 @@ DepthClustering::process_apollo(const std::string& frame_name,
 
 	cloud->InitProjection(*projection_parameter_);
 
-	clearOutputFrame();
+	clearBoundingBoxFrame();
 
 	depth_ground_remover_->OnNewObjectReceived(std::make_pair(frame_name, *cloud), 0);
 }
 
 void
-DepthClustering::process_data()
+DepthClustering::processDataset()
 {
 	for (const auto &path : folder_reader_data_->GetAllFilePaths())
 	{
@@ -150,12 +150,12 @@ DepthClustering::process_data()
 
 		auto cloud = Cloud::FromImage(depth_image, *projection_parameter_);
 
-		clearOutputFrame();
+		clearBoundingBoxFrame();
 		std::cout << "[INFO]: Started processing frame." << std::endl;
 
 		depth_ground_remover_->OnNewObjectReceived(std::make_pair(path, *cloud), 0);
 
-		storeOutputFrame();
+		storeBoundingBoxFrame();
 		std::cout << "[INFO]: Finished processing frame." << std::endl << std::endl;
 	}
 }
@@ -196,7 +196,7 @@ DepthClustering::resetBoundingBox(bool& log)
 }
 
 void
-DepthClustering::clearOutputFrame()
+DepthClustering::clearBoundingBoxFrame()
 {
 	switch (bounding_box_type_)
 	{
@@ -219,7 +219,7 @@ DepthClustering::clearOutputFrame()
 }
 
 void
-DepthClustering::storeOutputFrame()
+DepthClustering::storeBoundingBoxFrame()
 {
 	switch (bounding_box_type_)
 	{
