@@ -12,9 +12,9 @@ main(int argc, char* argv[])
 {
 	std::string dataset_path =
 			"../../../data/segment-1022527355599519580_4866_960_4886_960_with_camera_labels/";
-	std::string bounding_box_type_string = "cube";
 	const std::string dataset_file_type = ".tiff";
-	BoundingBox::Type bounding_box_type = BoundingBox::Type::Cube;
+	std::string bounding_box_type_string = "cube";
+	DepthClustering::Parameter depth_clustering_parameter;
 
 	if (argc > 1)
 	{
@@ -35,14 +35,14 @@ main(int argc, char* argv[])
 
 	if (bounding_box_type_string == "cube")
 	{
-		bounding_box_type = BoundingBox::Type::Cube;
+		depth_clustering_parameter.bounding_box_type = BoundingBox::Type::Cube;
 	}
 	else if (bounding_box_type_string == "polygon")
 	{
-		bounding_box_type = BoundingBox::Type::Polygon;
+		depth_clustering_parameter.bounding_box_type = BoundingBox::Type::Polygon;
 	}
 
-	DepthClustering depth_clustering;
+	DepthClustering depth_clustering(depth_clustering_parameter);
 
 	if (!depth_clustering.initializeForDataset(dataset_path, dataset_file_type))
 	{
@@ -51,7 +51,6 @@ main(int argc, char* argv[])
 	}
 
 	depth_clustering.processForDataset();
-
 	depth_clustering.finish();
 
 	return 0;

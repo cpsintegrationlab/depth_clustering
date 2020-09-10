@@ -34,10 +34,22 @@ class DepthClustering
 {
 public:
 
+	struct Parameter
+	{
+		Radians angle_clustering;
+		Radians angle_ground_removal;
+		int size_cluster_min;
+		int size_cluster_max;
+		int size_smooth_window;
+		BoundingBox::Type bounding_box_type;
+		bool log;
+
+		Parameter();
+	};
+
 	DepthClustering();
 
-	DepthClustering(BoundingBox::Type bounding_box_type, int size_cluster_min, int size_cluster_max,
-			int size_smooth_window, float angle_clustering, float angle_ground_removal, bool log);
+	DepthClustering(const Parameter& parameter);
 
 	bool
 	initializeForApollo();
@@ -57,16 +69,9 @@ public:
 
 private:
 
+	Parameter parameter_;
+
 	std::string dataset_file_type_;
-	BoundingBox::Type bounding_box_type_;
-
-	Radians angle_clustering_;
-	Radians angle_ground_removal_;
-	int size_cluster_min_;
-	int size_cluster_max_;
-	int size_smooth_window_;
-
-	bool log_;
 	std::string log_path_;
 	std::string log_file_name_;
 

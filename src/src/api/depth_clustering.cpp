@@ -20,40 +20,27 @@ using depth_clustering::MatFromDepthTiff;
 using depth_clustering::Radians;
 using depth_clustering::RichPoint;
 
-DepthClustering::DepthClustering()
+DepthClustering::Parameter::Parameter()
 {
-	dataset_file_type_ = ".tiff";
-	bounding_box_type_ = BoundingBox::Type::Cube;
-
-	size_cluster_min_ = 10;
-	size_cluster_max_ = 20000;
-	size_smooth_window_ = 5;
-	angle_clustering_ = 10_deg;
-	angle_ground_removal_ = 9_deg;
-
-	log_ = true;
-	log_path_ = "./";
-	log_file_name_ = "detection.json";
-
-	bounding_box_frame_cube_ = std::make_shared<BoundingBox::Frame<BoundingBox::Cube>>();
-	bounding_box_frame_polygon_ = std::make_shared<BoundingBox::Frame<BoundingBox::Polygon>>();
+	angle_clustering = 10_deg;
+	angle_ground_removal = 9_deg;
+	size_cluster_min = 10;
+	size_cluster_max = 20000;
+	size_smooth_window = 5;
+	bounding_box_type = BoundingBox::Type::Cube;
+	log = true;
 }
 
-DepthClustering::DepthClustering(BoundingBox::Type bounding_box_type, int size_cluster_min,
-		int size_cluster_max, int size_smooth_window, float angle_clustering,
-		float angle_ground_removal, bool log) :
-		bounding_box_type_(bounding_box_type), size_cluster_min_(size_cluster_min), size_cluster_max_(
-				size_cluster_max), size_smooth_window_(size_smooth_window), log_(log)
+DepthClustering::DepthClustering() :
+		DepthClustering(Parameter())
 {
+}
+
+DepthClustering::DepthClustering(const Parameter& parameter)
+{
+	parameter_ = parameter;
+
 	dataset_file_type_ = ".tiff";
-
-	angle_clustering_ = Radians
-	{ Radians::IsRadians
-	{ }, static_cast<float>(angle_clustering * M_PI / 180.0) };
-	angle_ground_removal_ = Radians
-	{ Radians::IsRadians
-	{ }, static_cast<float>(angle_ground_removal * M_PI / 180.0) };
-
 	log_path_ = "./";
 	log_file_name_ = "detection.json";
 
@@ -66,11 +53,11 @@ DepthClustering::initializeForApollo()
 {
 	projection_parameter_ = ProjectionParams::APOLLO();
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
-			angle_ground_removal_, size_smooth_window_);
-	bounding_box_ = std::make_shared<BoundingBox>(bounding_box_type_);
-	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,
-			size_cluster_min_, size_cluster_max_);
-	logger_ = std::make_shared<Logger>(log_);
+			parameter_.angle_ground_removal, parameter_.size_smooth_window);
+	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type);
+	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(
+			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
+	logger_ = std::make_shared<Logger>(parameter_.log);
 
 	bounding_box_->setFrame(bounding_box_frame_cube_, bounding_box_frame_polygon_);
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
@@ -93,10 +80,10 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 			FolderReader::Order::SORTED);
 	folder_reader_config_ = std::make_shared<FolderReader>(dataset_path, "img.cfg");
 
-	bounding_box_ = std::make_shared<BoundingBox>(bounding_box_type_);
-	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(angle_clustering_,
-			size_cluster_min_, size_cluster_max_);
-	logger_ = std::make_shared<Logger>(log_);
+	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type);
+	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(
+			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
+	logger_ = std::make_shared<Logger>(parameter_.log);
 
 	bounding_box_->setFrame(bounding_box_frame_cube_, bounding_box_frame_polygon_);
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
@@ -114,7 +101,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 	}
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
-			angle_ground_removal_, size_smooth_window_);
+			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
 	clusterer_->AddClient(bounding_box_.get());
@@ -143,7 +130,7 @@ DepthClustering::processForApollo(const std::string& frame_name,
 
 	depth_ground_remover_->OnNewObjectReceived(std::make_pair(frame_name, *cloud), 0);
 
-	logger_->logBoundingBoxFrame(frame_name, bounding_box_type_);
+	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 }
 
 void
@@ -177,8 +164,9 @@ DepthClustering::processForDataset()
 
 		std::cout << "[INFO]: Finished processing frame." << std::endl << std::endl;
 
-		while (std::getline(ss, frame_name, '/'));
-		logger_->logBoundingBoxFrame(frame_name, bounding_box_type_);
+		while (std::getline(ss, frame_name, '/'))
+			;
+		logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 	}
 }
 
