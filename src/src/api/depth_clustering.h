@@ -81,8 +81,6 @@ private:
 	std::shared_ptr<DepthGroundRemover> depth_ground_remover_;
 	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>> clusterer_;
 	std::shared_ptr<BoundingBox> bounding_box_;
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube_;
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frame_polygon_;
 	std::shared_ptr<Logger> logger_;
 };
 

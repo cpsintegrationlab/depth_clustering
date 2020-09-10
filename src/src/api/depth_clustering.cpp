@@ -43,9 +43,6 @@ DepthClustering::DepthClustering(const Parameter& parameter)
 	dataset_file_type_ = ".tiff";
 	log_path_ = "./";
 	log_file_name_ = "detection.json";
-
-	bounding_box_frame_cube_ = std::make_shared<BoundingBox::Frame<BoundingBox::Cube>>();
-	bounding_box_frame_polygon_ = std::make_shared<BoundingBox::Frame<BoundingBox::Polygon>>();
 }
 
 bool
@@ -59,9 +56,8 @@ DepthClustering::initializeForApollo()
 			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
 	logger_ = std::make_shared<Logger>(parameter_.log);
 
-	bounding_box_->setFrame(bounding_box_frame_cube_, bounding_box_frame_polygon_);
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
-	logger_->setBoundingBoxFrame(bounding_box_frame_cube_, bounding_box_frame_polygon_);
+	logger_->setBoundingBox(bounding_box_);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
 	clusterer_->AddClient(bounding_box_.get());
@@ -85,9 +81,8 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
 	logger_ = std::make_shared<Logger>(parameter_.log);
 
-	bounding_box_->setFrame(bounding_box_frame_cube_, bounding_box_frame_polygon_);
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
-	logger_->setBoundingBoxFrame(bounding_box_frame_cube_, bounding_box_frame_polygon_);
+	logger_->setBoundingBox(bounding_box_);
 
 	auto config_file_name = folder_reader_config_->GetNextFilePath();
 
@@ -131,6 +126,7 @@ DepthClustering::processForApollo(const std::string& frame_name,
 	depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
 
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
+	bounding_box_->clearFrame();
 }
 
 void
@@ -165,6 +161,7 @@ DepthClustering::processForDataset()
 		depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
 
 		logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
+		bounding_box_->clearFrame();
 	}
 }
 

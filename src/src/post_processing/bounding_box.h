@@ -46,9 +46,14 @@ public:
 
 	BoundingBox(const Type& type);
 
+	std::shared_ptr<Frame<Cube>>
+	getFrameCube() const;
+
+	std::shared_ptr<Frame<Polygon>>
+	getFramePolygon() const;
+
 	void
-	setFrame(std::shared_ptr<Frame<Cube>> frame_cube,
-			std::shared_ptr<Frame<Polygon>> frame_polygon);
+	clearFrame();
 
 	void
 	OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int id) override;

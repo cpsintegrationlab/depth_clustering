@@ -19,14 +19,27 @@ BoundingBox::BoundingBox() :
 BoundingBox::BoundingBox(const Type& type) :
 		type_(type)
 {
+	frame_cube_ = std::make_shared<Frame<Cube>>();
+	frame_polygon_ = std::make_shared<Frame<Polygon>>();
+}
+
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>>
+BoundingBox::getFrameCube() const
+{
+	return frame_cube_;
+}
+
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>>
+BoundingBox::getFramePolygon() const
+{
+	return frame_polygon_;
 }
 
 void
-BoundingBox::setFrame(std::shared_ptr<Frame<Cube>> frame_cube,
-		std::shared_ptr<Frame<Polygon>> frame_polygon)
+BoundingBox::clearFrame()
 {
-	frame_cube_ = frame_cube;
-	frame_polygon_ = frame_polygon;
+	frame_cube_->clear();
+	frame_polygon_->clear();
 }
 
 void

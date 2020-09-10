@@ -23,12 +23,9 @@ Logger::Logger(const bool& log) :
 }
 
 void
-Logger::setBoundingBoxFrame(
-		std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube,
-		std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frame_polygon)
+Logger::setBoundingBox(std::shared_ptr<BoundingBox> bounding_box)
 {
-	bounding_box_frame_cube_ = bounding_box_frame_cube;
-	bounding_box_frame_polygon_ = bounding_box_frame_polygon;
+	bounding_box_ = bounding_box;
 }
 
 void
@@ -87,13 +84,19 @@ Logger::logBoundingBoxFrameCube(const std::string& frame_name)
 		return;
 	}
 
-	if (!bounding_box_frame_cube_)
+	if (!bounding_box_)
+	{
+		std::cout << "[ERROR]: Bounding box missing." << std::endl;
+		return;
+	}
+
+	if (!bounding_box_->getFrameCube())
 	{
 		std::cout << "[ERROR]: Cube frame missing." << std::endl;
 		return;
 	}
 
-	auto bounding_box_frame_cube = *bounding_box_frame_cube_;
+	auto bounding_box_frame_cube = *(bounding_box_->getFrameCube());
 
 	for (const auto &cube : bounding_box_frame_cube)
 	{
@@ -141,8 +144,6 @@ Logger::logBoundingBoxFrameCube(const std::string& frame_name)
 			cloud_file_array.push_back(std::make_pair("", cube_array));
 		}
 	}
-
-	bounding_box_frame_cube_->clear();
 }
 
 void
@@ -153,13 +154,19 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 		return;
 	}
 
-	if (!bounding_box_frame_polygon_)
+	if (!bounding_box_)
+		{
+			std::cout << "[ERROR]: Bounding box missing." << std::endl;
+			return;
+		}
+
+	if (!bounding_box_->getFramePolygon())
 	{
 		std::cout << "[ERROR]: Polygon frame missing." << std::endl;
 		return;
 	}
 
-	auto bounding_box_frame_polygon = *bounding_box_frame_polygon_;
+	auto bounding_box_frame_polygon = *(bounding_box_->getFramePolygon());
 
 	for (const auto &polygon : bounding_box_frame_polygon)
 	{
@@ -213,8 +220,6 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 			cloud_file_array.push_back(std::make_pair("", cloud_object_array));
 		}
 	}
-
-	bounding_box_frame_polygon_->clear();
 }
 
 } // namespace depth_clustering

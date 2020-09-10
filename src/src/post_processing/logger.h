@@ -24,9 +24,7 @@ public:
 	Logger(const bool& log);
 
 	void
-	setBoundingBoxFrame(
-			std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube,
-			std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frame_polygon);
+	setBoundingBox(std::shared_ptr<BoundingBox> bounding_box);
 
 	void
 	logBoundingBoxFrame(const std::string& frame_name, const BoundingBox::Type& bounding_box_type);
@@ -44,8 +42,7 @@ private:
 
 	bool log_ = true;
 
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube_;
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frame_polygon_;
+	std::shared_ptr<BoundingBox> bounding_box_;
 	std::ofstream bounding_box_log_file_;
 	boost::property_tree::ptree bounding_box_log_tree_;
 };
