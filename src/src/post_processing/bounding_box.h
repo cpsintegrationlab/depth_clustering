@@ -1,35 +1,35 @@
-// Copyright Igor Bogoslavskyi, year 2017.
-// In case of any problems with the code please contact me.
-// Email: igor.bogoslavskyi@uni-bonn.de.
+/*
+ * bounding_box.h
+ *
+ *  Created on: Sep 9, 2020
+ *      Author: simonyu
+ */
 
-#ifndef SRC_QT_DRAWABLES_OBJECT_PAINTER_H_
-#define SRC_QT_DRAWABLES_OBJECT_PAINTER_H_
+#ifndef SRC_POST_PROCESSING_BOUNDING_BOX_H_
+#define SRC_POST_PROCESSING_BOUNDING_BOX_H_
 
-#include "ground_removal/depth_ground_remover.h"
-#include "clusterers/abstract_clusterer.h"
-#include "communication/abstract_client.h"
-
-#include <utils/cloud.h>
-#include <utils/timer.h>
-
-#include <fstream>
 #include <algorithm>
+#include <boost/property_tree/ptree.hpp>
+#include <fstream>
 #include <limits>
 #include <unordered_map>
 #include <vector>
 
-#include <boost/property_tree/ptree.hpp>
+#include "clusterers/abstract_clusterer.h"
+#include "communication/abstract_client.h"
+#include "ground_removal/depth_ground_remover.h"
+#include "utils/cloud.h"
+#include "utils/timer.h"
 
 namespace depth_clustering
 {
 
-class ObjectPainter: public depth_clustering::AbstractClient<NamedCluster>
+class BoundingBox: public depth_clustering::AbstractClient<NamedCluster>
 {
-	using Cloud = depth_clustering::Cloud;
-	using Timer = depth_clustering::time_utils::Timer;
-
 public:
 
+	using Cloud = depth_clustering::Cloud;
+	using Timer = depth_clustering::time_utils::Timer;
 	using AlignedEigenVectors =
 	std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>>;
 	using OutputBox = std::pair<Eigen::Vector3f, Eigen::Vector3f>;
@@ -43,10 +43,10 @@ public:
 	};
 
 	explicit
-	ObjectPainter(OutlineType outline_type, OutputBoxFrame* output_box_frame,
+	BoundingBox(OutlineType outline_type, OutputBoxFrame* output_box_frame,
 			OutputPolygonFrame* output_polygon_frame, bool log) :
-			outline_type_(outline_type), output_box_frame_(output_box_frame), output_polygon_frame_(
-					output_polygon_frame), log_(log)
+	outline_type_(outline_type), output_box_frame_(output_box_frame), output_polygon_frame_(
+			output_polygon_frame), log_(log)
 	{
 	}
 
@@ -69,8 +69,7 @@ private:
 			const Eigen::Vector3f& extent);
 
 	void
-	logObject(const std::string& file_name, const AlignedEigenVectors& hull,
-			const float& diff_z);
+	logObject(const std::string& file_name, const AlignedEigenVectors& hull, const float& diff_z);
 
 	void
 	openLogFile(const std::string& file_name);
@@ -86,6 +85,6 @@ private:
 	boost::property_tree::ptree log_file_tree_;
 };
 
-}  // namespace depth_clustering
+}	// namespace depth_clustering
 
-#endif  // SRC_QT_DRAWABLES_OBJECT_PAINTER_H_
+#endif	// SRC_POST_PROCESSING_BOUNDING_BOX_H_

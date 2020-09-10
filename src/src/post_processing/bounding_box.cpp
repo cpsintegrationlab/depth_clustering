@@ -1,17 +1,20 @@
-// Copyright Igor Bogoslavskyi, year 2017.
-// In case of any problems with the code please contact me.
-// Email: igor.bogoslavskyi@uni-bonn.de.
-
-#include <iostream>
-#include "./object_painter.h"
+/*
+ * bounding_box.cpp
+ *
+ *  Created on: Sep 9, 2020
+ *      Author: simonyu
+ */
 
 #include <boost/property_tree/json_parser.hpp>
+#include <iostream>
+
+#include "post_processing/bounding_box.h"
 
 namespace depth_clustering
 {
 
 void
-ObjectPainter::OnNewObjectReceived(const NamedCluster& named_cluster, int)
+BoundingBox::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 {
 	Timer timer;
 	const auto &clouds = named_cluster.second;
@@ -35,7 +38,7 @@ ObjectPainter::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 }
 
 void
-ObjectPainter::writeLog()
+BoundingBox::writeLog()
 {
 	if (log_)
 	{
@@ -49,7 +52,7 @@ ObjectPainter::writeLog()
 }
 
 void
-ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
+BoundingBox::CreateDrawableCube(const NamedCloud& named_cloud)
 {
 	const auto &cloud = named_cloud.second;
 	Eigen::Vector3f center = Eigen::Vector3f::Zero();
@@ -81,7 +84,7 @@ ObjectPainter::CreateDrawableCube(const NamedCloud& named_cloud)
 }
 
 void
-ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
+BoundingBox::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 {
 	const auto &cloud = named_cloud.second;
 	float min_z
@@ -121,7 +124,7 @@ ObjectPainter::CreateDrawablePolygon3d(const NamedCloud& named_cloud)
 }
 
 void
-ObjectPainter::logObject(const std::string& file_name, const Eigen::Vector3f& center,
+BoundingBox::logObject(const std::string& file_name, const Eigen::Vector3f& center,
 		const Eigen::Vector3f& extent)
 {
 	if (!log_file_.is_open())
@@ -183,7 +186,7 @@ ObjectPainter::logObject(const std::string& file_name, const Eigen::Vector3f& ce
 }
 
 void
-ObjectPainter::logObject(const std::string& file_name,
+BoundingBox::logObject(const std::string& file_name,
 		const AlignedEigenVectors& hull, const float& diff_z)
 {
 	if (!log_file_.is_open())
@@ -251,7 +254,7 @@ ObjectPainter::logObject(const std::string& file_name,
 }
 
 void
-ObjectPainter::openLogFile(const std::string& file_name)
+BoundingBox::openLogFile(const std::string& file_name)
 {
 	char log_file_path_delim = '/';
 	std::string log_file_path = "";

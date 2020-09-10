@@ -10,7 +10,7 @@ target_link_libraries(
 	projections
 	ground_remove
 	folder_reader
-	drawable
+	post_processing
 	${Boost_LIBRARIES}
 	${OpenCV_LIBS}
 	${CMAKE_THREAD_LIBS_INIT}

@@ -31,11 +31,11 @@ main(int argc, char* argv[])
 
 	DepthClustering depth_clustering;
 	const std::string data_type = ".tiff";
-	ObjectPainter::OutlineType outline_type = ObjectPainter::OutlineType::kBox;
+	BoundingBox::OutlineType outline_type = BoundingBox::OutlineType::kBox;
 
 	if (mode == "polygon")
 	{
-		outline_type = ObjectPainter::OutlineType::kPolygon3d;
+		outline_type = BoundingBox::OutlineType::kPolygon3d;
 	}
 
 	if (!depth_clustering.init_data(data_folder, data_type, outline_type))

@@ -23,7 +23,7 @@ using depth_clustering::RichPoint;
 DepthClustering::DepthClustering()
 {
 	data_type_ = ".tiff";
-	outline_type_ = ObjectPainter::OutlineType::kBox;
+	outline_type_ = BoundingBox::OutlineType::kBox;
 	size_cluster_min_ = 10;
 	size_cluster_max_ = 20000;
 	size_smooth_window_ = 5;
@@ -33,7 +33,7 @@ DepthClustering::DepthClustering()
 	log_data_ = true;
 }
 
-DepthClustering::DepthClustering(std::string data_type, ObjectPainter::OutlineType outline_type,
+DepthClustering::DepthClustering(std::string data_type, BoundingBox::OutlineType outline_type,
 		int size_cluster_min, int size_cluster_max, int size_smooth_window,
 		float angle_clustering, float angle_ground_removal, bool log_apollo, bool log_data) :
 		data_type_(data_type), outline_type_(outline_type), size_cluster_min_(size_cluster_min), size_cluster_max_(
@@ -48,7 +48,7 @@ DepthClustering::DepthClustering(std::string data_type, ObjectPainter::OutlineTy
 }
 
 bool
-DepthClustering::init_apollo(const ObjectPainter::OutlineType& outline_type)
+DepthClustering::init_apollo(const BoundingBox::OutlineType& outline_type)
 {
 	outline_type_ = outline_type;
 	projection_parameter_ = ProjectionParams::APOLLO();
@@ -59,17 +59,17 @@ DepthClustering::init_apollo(const ObjectPainter::OutlineType& outline_type)
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
 
-	resetObjectPainter(log_apollo_);
+	resetBoundingBox(log_apollo_);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
-	clusterer_->AddClient(object_painter_.get());
+	clusterer_->AddClient(bounding_box_.get());
 
 	return true;
 }
 
 bool
 DepthClustering::init_data(const std::string& data_folder, const std::string& data_type,
-		const ObjectPainter::OutlineType& outline_type)
+		const BoundingBox::OutlineType& outline_type)
 {
 	data_type_ = data_type;
 	outline_type_ = outline_type;
@@ -95,10 +95,10 @@ DepthClustering::init_data(const std::string& data_folder, const std::string& da
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			angle_ground_removal_, size_smooth_window_);
 
-	resetObjectPainter(log_data_);
+	resetBoundingBox(log_data_);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
-	clusterer_->AddClient(object_painter_.get());
+	clusterer_->AddClient(bounding_box_.get());
 
 	return true;
 }
@@ -164,19 +164,19 @@ DepthClustering::get_output_apollo_box() const
 	return output_box_frame_;
 }
 
-std::vector<std::pair<ObjectPainter::AlignedEigenVectors, float>>
+std::vector<std::pair<BoundingBox::AlignedEigenVectors, float>>
 DepthClustering::get_output_apollo_polygon() const
 {
 	return output_polygon_frame_;
 }
 
-std::vector<ObjectPainter::OutputBoxFrame>
+std::vector<BoundingBox::OutputBoxFrame>
 DepthClustering::get_output_data_box() const
 {
 	return outputs_box_frame_;
 }
 
-std::vector<ObjectPainter::OutputPolygonFrame>
+std::vector<BoundingBox::OutputPolygonFrame>
 DepthClustering::get_output_data_polygon() const
 {
 	return outputs_polygon_frame_;
@@ -185,31 +185,31 @@ DepthClustering::get_output_data_polygon() const
 void
 DepthClustering::finish()
 {
-	object_painter_->writeLog();
+	bounding_box_->writeLog();
 }
 
 void
-DepthClustering::resetObjectPainter(bool& log)
+DepthClustering::resetBoundingBox(bool& log)
 {
 	switch (outline_type_)
 	{
-	case ObjectPainter::OutlineType::kBox:
+	case BoundingBox::OutlineType::kBox:
 	{
-		object_painter_.reset(new ObjectPainter
+		bounding_box_.reset(new BoundingBox
 			{ outline_type_, &output_box_frame_, nullptr, log });
 
 		break;
 	}
-	case ObjectPainter::OutlineType::kPolygon3d:
+	case BoundingBox::OutlineType::kPolygon3d:
 	{
-		object_painter_.reset(new ObjectPainter
+		bounding_box_.reset(new BoundingBox
 			{ outline_type_, nullptr, &output_polygon_frame_, log });
 
 		break;
 	}
 	default:
 	{
-		object_painter_.reset(new ObjectPainter
+		bounding_box_.reset(new BoundingBox
 			{ outline_type_, &output_box_frame_, nullptr, log });
 
 		break;
@@ -222,12 +222,12 @@ DepthClustering::clearOutputFrame()
 {
 	switch (outline_type_)
 	{
-	case ObjectPainter::OutlineType::kBox:
+	case BoundingBox::OutlineType::kBox:
 	{
 		output_box_frame_.clear();
 		break;
 	}
-	case ObjectPainter::OutlineType::kPolygon3d:
+	case BoundingBox::OutlineType::kPolygon3d:
 	{
 		output_polygon_frame_.clear();
 		break;
@@ -245,12 +245,12 @@ DepthClustering::storeOutputFrame()
 {
 	switch (outline_type_)
 	{
-	case ObjectPainter::OutlineType::kBox:
+	case BoundingBox::OutlineType::kBox:
 	{
 		outputs_box_frame_.push_back(output_box_frame_);
 		break;
 	}
-	case ObjectPainter::OutlineType::kPolygon3d:
+	case BoundingBox::OutlineType::kPolygon3d:
 	{
 		outputs_polygon_frame_.push_back(output_polygon_frame_);
 		break;
