@@ -26,16 +26,15 @@
 
 namespace depth_clustering
 {
-using NamedCluster = std::pair<std::string, std::unordered_map<uint16_t, Cloud>>;
 
 /**
  * @brief      Class for abstract clusterer.
  */
-class AbstractClusterer: public AbstractClient<NamedCloud>, public AbstractSender<NamedCluster>
+class AbstractClusterer: public AbstractClient<Cloud>, public AbstractSender<std::unordered_map<uint16_t, Cloud>>
 {
 public:
-	using Receiver = AbstractClient<NamedCloud>;
-	using Sender = AbstractSender<NamedCluster>;
+	using Receiver = AbstractClient<Cloud>;
+	using Sender = AbstractSender<std::unordered_map<uint16_t, Cloud>>;
 
 	/**
 	 * @brief      Construct a clusterer.

@@ -23,7 +23,7 @@
 namespace depth_clustering
 {
 
-class BoundingBox: public depth_clustering::AbstractClient<NamedCluster>
+class BoundingBox: public depth_clustering::AbstractClient<std::unordered_map<uint16_t, Cloud>>
 {
 public:
 
@@ -47,18 +47,19 @@ public:
 	BoundingBox(const Type& type);
 
 	void
-	setFrame(std::shared_ptr<Frame<Cube>> frame_cube, std::shared_ptr<Frame<Polygon>> frame_polygon);
+	setFrame(std::shared_ptr<Frame<Cube>> frame_cube,
+			std::shared_ptr<Frame<Polygon>> frame_polygon);
 
 	void
-	OnNewObjectReceived(const NamedCluster& named_cluster, int id) override;
+	OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int id) override;
 
 private:
 
 	void
-	CreateCubes(const NamedCloud& named_cloud);
+	CreateCubes(const Cloud& cloud);
 
 	void
-	CreatePolygons(const NamedCloud& named_cloud);
+	CreatePolygons(const Cloud& cloud);
 
 	Type type_ = Type::Cube;
 	std::shared_ptr<Frame<Cube>> frame_cube_;

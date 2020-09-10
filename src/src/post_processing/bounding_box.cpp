@@ -30,10 +30,9 @@ BoundingBox::setFrame(std::shared_ptr<Frame<Cube>> frame_cube,
 }
 
 void
-BoundingBox::OnNewObjectReceived(const NamedCluster& named_cluster, int)
+BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int)
 {
 	Timer timer;
-	const auto &clouds = named_cluster.second;
 
 	for (const auto &kv : clouds)
 	{
@@ -43,12 +42,12 @@ BoundingBox::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 		{
 		case Type::Cube:
 		{
-			CreateCubes(std::make_pair(named_cluster.first, cluster));
+			CreateCubes(cluster);
 			break;
 		}
 		case Type::Polygon:
 		{
-			CreatePolygons(std::make_pair(named_cluster.first, cluster));
+			CreatePolygons(cluster);
 			break;
 		}
 		}
@@ -59,7 +58,7 @@ BoundingBox::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 }
 
 void
-BoundingBox::CreateCubes(const NamedCloud& named_cloud)
+BoundingBox::CreateCubes(const Cloud& cloud)
 {
 	if (!frame_cube_)
 	{
@@ -67,7 +66,6 @@ BoundingBox::CreateCubes(const NamedCloud& named_cloud)
 		return;
 	}
 
-	const auto &cloud = named_cloud.second;
 	Eigen::Vector3f center = Eigen::Vector3f::Zero();
 	Eigen::Vector3f extent = Eigen::Vector3f::Zero();
 	Eigen::Vector3f max_point(std::numeric_limits<float>::lowest(),
@@ -92,7 +90,7 @@ BoundingBox::CreateCubes(const NamedCloud& named_cloud)
 }
 
 void
-BoundingBox::CreatePolygons(const NamedCloud& named_cloud)
+BoundingBox::CreatePolygons(const Cloud& cloud)
 {
 	if (!frame_polygon_)
 	{
@@ -100,7 +98,6 @@ BoundingBox::CreatePolygons(const NamedCloud& named_cloud)
 		return;
 	}
 
-	const auto &cloud = named_cloud.second;
 	float min_z
 	{ std::numeric_limits<float>::max() };
 	float max_z

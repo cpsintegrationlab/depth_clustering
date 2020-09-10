@@ -47,8 +47,8 @@ template<typename LabelerT>
 class ImageBasedClusterer: public AbstractClusterer
 {
 public:
-	using Receiver = AbstractClient<NamedCloud>;
-	using Sender = AbstractSender<NamedCluster>;
+	using Receiver = AbstractClient<Cloud>;
+	using Sender = AbstractSender<std::unordered_map<uint16_t, Cloud>>;
 
 	/**
 	 * @brief      Construct an image-based clusterer.
@@ -100,11 +100,9 @@ public:
 	 * @param[in]  sender_id  The sender identifier
 	 */
 	void
-	OnNewObjectReceived(const NamedCloud& named_cloud, int) override
+	OnNewObjectReceived(const Cloud& cloud, int) override
 	{
 		// generate a projection from a point cloud
-		const Cloud &cloud = named_cloud.second;
-
 		if (!cloud.projection_ptr())
 		{
 			fprintf(stderr, "ERROR: projection not initialized in cloud.\n");
@@ -170,7 +168,7 @@ public:
 
 		fprintf(stderr, "[INFO]: Clusters prepared: %lu us.\n", timer.measure());
 
-		this->ShareDataWithAllClients(std::make_pair(named_cloud.first, clusters));
+		this->ShareDataWithAllClients(clusters);
 
 		fprintf(stderr, "[INFO]: Clusters shared: %lu us.\n", timer.measure());
 	}
