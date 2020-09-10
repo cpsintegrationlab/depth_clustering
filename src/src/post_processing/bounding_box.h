@@ -45,8 +45,8 @@ public:
 	explicit
 	BoundingBox(OutlineType outline_type, OutputBoxFrame* output_box_frame,
 			OutputPolygonFrame* output_polygon_frame, bool log) :
-	outline_type_(outline_type), output_box_frame_(output_box_frame), output_polygon_frame_(
-			output_polygon_frame), log_(log)
+			outline_type_(outline_type), output_box_frame_(output_box_frame), output_polygon_frame_(
+					output_polygon_frame), log_(log)
 	{
 	}
 

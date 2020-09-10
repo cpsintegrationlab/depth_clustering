@@ -151,10 +151,12 @@ DepthClustering::process_data()
 		auto cloud = Cloud::FromImage(depth_image, *projection_parameter_);
 
 		clearOutputFrame();
+		std::cout << "[INFO]: Started processing frame." << std::endl;
 
 		depth_ground_remover_->OnNewObjectReceived(std::make_pair(path, *cloud), 0);
 
 		storeOutputFrame();
+		std::cout << "[INFO]: Finished processing frame." << std::endl << std::endl;
 	}
 }
 

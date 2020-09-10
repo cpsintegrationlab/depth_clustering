@@ -34,7 +34,7 @@ BoundingBox::OnNewObjectReceived(const NamedCluster& named_cluster, int)
 		}
 	}
 
-	fprintf(stderr, "[TIMING]: Adding all boxes took %lu us\n", timer.measure(Timer::Units::Micro));
+	fprintf(stderr, "[INFO]: Bounding boxes created: %lu us.\n", timer.measure(Timer::Units::Micro));
 }
 
 void
@@ -44,7 +44,7 @@ BoundingBox::writeLog()
 	{
 		boost::property_tree::write_json(log_file_, log_file_tree_);
 
-		std::cout << "[INFO]: wrote to log file '" << log_file_path_ + log_file_name_ << "'."
+		std::cout << "[INFO]: Wrote to log file '" << log_file_path_ + log_file_name_ << "'."
 				<< std::endl;
 
 		log_file_.close();
@@ -133,12 +133,12 @@ BoundingBox::logObject(const std::string& file_name, const Eigen::Vector3f& cent
 
 		if (!log_file_.is_open())
 		{
-			std::cout << "[WARN]: failed to open log file '" << log_file_path_ + log_file_name_
+			std::cout << "[WARN]: Failed to open log file '" << log_file_path_ + log_file_name_
 					<< "'." << std::endl;
 			return;
 		}
 
-		std::cout << "[INFO]: opened log file '" << log_file_path_ + log_file_name_ << "'."
+		std::cout << "[INFO]: Opened log file '" << log_file_path_ + log_file_name_ << "'."
 				<< std::endl;
 	}
 
@@ -186,8 +186,8 @@ BoundingBox::logObject(const std::string& file_name, const Eigen::Vector3f& cent
 }
 
 void
-BoundingBox::logObject(const std::string& file_name,
-		const AlignedEigenVectors& hull, const float& diff_z)
+BoundingBox::logObject(const std::string& file_name, const AlignedEigenVectors& hull,
+		const float& diff_z)
 {
 	if (!log_file_.is_open())
 	{
@@ -195,12 +195,12 @@ BoundingBox::logObject(const std::string& file_name,
 
 		if (!log_file_.is_open())
 		{
-			std::cout << "[WARN]: failed to open log file '" << log_file_path_ + log_file_name_
+			std::cout << "[WARN]: Failed to open log file '" << log_file_path_ + log_file_name_
 					<< "'." << std::endl;
 			return;
 		}
 
-		std::cout << "[INFO]: opened log file '" << log_file_path_ + log_file_name_ << "'."
+		std::cout << "[INFO]: Opened log file '" << log_file_path_ + log_file_name_ << "'."
 				<< std::endl;
 	}
 

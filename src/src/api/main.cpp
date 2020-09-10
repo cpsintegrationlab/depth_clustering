@@ -17,7 +17,7 @@ main(int argc, char* argv[])
 	{
 		if (std::string(argv[1]) == "-h")
 		{
-			std::cout << std::endl << "usage: " << argv[0] << " [data folder] [mode]" << std::endl << std::endl;
+			std::cout << std::endl << "Usage: " << argv[0] << " [data folder] [mode]" << std::endl << std::endl;
 			return 0;
 		}
 
@@ -40,7 +40,7 @@ main(int argc, char* argv[])
 
 	if (!depth_clustering.init_data(data_folder, data_type, outline_type))
 	{
-		std::cout << "Failed to initialize. Quit." << std::endl;
+		std::cout << "[ERROR]: Failed to initialize. Quit." << std::endl;
 		return -1;
 	}
 
@@ -49,12 +49,12 @@ main(int argc, char* argv[])
 	if (mode == "polygon")
 	{
 		auto outputs_frame = depth_clustering.get_output_data_polygon();
-		std::cout << std::endl << "Total processed frames: " << outputs_frame.size() << "." << std::endl;
+		std::cout << "[INFO]: Total processed frames: " << outputs_frame.size() << "." << std::endl;
 	}
 	else
 	{
 		auto outputs_frame = depth_clustering.get_output_data_box();
-		std::cout << std::endl << "Total processed frames: " << outputs_frame.size() << "." << std::endl;
+		std::cout << "[INFO]: Total processed frames: " << outputs_frame.size() << "." << std::endl;
 	}
 
 	depth_clustering.finish();
