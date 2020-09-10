@@ -16,15 +16,17 @@
 #include "ground_removal/depth_ground_remover.h"
 #include "image_labelers/linear_image_labeler.h"
 #include "post_processing/bounding_box.h"
+#include "post_processing/logger.h"
 #include "projections/projection_params.h"
 #include "utils/folder_reader.h"
 #include "utils/radians.h"
 
+using depth_clustering::BoundingBox;
 using depth_clustering::DepthGroundRemover;
 using depth_clustering::FolderReader;
 using depth_clustering::ImageBasedClusterer;
 using depth_clustering::LinearImageLabeler;
-using depth_clustering::BoundingBox;
+using depth_clustering::Logger;
 using depth_clustering::ProjectionParams;
 using depth_clustering::Radians;
 
@@ -34,58 +36,49 @@ public:
 
 	DepthClustering();
 
-	DepthClustering(std::string data_type, BoundingBox::Type bounding_box_type,
-			int size_cluster_min, int size_cluster_max, int size_smooth_window,
-			float angle_clustering, float angle_ground_removal, bool log_apollo, bool log_data);
+	DepthClustering(BoundingBox::Type bounding_box_type, int size_cluster_min, int size_cluster_max,
+			int size_smooth_window, float angle_clustering, float angle_ground_removal, bool log);
 
 	bool
-	initApollo(const BoundingBox::Type& bounding_box_type);
+	initializeForApollo();
 
 	bool
-	initDataset(const std::string& data_folder, const std::string& data_type,
-			const BoundingBox::Type& bounding_box_type);
+	initializeForDataset(const std::string& dataset_path, const std::string& dataset_file_type);
 
 	void
-	processApollo(const std::string& frame_name, const std::vector<Eigen::Vector3f>& point_cloud);
+	processForApollo(const std::string& frame_name,
+			const std::vector<Eigen::Vector3f>& point_cloud);
 
 	void
-	processDataset();
+	processForDataset();
 
 	void
 	finish();
 
 private:
 
-	void
-	resetBoundingBox(bool& log);
-
-	void
-	clearBoundingBoxFrame();
-
-	void
-	storeBoundingBoxFrame();
-
-	std::string data_type_;
+	std::string dataset_file_type_;
 	BoundingBox::Type bounding_box_type_;
+
 	Radians angle_clustering_;
 	Radians angle_ground_removal_;
 	int size_cluster_min_;
 	int size_cluster_max_;
 	int size_smooth_window_;
-	bool log_apollo_;
-	bool log_data_;
+
+	bool log_;
+	std::string log_path_;
+	std::string log_file_name_;
 
 	std::shared_ptr<FolderReader> folder_reader_data_;
 	std::shared_ptr<FolderReader> folder_reader_config_;
 	std::unique_ptr<ProjectionParams> projection_parameter_;
 	std::shared_ptr<DepthGroundRemover> depth_ground_remover_;
 	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>> clusterer_;
-	std::unique_ptr<BoundingBox> bounding_box_;
-
-	BoundingBox::Frame<BoundingBox::Cube> bounding_box_frame_cube_;
-	BoundingBox::Frame<BoundingBox::Polygon> bounding_box_frame_polygon_;
-	std::vector<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frames_cube_;
-	std::vector<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frames_polygon_;
+	std::shared_ptr<BoundingBox> bounding_box_;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube_;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frame_polygon_;
+	std::shared_ptr<Logger> logger_;
 };
 
 #endif /* SRC_API_DEPTH_CLUSTERING_H_ */

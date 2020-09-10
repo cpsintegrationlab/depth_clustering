@@ -9,7 +9,6 @@
 #define SRC_POST_PROCESSING_BOUNDING_BOX_H_
 
 #include <algorithm>
-#include <boost/property_tree/ptree.hpp>
 #include <fstream>
 #include <limits>
 #include <unordered_map>
@@ -43,17 +42,15 @@ public:
 		Cube, Polygon
 	};
 
-	explicit
-	BoundingBox(Type type, Frame<Cube>* frame_cube, Frame<Polygon>* frame_polygon, bool log) :
-			type_(type), frame_cube_(frame_cube), frame_polygon_(frame_polygon), log_(log)
-	{
-	}
+	BoundingBox();
+
+	BoundingBox(const Type& type);
+
+	void
+	setFrame(std::shared_ptr<Frame<Cube>> frame_cube, std::shared_ptr<Frame<Polygon>> frame_polygon);
 
 	void
 	OnNewObjectReceived(const NamedCluster& named_cluster, int id) override;
-
-	void
-	writeLog();
 
 private:
 
@@ -63,27 +60,11 @@ private:
 	void
 	CreatePolygons(const NamedCloud& named_cloud);
 
-	void
-	logObject(const std::string& file_name, const Eigen::Vector3f& center,
-			const Eigen::Vector3f& extent);
-
-	void
-	logObject(const std::string& file_name, const AlignedEigenVectors& hull, const float& diff_z);
-
-	void
-	openLogFile(const std::string& file_name);
-
 	Type type_ = Type::Cube;
-	Frame<Cube> *frame_cube_ = nullptr;
-	Frame<Polygon> *frame_polygon_ = nullptr;
-
-	bool log_ = true;
-	std::ofstream log_file_;
-	std::string log_file_path_ = "";
-	const std::string log_file_name_ = "detection.json";
-	boost::property_tree::ptree log_file_tree_;
+	std::shared_ptr<Frame<Cube>> frame_cube_;
+	std::shared_ptr<Frame<Polygon>> frame_polygon_;
 };
 
-}	// namespace depth_clustering
+} // namespace depth_clustering
 
-#endif	// SRC_POST_PROCESSING_BOUNDING_BOX_H_
+#endif /* SRC_POST_PROCESSING_BOUNDING_BOX_H_ */

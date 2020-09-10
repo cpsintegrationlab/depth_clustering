@@ -32,7 +32,7 @@ int num_from_string(const std::string& query_str) {
     return 0;
   }
 
-  // Extract file nam from full path
+  // Extract file name from path
   std::stringstream ss(query_str);
   std::string substring = "";
   while (std::getline(ss, substring, '/'));
