@@ -73,7 +73,8 @@ Logger::writeBoundingBoxLog(std::string& path, const std::string& file_name)
 
 	boost::property_tree::write_json(bounding_box_log_file_, bounding_box_log_tree_);
 
-	std::cout << "[INFO]: Wrote to log file '" << path + file_name << "'." << std::endl;
+	std::cout << std::endl << "[INFO]: Wrote to log file \"" << path + file_name << "\"."
+			<< std::endl;
 
 	bounding_box_log_file_.close();
 }

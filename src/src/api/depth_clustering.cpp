@@ -142,6 +142,8 @@ DepthClustering::processForDataset()
 		std::string frame_name = "";
 		std::stringstream ss(path);
 
+		while (std::getline(ss, frame_name, '/'));
+
 		if (dataset_file_type_ == ".png")
 		{
 			depth_image = MatFromDepthPng(path);
@@ -158,14 +160,10 @@ DepthClustering::processForDataset()
 
 		auto cloud = Cloud::FromImage(depth_image, *projection_parameter_);
 
-		std::cout << "[INFO]: Started processing frame." << std::endl;
+		std::cout << std::endl << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
 		depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
 
-		std::cout << "[INFO]: Finished processing frame." << std::endl << std::endl;
-
-		while (std::getline(ss, frame_name, '/'))
-			;
 		logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 	}
 }
