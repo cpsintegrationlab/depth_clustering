@@ -109,11 +109,10 @@ DepthClustering::processForApollo(const std::string& frame_name,
 
 	cloud->InitProjection(*projection_parameter_);
 
+	bounding_box_->clearFrames();
 	depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
 
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
-
-	bounding_box_->clearFrames();
 }
 
 void
@@ -147,14 +146,13 @@ DepthClustering::processForDataset()
 
 		std::cout << std::endl << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
+		bounding_box_->clearFrames();
 		depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
 
 		bounding_box_->produceFrameFlat();
 
 		logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 		logger_->logBoundingBoxFrameFlat(frame_name);
-
-		bounding_box_->clearFrames();
 	}
 }
 
