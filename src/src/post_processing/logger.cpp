@@ -224,6 +224,51 @@ Logger::logBoundingBoxFrameFlat(const std::string& frame_name)
 		std::cout << "[ERROR]: Flat bounding box frame missing." << std::endl;
 		return;
 	}
+
+	for (const auto &flat : *bounding_box_frame_flat)
+	{
+		boost::property_tree::ptree flat_array_value;
+		boost::property_tree::ptree flat_array;
+
+		auto corner_upper_left = std::get<0>(flat);
+		auto corner_lower_right = std::get<1>(flat);
+		auto depth = std::get<2>(flat);
+
+		flat_array_value.put_value(corner_upper_left.x());
+		flat_array.push_back(std::make_pair("", flat_array_value));
+
+		flat_array_value.put_value(corner_upper_left.y());
+		flat_array.push_back(std::make_pair("", flat_array_value));
+
+		flat_array_value.put_value(corner_lower_right.x());
+		flat_array.push_back(std::make_pair("", flat_array_value));
+
+		flat_array_value.put_value(corner_lower_right.y());
+		flat_array.push_back(std::make_pair("", flat_array_value));
+
+		flat_array_value.put_value(depth);
+		flat_array.push_back(std::make_pair("", flat_array_value));
+
+		auto cloud_file_array_optional = bounding_box_log_tree_flat_.get_child_optional(
+				boost::property_tree::ptree::path_type(frame_name, '/'));
+
+		if (!cloud_file_array_optional)
+		{
+			bounding_box_log_tree_flat_.add_child(
+					boost::property_tree::ptree::path_type(frame_name, '/'),
+					boost::property_tree::ptree());
+			auto &cloud_file_array = bounding_box_log_tree_flat_.get_child(
+					boost::property_tree::ptree::path_type(frame_name, '/'));
+
+			cloud_file_array.push_back(std::make_pair("", flat_array));
+		}
+		else
+		{
+			auto &cloud_file_array = *cloud_file_array_optional;
+
+			cloud_file_array.push_back(std::make_pair("", flat_array));
+		}
+	}
 }
 
 void

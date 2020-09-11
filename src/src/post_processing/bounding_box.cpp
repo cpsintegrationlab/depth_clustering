@@ -61,7 +61,7 @@ BoundingBox::clearFrames()
 void
 BoundingBox::produceFrameFlat()
 {
-	if (camera_projection_)
+	if (!camera_projection_)
 	{
 		std::cout << "[WARN]: Camera projection missing." << std::endl;
 		return;
