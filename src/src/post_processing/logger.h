@@ -10,6 +10,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "post_processing/camera_projection.h"
 #include "post_processing/bounding_box.h"
 
 namespace depth_clustering
@@ -19,20 +20,29 @@ class Logger
 {
 public:
 
+	struct Parameter
+	{
+		std::string log_path;
+		std::string log_file_name_cude;
+		std::string log_file_name_polygon;
+		std::string log_file_name_flat;
+		bool log;
+
+		Parameter();
+	};
+
 	Logger();
 
-	Logger(const bool& log);
+	Logger(const Parameter& parameter);
 
 	void
 	setBoundingBox(std::shared_ptr<BoundingBox> bounding_box);
 
 	void
-	logBoundingBoxFrame(const std::string& frame_name, const BoundingBox::Type& bounding_box_type);
+	setCameraProjection(std::shared_ptr<CameraProjection> camera_projection);
 
 	void
-	writeBoundingBoxLog(std::string& path, const std::string& file_name);
-
-private:
+	logBoundingBoxFrame(const std::string& frame_name, const BoundingBox::Type& bounding_box_type);
 
 	void
 	logBoundingBoxFrameCube(const std::string& frame_name);
@@ -40,11 +50,21 @@ private:
 	void
 	logBoundingBoxFramePolygon(const std::string& frame_name);
 
-	bool log_ = true;
+	void
+	logBoundingBoxFrameFlat(const std::string& frame_name);
+
+	void
+	writeBoundingBoxLog(const BoundingBox::Type& bounding_box_type);
+
+private:
+
+	Parameter parameter_;
+	boost::property_tree::ptree bounding_box_log_tree_cube_;
+	boost::property_tree::ptree bounding_box_log_tree_polygon_;
+	boost::property_tree::ptree bounding_box_log_tree_flat_;
 
 	std::shared_ptr<BoundingBox> bounding_box_;
-	std::ofstream bounding_box_log_file_;
-	boost::property_tree::ptree bounding_box_log_tree_;
+	std::shared_ptr<CameraProjection> camera_projection_;
 };
 
 } // namespace depth_clustering

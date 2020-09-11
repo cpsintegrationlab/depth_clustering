@@ -24,6 +24,7 @@ ParameterFactory::ParameterFactory(std::string& path) :
 	depth_clustering_tree_ = top_tree_.get_child_optional("depth_clustering");
 	lidar_projection_tree_ = top_tree_.get_child_optional("lidar_projection");
 	camera_projection_tree_ = top_tree_.get_child_optional("camera_projection");
+	logger_tree_ = top_tree_.get_child_optional("logger");
 }
 
 DepthClustering::Parameter
@@ -46,8 +47,6 @@ ParameterFactory::getDepthClusteringParameter()
 	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
 	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
 	auto dataset_file_type_optional = tree.get_optional<std::string>("dataset_file_type");
-	auto log_file_name_optional = tree.get_optional<std::string>("log_file_name");
-	auto log_optional = tree.get_optional<bool>("log");
 
 	if (angle_clustering_optional)
 	{
@@ -95,16 +94,6 @@ ParameterFactory::getDepthClusteringParameter()
 	if (dataset_file_type_optional)
 	{
 		parameter.dataset_file_type = *dataset_file_type_optional;
-	}
-
-	if (log_file_name_optional)
-	{
-		parameter.log_file_name = *log_file_name_optional;
-	}
-
-	if (log_optional)
-	{
-		parameter.log = *log_optional;
 	}
 
 	return parameter;
@@ -214,6 +203,53 @@ ParameterFactory::getCameraProjectionParameter()
 	if (correct_distortions_optional)
 	{
 		parameter.correct_distortions = *correct_distortions_optional;
+	}
+
+	return parameter;
+}
+
+Logger::Parameter
+ParameterFactory::getLoggerParameter()
+{
+	if (!logger_tree_)
+	{
+		std::cout << "[ERROR]: Logger configuration missing." << std::endl;
+		return Logger::Parameter();
+	}
+
+	Logger::Parameter parameter;
+
+	auto tree = *logger_tree_;
+
+	auto log_path_optional = tree.get_optional<std::string>("log_path");
+	auto log_file_name_cude_optional = tree.get_optional<std::string>("log_file_name_cude");
+	auto log_file_name_polygon_optional = tree.get_optional<std::string>("log_file_name_polygon");
+	auto log_file_name_flat_optional = tree.get_optional<std::string>("log_file_name_flat");
+	auto log_optional = tree.get_optional<bool>("log");
+
+	if (log_path_optional)
+	{
+		parameter.log_path = *log_path_optional;
+	}
+
+	if (log_file_name_cude_optional)
+	{
+		parameter.log_file_name_cude = *log_file_name_cude_optional;
+	}
+
+	if (log_file_name_polygon_optional)
+	{
+		parameter.log_file_name_polygon = *log_file_name_polygon_optional;
+	}
+
+	if (log_file_name_flat_optional)
+	{
+		parameter.log_file_name_flat = *log_file_name_flat_optional;
+	}
+
+	if (log_optional)
+	{
+		parameter.log = *log_optional;
 	}
 
 	return parameter;

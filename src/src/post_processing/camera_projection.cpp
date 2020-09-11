@@ -12,10 +12,9 @@ CameraProjection::Parameter::Parameter() :
 {
 }
 
-CameraProjection::CameraProjection(const Parameter& parameter)
+CameraProjection::CameraProjection(const Parameter& parameter) :
+		parameter_(parameter)
 {
-	parameter_ = parameter;
-
 	frame_flat_ = std::make_shared<BoundingBox::Frame<BoundingBox::Flat>>();
 }
 

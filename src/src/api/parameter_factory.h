@@ -28,6 +28,9 @@ public:
 	CameraProjection::Parameter
 	getCameraProjectionParameter();
 
+	Logger::Parameter
+	getLoggerParameter();
+
 private:
 
 	const std::string configuration_file_name_;
@@ -36,6 +39,7 @@ private:
 	boost::optional<boost::property_tree::ptree> depth_clustering_tree_;
 	boost::optional<boost::property_tree::ptree> lidar_projection_tree_;
 	boost::optional<boost::property_tree::ptree> camera_projection_tree_;
+	boost::optional<boost::property_tree::ptree> logger_tree_;
 };
 
 #endif /* SRC_API_PARAMETER_FACTORY_H_ */

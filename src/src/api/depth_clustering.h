@@ -46,8 +46,6 @@ public:
 		int size_smooth_window;
 		BoundingBox::Type bounding_box_type;
 		std::string dataset_file_type;
-		std::string log_file_name;
-		bool log;
 
 		Parameter();
 	};
@@ -70,12 +68,14 @@ public:
 	processForDataset();
 
 	void
-	finish();
+	finishForApollo();
+
+	void
+	finishForDataset();
 
 private:
 
 	Parameter parameter_;
-	std::string log_path_;
 
 	std::shared_ptr<ParameterFactory> parameter_factory_;
 	std::unique_ptr<ProjectionParams> projection_parameter_;
