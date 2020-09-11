@@ -12,20 +12,12 @@
 namespace depth_clustering
 {
 
-Logger::Parameter::Parameter() :
-		log_path("./"), log_file_name_cude("depth_clustering_detection_cube.json"), log_file_name_polygon(
-				"depth_clustering_detection_polygon.json"), log_file_name_flat(
-				"depth_clustering_detection_flat.json"), log(true)
-{
-
-}
-
 Logger::Logger() :
-		Logger(Parameter())
+		Logger(LoggerParameter())
 {
 }
 
-Logger::Logger(const Parameter& parameter) :
+Logger::Logger(const LoggerParameter& parameter) :
 		parameter_(parameter)
 {
 }
@@ -34,12 +26,6 @@ void
 Logger::setBoundingBox(std::shared_ptr<BoundingBox> bounding_box)
 {
 	bounding_box_ = bounding_box;
-}
-
-void
-Logger::setCameraProjection(std::shared_ptr<CameraProjection> camera_projection)
-{
-	camera_projection_ = camera_projection;
 }
 
 void
@@ -225,13 +211,13 @@ Logger::logBoundingBoxFrameFlat(const std::string& frame_name)
 		return;
 	}
 
-	if (!camera_projection_)
+	if (!bounding_box_)
 	{
-		std::cout << "[ERROR]: Camera projection missing." << std::endl;
+		std::cout << "[ERROR]: Bounding box missing." << std::endl;
 		return;
 	}
 
-	auto bounding_box_frame_flat = camera_projection_->getFrameFlat();
+	auto bounding_box_frame_flat = bounding_box_->getFrameFlat();
 
 	if (!bounding_box_frame_flat)
 	{

@@ -8,6 +8,7 @@
 #ifndef SRC_POST_PROCESSING_CAMERA_PROJECTION_H_
 #define SRC_POST_PROCESSING_CAMERA_PROJECTION_H_
 
+#include "post_processing/camera_projection_parameter.h"
 #include "post_processing/bounding_box.h"
 
 using depth_clustering::BoundingBox;
@@ -16,30 +17,17 @@ class CameraProjection
 {
 public:
 
-	struct Parameter
-	{
-		std::vector<double> intrinsic;
-		std::vector<double> extrinsic;
-		int width;
-		int height;
-		bool correct_distortions;
+	CameraProjection();
 
-		Parameter();
-	};
-
-	CameraProjection(const Parameter& parameter);
-
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
-	getFrameFlat() const;
+	CameraProjection(const CameraProjectionParameter& parameter);
 
 	void
-	setBoundingBox(std::shared_ptr<BoundingBox> bounding_box);
+	setFrames(std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube,
+			std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frame_polygon,
+			std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> bounding_box_frame_flat);
 
 	void
-	clearFrame();
-
-	void
-	projectBoundingBoxFrame(const BoundingBox::Type& bounding_box_type);
+	projectFromBoundingBoxFrame(const BoundingBox::Type& bounding_box_type);
 
 private:
 
@@ -59,15 +47,16 @@ private:
 	correctCameraDistortions(const Eigen::Vector2f& point);
 
 	void
-	projectBoundingBoxFrameCube();
+	projectFromBoundingBoxFrameCube();
 
 	void
-	projectBoundingBoxFramePolygon();
+	projectFromBoundingBoxFramePolygon();
 
-	Parameter parameter_;
+	CameraProjectionParameter parameter_;
 
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> frame_flat_;
-	std::shared_ptr<BoundingBox> bounding_box_;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube_;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frame_polygon_;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> bounding_box_frame_flat_;
 };
 
 #endif /* SRC_POST_PROCESSING_CAMERA_PROJECTION_H_ */

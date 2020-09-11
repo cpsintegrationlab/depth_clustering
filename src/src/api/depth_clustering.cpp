@@ -20,19 +20,12 @@ using depth_clustering::MatFromDepthTiff;
 using depth_clustering::Radians;
 using depth_clustering::RichPoint;
 
-DepthClustering::Parameter::Parameter() :
-		angle_clustering(10_deg), angle_ground_removal(9_deg), size_cluster_min(10), size_cluster_max(
-				20000), size_smooth_window(5), bounding_box_type(BoundingBox::Type::Cube), dataset_file_type(
-				".tiff")
-{
-}
-
 DepthClustering::DepthClustering() :
-		DepthClustering(Parameter())
+		DepthClustering(DepthClusteringParameter())
 {
 }
 
-DepthClustering::DepthClustering(const Parameter& parameter) :
+DepthClustering::DepthClustering(const DepthClusteringParameter& parameter) :
 		parameter_(parameter)
 {
 }
@@ -84,15 +77,12 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(
 			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
-	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type);
-	camera_projection_ = std::make_shared<CameraProjection>(
+	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
 			parameter_factory_->getCameraProjectionParameter());
 	logger_ = std::make_shared<Logger>(logger_parameter);
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
-	camera_projection_->setBoundingBox(bounding_box_);
 	logger_->setBoundingBox(bounding_box_);
-	logger_->setCameraProjection(camera_projection_);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
 	clusterer_->AddClient(bounding_box_.get());
@@ -123,7 +113,7 @@ DepthClustering::processForApollo(const std::string& frame_name,
 
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 
-	bounding_box_->clearFrame();
+	bounding_box_->clearFrames();
 }
 
 void
@@ -135,7 +125,9 @@ DepthClustering::processForDataset()
 		std::string frame_name = "";
 		std::stringstream ss(path);
 
-		while (std::getline(ss, frame_name, '/'));
+		while (std::getline(ss, frame_name, '/'))
+		{
+		}
 
 		if (parameter_.dataset_file_type == ".png")
 		{
@@ -157,13 +149,12 @@ DepthClustering::processForDataset()
 
 		depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
 
-		camera_projection_->projectBoundingBoxFrame(parameter_.bounding_box_type);
+		bounding_box_->produceFrameFlat();
 
 		logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 		logger_->logBoundingBoxFrameFlat(frame_name);
 
-		bounding_box_->clearFrame();
-		camera_projection_->clearFrame();
+		bounding_box_->clearFrames();
 	}
 }
 

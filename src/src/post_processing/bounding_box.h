@@ -17,8 +17,11 @@
 #include "clusterers/abstract_clusterer.h"
 #include "communication/abstract_client.h"
 #include "ground_removal/depth_ground_remover.h"
+#include "post_processing/camera_projection_parameter.h"
 #include "utils/cloud.h"
 #include "utils/timer.h"
+
+class CameraProjection;
 
 namespace depth_clustering
 {
@@ -47,14 +50,22 @@ public:
 
 	BoundingBox(const Type& type);
 
+	BoundingBox(const Type& type, const CameraProjectionParameter& camera_projection_parameter);
+
 	std::shared_ptr<Frame<Cube>>
 	getFrameCube() const;
 
 	std::shared_ptr<Frame<Polygon>>
 	getFramePolygon() const;
 
+	std::shared_ptr<Frame<Flat>>
+	getFrameFlat() const;
+
 	void
-	clearFrame();
+	clearFrames();
+
+	void
+	produceFrameFlat();
 
 	void
 	OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int id) override;
@@ -68,8 +79,11 @@ private:
 	CreatePolygons(const Cloud& cloud);
 
 	Type type_ = Type::Cube;
+
 	std::shared_ptr<Frame<Cube>> frame_cube_;
 	std::shared_ptr<Frame<Polygon>> frame_polygon_;
+	std::shared_ptr<Frame<Flat>> frame_flat_;
+	std::shared_ptr<CameraProjection> camera_projection_;
 };
 
 } // namespace depth_clustering

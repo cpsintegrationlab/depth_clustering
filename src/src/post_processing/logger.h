@@ -12,6 +12,7 @@
 
 #include "post_processing/camera_projection.h"
 #include "post_processing/bounding_box.h"
+#include "post_processing/logger_parameter.h"
 
 namespace depth_clustering
 {
@@ -20,26 +21,12 @@ class Logger
 {
 public:
 
-	struct Parameter
-	{
-		std::string log_path;
-		std::string log_file_name_cude;
-		std::string log_file_name_polygon;
-		std::string log_file_name_flat;
-		bool log;
-
-		Parameter();
-	};
-
 	Logger();
 
-	Logger(const Parameter& parameter);
+	Logger(const LoggerParameter& parameter);
 
 	void
 	setBoundingBox(std::shared_ptr<BoundingBox> bounding_box);
-
-	void
-	setCameraProjection(std::shared_ptr<CameraProjection> camera_projection);
 
 	void
 	logBoundingBoxFrame(const std::string& frame_name, const BoundingBox::Type& bounding_box_type);
@@ -58,13 +45,12 @@ public:
 
 private:
 
-	Parameter parameter_;
+	LoggerParameter parameter_;
 	boost::property_tree::ptree bounding_box_log_tree_cube_;
 	boost::property_tree::ptree bounding_box_log_tree_polygon_;
 	boost::property_tree::ptree bounding_box_log_tree_flat_;
 
 	std::shared_ptr<BoundingBox> bounding_box_;
-	std::shared_ptr<CameraProjection> camera_projection_;
 };
 
 } // namespace depth_clustering

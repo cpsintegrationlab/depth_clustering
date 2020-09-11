@@ -11,7 +11,6 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "api/depth_clustering.h"
-#include "post_processing/camera_projection.h"
 
 class ParameterFactory
 {
@@ -19,16 +18,16 @@ public:
 
 	ParameterFactory(std::string& path);
 
-	DepthClustering::Parameter
+	DepthClusteringParameter
 	getDepthClusteringParameter();
 
 	std::unique_ptr<ProjectionParams>
 	getLidarProjectionParameter();
 
-	CameraProjection::Parameter
+	CameraProjectionParameter
 	getCameraProjectionParameter();
 
-	Logger::Parameter
+	LoggerParameter
 	getLoggerParameter();
 
 private:

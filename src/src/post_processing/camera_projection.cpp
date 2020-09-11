@@ -7,53 +7,45 @@
 
 #include "post_processing/camera_projection.h"
 
-CameraProjection::Parameter::Parameter() :
-		intrinsic(), extrinsic(), width(0), height(0), correct_distortions(false)
+CameraProjection::CameraProjection() :
+		CameraProjection(CameraProjectionParameter())
 {
 }
 
-CameraProjection::CameraProjection(const Parameter& parameter) :
+CameraProjection::CameraProjection(const CameraProjectionParameter& parameter) :
 		parameter_(parameter)
 {
-	frame_flat_ = std::make_shared<BoundingBox::Frame<BoundingBox::Flat>>();
-}
-
-std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
-CameraProjection::getFrameFlat() const
-{
-	return frame_flat_;
 }
 
 void
-CameraProjection::setBoundingBox(std::shared_ptr<BoundingBox> bounding_box)
+CameraProjection::setFrames(
+		std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube,
+		std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frame_polygon,
+		std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> bounding_box_frame_flat)
 {
-	bounding_box_ = bounding_box;
+	bounding_box_frame_cube_ = bounding_box_frame_cube;
+	bounding_box_frame_polygon_ = bounding_box_frame_polygon;
+	bounding_box_frame_flat_ = bounding_box_frame_flat;
 }
 
 void
-CameraProjection::clearFrame()
-{
-	frame_flat_->clear();
-}
-
-void
-CameraProjection::projectBoundingBoxFrame(const BoundingBox::Type& bounding_box_type)
+CameraProjection::projectFromBoundingBoxFrame(const BoundingBox::Type& bounding_box_type)
 {
 	switch (bounding_box_type)
 	{
 	case BoundingBox::Type::Cube:
 	{
-		projectBoundingBoxFrameCube();
+		projectFromBoundingBoxFrameCube();
 		break;
 	}
 	case BoundingBox::Type::Polygon:
 	{
-		projectBoundingBoxFramePolygon();
+		projectFromBoundingBoxFramePolygon();
 		break;
 	}
 	default:
 	{
-		projectBoundingBoxFrameCube();
+		projectFromBoundingBoxFrameCube();
 		break;
 	}
 	}
@@ -216,19 +208,11 @@ CameraProjection::correctCameraDistortions(const Eigen::Vector2f& point)
 }
 
 void
-CameraProjection::projectBoundingBoxFrameCube()
+CameraProjection::projectFromBoundingBoxFrameCube()
 {
-	if (!bounding_box_)
+	if (!bounding_box_frame_cube_)
 	{
-		std::cout << "[ERROR]: Bounding box missing." << std::endl;
-		return;
-	}
-
-	auto bounding_box_frame = bounding_box_->getFrameCube();
-
-	if (!bounding_box_frame)
-	{
-		std::cout << "[ERROR]: Bounding box frame missing." << std::endl;
+		std::cout << "[ERROR]: Cube bounding box frame missing." << std::endl;
 		return;
 	}
 
@@ -253,7 +237,7 @@ CameraProjection::projectBoundingBoxFrameCube()
 	world_to_camera(2, 3) = 0;
 
 	// Process all bounding boxes in the frame
-	for (const auto &bounding_box : *bounding_box_frame)
+	for (const auto &bounding_box : *bounding_box_frame_cube_)
 	{
 		std::vector<Eigen::Vector3f> bounding_box_corners_world = getBoundingBoxCornersCube(
 				bounding_box);
@@ -307,12 +291,12 @@ CameraProjection::projectBoundingBoxFrameCube()
 		std::get<2>(bounding_box_flat) = bounding_box_depth;
 
 		// Store 2D flat bounding box
-		frame_flat_->push_back(bounding_box_flat);
+		bounding_box_frame_flat_->push_back(bounding_box_flat);
 	}
 }
 
 void
-CameraProjection::projectBoundingBoxFramePolygon()
+CameraProjection::projectFromBoundingBoxFramePolygon()
 {
 	std::cout << "[ERROR]: Not implemented." << std::endl;
 }

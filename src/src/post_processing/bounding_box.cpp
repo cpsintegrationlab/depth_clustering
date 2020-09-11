@@ -6,6 +6,7 @@
  */
 
 #include "post_processing/bounding_box.h"
+#include "post_processing/camera_projection.h"
 
 namespace depth_clustering
 {
@@ -13,7 +14,6 @@ namespace depth_clustering
 BoundingBox::BoundingBox() :
 		BoundingBox(Type::Cube)
 {
-
 }
 
 BoundingBox::BoundingBox(const Type& type) :
@@ -21,6 +21,15 @@ BoundingBox::BoundingBox(const Type& type) :
 {
 	frame_cube_ = std::make_shared<Frame<Cube>>();
 	frame_polygon_ = std::make_shared<Frame<Polygon>>();
+	frame_flat_ = std::make_shared<Frame<Flat>>();
+}
+
+BoundingBox::BoundingBox(const Type& type,
+		const CameraProjectionParameter& camera_projection_parameter) :
+		BoundingBox(type)
+{
+	camera_projection_ = std::make_shared<CameraProjection>(camera_projection_parameter);
+	camera_projection_->setFrames(frame_cube_, frame_polygon_, frame_flat_);
 }
 
 std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>>
@@ -35,11 +44,30 @@ BoundingBox::getFramePolygon() const
 	return frame_polygon_;
 }
 
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
+BoundingBox::getFrameFlat() const
+{
+	return frame_flat_;
+}
+
 void
-BoundingBox::clearFrame()
+BoundingBox::clearFrames()
 {
 	frame_cube_->clear();
 	frame_polygon_->clear();
+	frame_flat_->clear();
+}
+
+void
+BoundingBox::produceFrameFlat()
+{
+	if (camera_projection_)
+	{
+		std::cout << "[WARN]: Camera projection missing." << std::endl;
+		return;
+	}
+
+	camera_projection_->projectFromBoundingBoxFrame(type_);
 }
 
 void

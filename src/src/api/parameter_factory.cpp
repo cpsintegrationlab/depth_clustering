@@ -27,16 +27,16 @@ ParameterFactory::ParameterFactory(std::string& path) :
 	logger_tree_ = top_tree_.get_child_optional("logger");
 }
 
-DepthClustering::Parameter
+DepthClusteringParameter
 ParameterFactory::getDepthClusteringParameter()
 {
 	if (!depth_clustering_tree_)
 	{
 		std::cout << "[ERROR]: Depth clustering configuration missing." << std::endl;
-		return DepthClustering::Parameter();
+		return DepthClusteringParameter();
 	}
 
-	DepthClustering::Parameter parameter;
+	DepthClusteringParameter parameter;
 
 	auto tree = *depth_clustering_tree_;
 
@@ -155,16 +155,16 @@ ParameterFactory::getLidarProjectionParameter()
 			horizontal_angle_end, beam_inclinations);
 }
 
-CameraProjection::Parameter
+CameraProjectionParameter
 ParameterFactory::getCameraProjectionParameter()
 {
 	if (!camera_projection_tree_)
 	{
 		std::cout << "[ERROR]: Camera projection configuration missing." << std::endl;
-		return CameraProjection::Parameter();
+		return CameraProjectionParameter();
 	}
 
-	CameraProjection::Parameter parameter;
+	CameraProjectionParameter parameter;
 
 	auto tree = *camera_projection_tree_;
 
@@ -208,16 +208,16 @@ ParameterFactory::getCameraProjectionParameter()
 	return parameter;
 }
 
-Logger::Parameter
+LoggerParameter
 ParameterFactory::getLoggerParameter()
 {
 	if (!logger_tree_)
 	{
 		std::cout << "[ERROR]: Logger configuration missing." << std::endl;
-		return Logger::Parameter();
+		return LoggerParameter();
 	}
 
-	Logger::Parameter parameter;
+	LoggerParameter parameter;
 
 	auto tree = *logger_tree_;
 
