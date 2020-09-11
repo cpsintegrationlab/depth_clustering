@@ -16,8 +16,8 @@ class CameraProjection
 {
 public:
 
-	using Projection = std::tuple<Eigen::Vector2f, Eigen::Vector2f, float>;
-	using Frame = std::vector<Projection>;
+	using Flat = std::tuple<Eigen::Vector2d, Eigen::Vector2d, float>;
+	using Frame = std::vector<Flat>;
 
 	struct Parameter
 	{
@@ -25,6 +25,7 @@ public:
 		std::vector<double> extrinsic;
 		int width;
 		int height;
+		bool correct_distortions;
 
 		Parameter();
 	};
@@ -44,6 +45,21 @@ public:
 	projectBoundingBoxFrame(const BoundingBox::Type& bounding_box_type);
 
 private:
+
+	std::vector<Eigen::Vector3f>
+	getBoundingBoxCornersCube(const BoundingBox::Cube& bounding_box);
+
+	std::vector<Eigen::Vector3f>
+	getBoundingBoxCornersPolygon(const BoundingBox::Polygon& bounding_box);
+
+	float
+	getBoundingBoxDepth(const std::vector<Eigen::Vector3f>& bounding_box_corners);
+
+	Flat
+	getBoundingBoxFlat(const std::vector<Eigen::Vector2d>& bounding_box_corners_projected);
+
+	Eigen::Vector2f
+	correctCameraDistortions(const Eigen::Vector2f& point);
 
 	void
 	projectBoundingBoxFrameCube();

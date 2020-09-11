@@ -183,6 +183,7 @@ ParameterFactory::getCameraProjectionParameter()
 	auto extrinsic_optional = tree.get_child_optional("extrinsic");
 	auto width_optional = tree.get_optional<int>("width");
 	auto height_optional = tree.get_optional<int>("height");
+	auto correct_distortions_optional = tree.get_optional<bool>("correct_distortions");
 
 	if (intrinsic_optional)
 	{
@@ -208,6 +209,11 @@ ParameterFactory::getCameraProjectionParameter()
 	if (height_optional)
 	{
 		parameter.height = *height_optional;
+	}
+
+	if (correct_distortions_optional)
+	{
+		parameter.correct_distortions = *correct_distortions_optional;
 	}
 
 	return parameter;
