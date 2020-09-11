@@ -7,14 +7,9 @@
 
 #include "post_processing/camera_projection.h"
 
-CameraProjection::Parameter::Parameter()
+CameraProjection::Parameter::Parameter() :
+		intrinsic(), extrinsic(), width(0), height(0)
 {
-}
-
-CameraProjection::CameraProjection() :
-		CameraProjection(Parameter())
-{
-
 }
 
 CameraProjection::CameraProjection(const Parameter& parameter)

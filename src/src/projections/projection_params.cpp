@@ -19,6 +19,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <algorithm>
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -367,6 +368,49 @@ ProjectionParams::FromConfigFile(const std::string& path)
 	fprintf(stderr, "INFO: Params sucessfully read. Rows: %lu, Cols: %lu\n",
 			params._row_angles.size(), params._col_angles.size());
 	return mem_utils::make_unique<ProjectionParams>(params);
+}
+
+std::unique_ptr<ProjectionParams>
+ProjectionParams::FromBeamInclinations(const int& horizontal_steps, const int& beams,
+		const int& horizontal_angle_start, const int& horizontal_angle_end,
+		const std::vector<double>& beam_inclinations)
+{
+	ProjectionParams parameter;
+	int cols = horizontal_steps;
+	int rows = beams;
+
+	parameter._h_span_params = SpanParams(Radians::FromDegrees(horizontal_angle_start),
+			Radians::FromDegrees(horizontal_angle_end), cols);
+
+	for (int col = 0; col < cols; col++)
+	{
+		parameter._col_angles.push_back(
+				parameter._h_span_params.start_angle() + parameter._h_span_params.step() * col);
+	}
+
+	parameter._v_span_params = SpanParams(Radians::FromDegrees(beam_inclinations.front()),
+			Radians::FromDegrees(beam_inclinations.back()), rows);
+
+	for (const auto &beam_inclination : beam_inclinations)
+	{
+		parameter._row_angles.push_back(Radians::FromDegrees(beam_inclination));
+	}
+
+	if (parameter._row_angles.size() != static_cast<size_t>(rows))
+	{
+		std::cout << "[ERROR]: Invalid beam inclinations." << std::endl;
+		return nullptr;
+	}
+
+	parameter.FillCosSin();
+
+	if (!parameter.valid())
+	{
+		std::cout << "[ERROR]: Invalid lidar projection parameter." << std::endl;
+		return nullptr;
+	}
+
+	return mem_utils::make_unique<ProjectionParams>(parameter);
 }
 
 const std::vector<float>&

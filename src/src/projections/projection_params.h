@@ -293,6 +293,15 @@ public:
 	 * @return     A pointer to parameters
 	 */
 	static std::unique_ptr<ProjectionParams>
+	FromBeamInclinations(const int& horizontal_steps, const int& beams,
+			const int& horizontal_angle_start, const int& horizontal_angle_end,
+			const std::vector<double>& beam_inclinations);
+	/**
+	 * @brief      Default parameters to cover full sphere
+	 *
+	 * @return     A pointer to parameters
+	 */
+	static std::unique_ptr<ProjectionParams>
 	FullSphere(const Radians& discretization = 5_deg);
 
 private:

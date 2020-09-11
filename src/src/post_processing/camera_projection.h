@@ -21,13 +21,13 @@ public:
 
 	struct Parameter
 	{
-		std::vector<double> camera_intrinsic;
-		std::vector<double> camera_extrinsic;
+		std::vector<double> intrinsic;
+		std::vector<double> extrinsic;
+		int width;
+		int height;
 
 		Parameter();
 	};
-
-	CameraProjection();
 
 	CameraProjection(const Parameter& parameter);
 

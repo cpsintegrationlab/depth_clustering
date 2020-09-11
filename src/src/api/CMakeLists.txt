@@ -1,5 +1,9 @@
 # Add libraries
-add_library(depth_clustering SHARED depth_clustering.cpp)
+add_library(
+	depth_clustering SHARED
+	depth_clustering.cpp
+	parameter_factory.cpp
+)
 
 # Set library link targets
 target_link_libraries(

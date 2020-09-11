@@ -30,6 +30,8 @@ using depth_clustering::Logger;
 using depth_clustering::ProjectionParams;
 using depth_clustering::Radians;
 
+class ParameterFactory;
+
 class DepthClustering
 {
 public:
@@ -55,7 +57,7 @@ public:
 	initializeForApollo();
 
 	bool
-	initializeForDataset(const std::string& dataset_path, const std::string& dataset_file_type);
+	initializeForDataset(std::string& dataset_path, const std::string& dataset_file_type);
 
 	void
 	processForApollo(const std::string& frame_name,
@@ -73,10 +75,10 @@ private:
 
 	std::string dataset_file_type_;
 	std::string log_path_;
-	std::string log_file_name_;
+	const std::string log_file_name_;
 
-	std::shared_ptr<FolderReader> folder_reader_data_;
-	std::shared_ptr<FolderReader> folder_reader_config_;
+	std::shared_ptr<ParameterFactory> parameter_factory_;
+	std::shared_ptr<FolderReader> folder_reader_;
 	std::unique_ptr<ProjectionParams> projection_parameter_;
 	std::shared_ptr<DepthGroundRemover> depth_ground_remover_;
 	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>> clusterer_;

@@ -5,7 +5,7 @@
  *      Author: simonyu
  */
 
-#include "depth_clustering.h"
+#include "api/depth_clustering.h"
 
 int
 main(int argc, char* argv[])
