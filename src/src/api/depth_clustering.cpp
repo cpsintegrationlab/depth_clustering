@@ -26,7 +26,7 @@ DepthClustering::DepthClustering() :
 }
 
 DepthClustering::DepthClustering(const DepthClusteringParameter& parameter) :
-		parameter_(parameter)
+		parameter_(parameter), frame_counter_(0)
 {
 }
 
@@ -118,41 +118,54 @@ DepthClustering::processForApollo(const std::string& frame_name,
 void
 DepthClustering::processForDataset()
 {
-	for (const auto &path : folder_reader_->GetAllFilePaths())
+	for (const auto &frame_path_name : folder_reader_->GetAllFilePaths())
 	{
-		cv::Mat depth_image;
-		std::string frame_name = "";
-		std::stringstream ss(path);
+		const auto &frame_name = processFrameForDataset(frame_path_name);
 
-		while (std::getline(ss, frame_name, '/'))
+		if (frame_name != "")
 		{
+			logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
+			logger_->logBoundingBoxFrameFlat(frame_name);
 		}
-
-		if (parameter_.dataset_file_type == ".png")
-		{
-			depth_image = MatFromDepthPng(path);
-		}
-		else if (parameter_.dataset_file_type == ".tiff")
-		{
-			depth_image = MatFromDepthTiff(path);
-		}
-		else
-		{
-			std::cout << "Unknown data type. Skip." << std::endl;
-			return;
-		}
-
-		auto cloud = Cloud::FromImage(depth_image, *projection_parameter_);
-
-		std::cout << std::endl << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
-
-		bounding_box_->clearFrames();
-		depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
-		bounding_box_->produceFrameFlat();
-
-		logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
-		logger_->logBoundingBoxFrameFlat(frame_name);
 	}
+}
+
+const std::string
+DepthClustering::processNextFrameForDataset()
+{
+	std::string frame_name = "";
+	const auto &frame_paths_names = folder_reader_->GetAllFilePaths();
+
+	if (frame_counter_ >= static_cast<int>(frame_paths_names.size()))
+	{
+		return frame_name;
+	}
+
+	while (frame_name == "" && frame_counter_ < static_cast<int>(frame_paths_names.size()))
+	{
+		frame_name = processFrameForDataset(frame_paths_names[frame_counter_++]);
+	}
+
+	return frame_name;
+}
+
+const std::string
+DepthClustering::processLastFrameForDataset()
+{
+	std::string frame_name = "";
+	const auto &frame_paths_names = folder_reader_->GetAllFilePaths();
+
+	if (frame_counter_ < 0)
+	{
+		return frame_name;
+	}
+
+	while (frame_name == "" && frame_counter_ >= 0)
+	{
+		frame_name = processFrameForDataset(frame_paths_names[frame_counter_--]);
+	}
+
+	return frame_name;
 }
 
 void
@@ -166,4 +179,40 @@ DepthClustering::finishForDataset()
 {
 	logger_->writeBoundingBoxLog(parameter_.bounding_box_type);
 	logger_->writeBoundingBoxLog(BoundingBox::Type::Flat);
+}
+
+const std::string
+DepthClustering::processFrameForDataset(const std::string& frame_path_name)
+{
+	cv::Mat depth_image;
+	std::string frame_name = "";
+	std::stringstream ss(frame_path_name);
+
+	while (std::getline(ss, frame_name, '/'))
+	{
+	}
+
+	if (parameter_.dataset_file_type == ".png")
+	{
+		depth_image = MatFromDepthPng(frame_path_name);
+	}
+	else if (parameter_.dataset_file_type == ".tiff")
+	{
+		depth_image = MatFromDepthTiff(frame_path_name);
+	}
+	else
+	{
+		std::cout << "[INFO]: Unknown data type. Skip." << std::endl;
+		return "";
+	}
+
+	auto cloud = Cloud::FromImage(depth_image, *projection_parameter_);
+
+	std::cout << std::endl << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+
+	bounding_box_->clearFrames();
+	depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
+	bounding_box_->produceFrameFlat();
+
+	return frame_name;
 }

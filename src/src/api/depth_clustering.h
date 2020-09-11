@@ -50,6 +50,12 @@ public:
 	void
 	processForDataset();
 
+	const std::string
+	processNextFrameForDataset();
+
+	const std::string
+	processLastFrameForDataset();
+
 	void
 	finishForApollo();
 
@@ -58,7 +64,11 @@ public:
 
 private:
 
+	const std::string
+	processFrameForDataset(const std::string& frame_path_name);
+
 	DepthClusteringParameter parameter_;
+	int frame_counter_;
 
 	std::shared_ptr<ParameterFactory> parameter_factory_;
 	std::unique_ptr<ProjectionParams> projection_parameter_;
