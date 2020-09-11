@@ -78,24 +78,18 @@ CameraProjection::projectBoundingBoxFrameCube()
 	auto bounding_box_frame_cube = *(bounding_box_->getFrameCube());
 
 	Eigen::Matrix<double, 3, 4> camera_to_image;
-	Eigen::Matrix<double, 4, 4> world_to_camera_axes;
 	Eigen::Matrix<double, 4, 4> world_to_camera;
+	Eigen::Matrix<double, 4, 4> world_to_camera_axes;
 
-	camera_to_image(0, 0) = parameter_.intrinsic[0];
-	camera_to_image(0, 2) = parameter_.intrinsic[1];
-	camera_to_image(1, 1) = parameter_.intrinsic[2];
-	camera_to_image(1, 2) = parameter_.intrinsic[3];
-	camera_to_image(2, 2) = 1;
+	camera_to_image << parameter_.intrinsic[0], 0, parameter_.intrinsic[2], 0, 0, parameter_.intrinsic[1], parameter_.intrinsic[3], 0, 0, 0, 1, 0;
 
-	for (size_t i = 0; i < parameter_.extrinsic.size(); i ++)
+	for (size_t i = 0; i < parameter_.extrinsic.size(); i++)
 	{
-		world_to_camera(i) = parameter_.extrinsic[i];
+		world_to_camera(i / 4, i % 4) = parameter_.extrinsic[i];
 	}
 
-	world_to_camera_axes(0, 1) = -1;
-	world_to_camera_axes(1, 2) = -1;
-	world_to_camera_axes(2, 0) = 1;
-	world_to_camera_axes(3, 3) = 1;
+	world_to_camera_axes << 0, -1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 1;
+
 
 	world_to_camera = world_to_camera_axes * world_to_camera.inverse();
 

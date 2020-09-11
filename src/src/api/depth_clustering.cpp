@@ -88,6 +88,7 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 	logger_ = std::make_shared<Logger>(parameter_.log);
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
+	camera_projection_->setBoundingBox(bounding_box_);
 	logger_->setBoundingBox(bounding_box_);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
