@@ -30,6 +30,7 @@ using depth_clustering::Logger;
 using depth_clustering::ProjectionParams;
 using depth_clustering::Radians;
 
+class CameraProjection;
 class ParameterFactory;
 
 class DepthClustering
@@ -77,11 +78,12 @@ private:
 	std::string log_path_;
 
 	std::shared_ptr<ParameterFactory> parameter_factory_;
-	std::shared_ptr<FolderReader> folder_reader_;
 	std::unique_ptr<ProjectionParams> projection_parameter_;
+	std::shared_ptr<FolderReader> folder_reader_;
 	std::shared_ptr<DepthGroundRemover> depth_ground_remover_;
 	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>> clusterer_;
 	std::shared_ptr<BoundingBox> bounding_box_;
+	std::shared_ptr<CameraProjection> camera_projection_;
 	std::shared_ptr<Logger> logger_;
 };
 

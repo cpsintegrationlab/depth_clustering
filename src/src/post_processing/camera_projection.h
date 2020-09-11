@@ -51,8 +51,6 @@ private:
 	void
 	projectBoundingBoxFramePolygon();
 
-
-
 	Parameter parameter_;
 
 	std::shared_ptr<Frame> frame_;

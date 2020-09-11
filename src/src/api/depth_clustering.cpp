@@ -69,8 +69,6 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 
 	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path);
 	parameter_ = parameter_factory_->getDepthClusteringParameter();
-	folder_reader_ = std::make_shared<FolderReader>(dataset_path, parameter_.dataset_file_type,
-			FolderReader::Order::SORTED);
 	projection_parameter_ = parameter_factory_->getLidarProjectionParameter();
 
 	if (!projection_parameter_)
@@ -78,11 +76,15 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 		return false;
 	}
 
+	folder_reader_ = std::make_shared<FolderReader>(dataset_path, parameter_.dataset_file_type,
+			FolderReader::Order::SORTED);
+
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(
 			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type);
+	camera_projection_ = std::make_shared<CameraProjection>(parameter_factory_->getCameraProjectionParameter());
 	logger_ = std::make_shared<Logger>(parameter_.log);
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
@@ -128,8 +130,7 @@ DepthClustering::processForDataset()
 		std::string frame_name = "";
 		std::stringstream ss(path);
 
-		while (std::getline(ss, frame_name, '/'))
-			;
+		while (std::getline(ss, frame_name, '/'));
 
 		if (parameter_.dataset_file_type == ".png")
 		{
@@ -151,7 +152,9 @@ DepthClustering::processForDataset()
 
 		depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
 
+		camera_projection_->projectBoundingBoxFrame(parameter_.bounding_box_type);
 		logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
+
 		bounding_box_->clearFrame();
 	}
 }
