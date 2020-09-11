@@ -90,6 +90,17 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 	return true;
 }
 
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
+DepthClustering::getFrameFlat() const
+{
+	if (!bounding_box_)
+	{
+		return nullptr;
+	}
+
+	return bounding_box_->getFrameFlat();
+}
+
 void
 DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)

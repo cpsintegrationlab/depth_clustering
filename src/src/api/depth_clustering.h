@@ -43,6 +43,9 @@ public:
 	bool
 	initializeForDataset(std::string& dataset_path);
 
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
+	getFrameFlat() const;
+
 	void
 	processOneFrameForApollo(const std::string& frame_name,
 			const std::vector<Eigen::Vector3f>& point_cloud);
