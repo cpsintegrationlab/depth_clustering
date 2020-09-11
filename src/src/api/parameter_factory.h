@@ -10,7 +10,11 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "api/depth_clustering.h"
+#include "api/depth_clustering_parameter.h"
+#include "post_processing/logger_parameter.h"
+#include "projections/projection_params.h"
+
+using depth_clustering::ProjectionParams;
 
 class ParameterFactory
 {

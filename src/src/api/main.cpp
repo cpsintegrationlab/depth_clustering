@@ -33,7 +33,7 @@ main(int argc, char* argv[])
 		return -1;
 	}
 
-	depth_clustering.processForDataset();
+	depth_clustering.processAllFramesForDataset();
 	depth_clustering.finishForDataset();
 
 	return 0;

@@ -44,11 +44,11 @@ public:
 	initializeForDataset(std::string& dataset_path);
 
 	void
-	processForApollo(const std::string& frame_name,
+	processOneFrameForApollo(const std::string& frame_name,
 			const std::vector<Eigen::Vector3f>& point_cloud);
 
-	void
-	processForDataset();
+	const std::string
+	processOneFrameForDataset(const std::string& frame_path_name);
 
 	const std::string
 	processNextFrameForDataset();
@@ -57,15 +57,15 @@ public:
 	processLastFrameForDataset();
 
 	void
+	processAllFramesForDataset();
+
+	void
 	finishForApollo();
 
 	void
 	finishForDataset();
 
 private:
-
-	const std::string
-	processFrameForDataset(const std::string& frame_path_name);
 
 	DepthClusteringParameter parameter_;
 	int frame_counter_;
