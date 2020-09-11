@@ -12,14 +12,13 @@ main(int argc, char* argv[])
 {
 	std::string dataset_path =
 			"../../../data/segment-1022527355599519580_4866_960_4886_960_with_camera_labels/";
-	const std::string dataset_file_type = ".tiff";
 
 	if (argc > 1)
 	{
 		if (std::string(argv[1]) == "-h")
 		{
-			std::cout << std::endl << "Usage: " << argv[0] << " [dataset path]"
-					<< std::endl << std::endl;
+			std::cout << std::endl << "Usage: " << argv[0] << " [dataset path]" << std::endl
+					<< std::endl;
 			return 0;
 		}
 
@@ -28,7 +27,7 @@ main(int argc, char* argv[])
 
 	DepthClustering depth_clustering;
 
-	if (!depth_clustering.initializeForDataset(dataset_path, dataset_file_type))
+	if (!depth_clustering.initializeForDataset(dataset_path))
 	{
 		std::cout << "[ERROR]: Failed to initialize for dataset. Quit." << std::endl;
 		return -1;

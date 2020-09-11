@@ -45,6 +45,8 @@ ParameterFactory::getDepthClusteringParameter()
 	auto size_cluster_max_optional = tree.get_optional<int>("size_cluster_max");
 	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
 	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
+	auto dataset_file_type_optional = tree.get_optional<std::string>("dataset_file_type");
+	auto log_file_name_optional = tree.get_optional<std::string>("log_file_name");
 	auto log_optional = tree.get_optional<bool>("log");
 
 	if (angle_clustering_optional)
@@ -88,6 +90,16 @@ ParameterFactory::getDepthClusteringParameter()
 		{
 			parameter.bounding_box_type = BoundingBox::Type::Polygon;
 		}
+	}
+
+	if (dataset_file_type_optional)
+	{
+		parameter.dataset_file_type = *dataset_file_type_optional;
+	}
+
+	if (log_file_name_optional)
+	{
+		parameter.log_file_name = *log_file_name_optional;
 	}
 
 	if (log_optional)

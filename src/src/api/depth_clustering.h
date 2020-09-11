@@ -44,6 +44,8 @@ public:
 		int size_cluster_max;
 		int size_smooth_window;
 		BoundingBox::Type bounding_box_type;
+		std::string dataset_file_type;
+		std::string log_file_name;
 		bool log;
 
 		Parameter();
@@ -57,7 +59,7 @@ public:
 	initializeForApollo();
 
 	bool
-	initializeForDataset(std::string& dataset_path, const std::string& dataset_file_type);
+	initializeForDataset(std::string& dataset_path);
 
 	void
 	processForApollo(const std::string& frame_name,
@@ -72,10 +74,7 @@ public:
 private:
 
 	Parameter parameter_;
-
-	std::string dataset_file_type_;
 	std::string log_path_;
-	const std::string log_file_name_;
 
 	std::shared_ptr<ParameterFactory> parameter_factory_;
 	std::shared_ptr<FolderReader> folder_reader_;

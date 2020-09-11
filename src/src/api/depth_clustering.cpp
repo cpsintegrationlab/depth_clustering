@@ -22,7 +22,8 @@ using depth_clustering::RichPoint;
 
 DepthClustering::Parameter::Parameter() :
 		angle_clustering(10_deg), angle_ground_removal(9_deg), size_cluster_min(10), size_cluster_max(
-				20000), size_smooth_window(5), bounding_box_type(BoundingBox::Type::Cube), log(true)
+				20000), size_smooth_window(5), bounding_box_type(BoundingBox::Type::Cube), dataset_file_type(
+				".tiff"), log_file_name("depth_clustering_detection.json"), log(true)
 {
 }
 
@@ -32,8 +33,7 @@ DepthClustering::DepthClustering() :
 }
 
 DepthClustering::DepthClustering(const Parameter& parameter) :
-		parameter_(parameter), dataset_file_type_(".tiff"), log_path_("./"), log_file_name_(
-				"depth_clustering_detection.json")
+		parameter_(parameter), log_path_("./")
 {
 }
 
@@ -58,20 +58,18 @@ DepthClustering::initializeForApollo()
 }
 
 bool
-DepthClustering::initializeForDataset(std::string& dataset_path,
-		const std::string& dataset_file_type)
+DepthClustering::initializeForDataset(std::string& dataset_path)
 {
 	if (dataset_path[dataset_path.size() - 1] != '/')
 	{
 		dataset_path += "/";
 	}
 
-	dataset_file_type_ = dataset_file_type;
 	log_path_ = dataset_path;
 
 	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path);
 	parameter_ = parameter_factory_->getDepthClusteringParameter();
-	folder_reader_ = std::make_shared<FolderReader>(dataset_path, dataset_file_type_,
+	folder_reader_ = std::make_shared<FolderReader>(dataset_path, parameter_.dataset_file_type,
 			FolderReader::Order::SORTED);
 	projection_parameter_ = parameter_factory_->getLidarProjectionParameter();
 
@@ -133,11 +131,11 @@ DepthClustering::processForDataset()
 		while (std::getline(ss, frame_name, '/'))
 			;
 
-		if (dataset_file_type_ == ".png")
+		if (parameter_.dataset_file_type == ".png")
 		{
 			depth_image = MatFromDepthPng(path);
 		}
-		else if (dataset_file_type_ == ".tiff")
+		else if (parameter_.dataset_file_type == ".tiff")
 		{
 			depth_image = MatFromDepthTiff(path);
 		}
@@ -161,5 +159,5 @@ DepthClustering::processForDataset()
 void
 DepthClustering::finish()
 {
-	logger_->writeBoundingBoxLog(log_path_, log_file_name_);
+	logger_->writeBoundingBoxLog(log_path_, parameter_.log_file_name);
 }
