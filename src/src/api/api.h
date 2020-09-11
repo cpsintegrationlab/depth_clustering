@@ -1,5 +1,5 @@
 /*
- * depth_clustering.h
+ * api.h
  *
  *  Created on: Apr 27, 2020
  *      Author: simonyu
@@ -12,7 +12,7 @@
 #include <thread>
 #include <string>
 
-#include "api/depth_clustering_parameter.h"
+#include "api/api_parameter.h"
 #include "clusterers/image_based_clusterer.h"
 #include "ground_removal/depth_ground_remover.h"
 #include "image_labelers/linear_image_labeler.h"

@@ -1,11 +1,11 @@
 /*
- * main.cpp
+ * depth_clustering.cpp
  *
  *  Created on: Apr 28, 2020
  *      Author: simonyu
  */
 
-#include "api/depth_clustering.h"
+#include "api/api.h"
 
 int
 main(int argc, char* argv[])

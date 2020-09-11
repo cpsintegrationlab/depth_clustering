@@ -1,11 +1,11 @@
 /*
- * depth_clustering.cpp
+ * api.cpp
  *
  *  Created on: Apr 27, 2020
  *      Author: simonyu
  */
 
-#include "api/depth_clustering.h"
+#include "api/api.h"
 #include "api/parameter_factory.h"
 #include "image_labelers/diff_helpers/diff_factory.h"
 #include "utils/cloud.h"

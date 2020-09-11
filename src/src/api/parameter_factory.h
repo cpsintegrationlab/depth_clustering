@@ -10,7 +10,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "api/depth_clustering_parameter.h"
+#include "api/api_parameter.h"
 #include "post_processing/logger_parameter.h"
 #include "projections/projection_params.h"
 
