@@ -7,8 +7,6 @@
 
 #include "post_processing/camera_projection.h"
 
-using std::sqrt;
-
 CameraProjection::Parameter::Parameter() :
 		intrinsic(), extrinsic(), width(0), height(0), correct_distortions(false)
 {
@@ -18,13 +16,13 @@ CameraProjection::CameraProjection(const Parameter& parameter)
 {
 	parameter_ = parameter;
 
-	frame_ = std::make_shared<Frame>();
+	frame_flat_ = std::make_shared<BoundingBox::Frame<BoundingBox::Flat>>();
 }
 
-std::shared_ptr<CameraProjection::Frame>
-CameraProjection::getFrame() const
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
+CameraProjection::getFrameFlat() const
 {
-	return frame_;
+	return frame_flat_;
 }
 
 void
@@ -36,7 +34,7 @@ CameraProjection::setBoundingBox(std::shared_ptr<BoundingBox> bounding_box)
 void
 CameraProjection::clearFrame()
 {
-	frame_->clear();
+	frame_flat_->clear();
 }
 
 void
@@ -137,7 +135,7 @@ CameraProjection::getBoundingBoxDepth(const std::vector<Eigen::Vector3f>& boundi
 	return depth;
 }
 
-CameraProjection::Flat
+BoundingBox::Flat
 CameraProjection::getBoundingBoxFlat(
 		const std::vector<Eigen::Vector2d>& bounding_box_corners_projected)
 {
@@ -306,11 +304,11 @@ CameraProjection::projectBoundingBoxFrameCube()
 		}
 
 		// Obtain 2D flat bounding box
-		Flat bounding_box_flat = getBoundingBoxFlat(bounding_box_corners_projected);
+		BoundingBox::Flat bounding_box_flat = getBoundingBoxFlat(bounding_box_corners_projected);
 		std::get<2>(bounding_box_flat) = bounding_box_depth;
 
 		// Store 2D flat bounding box
-		frame_->push_back(bounding_box_flat);
+		frame_flat_->push_back(bounding_box_flat);
 	}
 }
 

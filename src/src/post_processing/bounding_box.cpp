@@ -63,6 +63,11 @@ BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clou
 			CreatePolygons(cluster);
 			break;
 		}
+		default:
+		{
+			CreateCubes(cluster);
+			break;
+		}
 		}
 	}
 

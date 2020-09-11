@@ -16,9 +16,6 @@ class CameraProjection
 {
 public:
 
-	using Flat = std::tuple<Eigen::Vector2d, Eigen::Vector2d, float>;
-	using Frame = std::vector<Flat>;
-
 	struct Parameter
 	{
 		std::vector<double> intrinsic;
@@ -32,8 +29,8 @@ public:
 
 	CameraProjection(const Parameter& parameter);
 
-	std::shared_ptr<Frame>
-	getFrame() const;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
+	getFrameFlat() const;
 
 	void
 	setBoundingBox(std::shared_ptr<BoundingBox> bounding_box);
@@ -55,7 +52,7 @@ private:
 	float
 	getBoundingBoxDepth(const std::vector<Eigen::Vector3f>& bounding_box_corners);
 
-	Flat
+	BoundingBox::Flat
 	getBoundingBoxFlat(const std::vector<Eigen::Vector2d>& bounding_box_corners_projected);
 
 	Eigen::Vector2f
@@ -69,7 +66,7 @@ private:
 
 	Parameter parameter_;
 
-	std::shared_ptr<Frame> frame_;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> frame_flat_;
 	std::shared_ptr<BoundingBox> bounding_box_;
 };
 
