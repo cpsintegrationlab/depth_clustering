@@ -39,7 +39,7 @@ public:
 	using Frame = std::vector<Type>;
 	using Cube = std::pair<Eigen::Vector3f, Eigen::Vector3f>;
 	using Polygon = std::pair<AlignedEigenVectors, float>;
-	using Flat = std::tuple<Eigen::Vector2d, Eigen::Vector2d, float>;
+	using Flat = std::tuple<Eigen::Vector2i, Eigen::Vector2i, float>;
 
 	enum class Type
 	{

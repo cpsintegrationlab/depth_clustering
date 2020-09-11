@@ -41,7 +41,7 @@ private:
 	getBoundingBoxDepth(const std::vector<Eigen::Vector3f>& bounding_box_corners);
 
 	BoundingBox::Flat
-	getBoundingBoxFlat(const std::vector<Eigen::Vector2d>& bounding_box_corners_projected);
+	getBoundingBoxFlat(const std::vector<Eigen::Vector2i>& bounding_box_corners_projected);
 
 	Eigen::Vector2f
 	correctCameraDistortions(const Eigen::Vector2f& point);

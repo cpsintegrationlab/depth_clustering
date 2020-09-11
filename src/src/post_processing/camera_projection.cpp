@@ -128,15 +128,15 @@ CameraProjection::getBoundingBoxDepth(const std::vector<Eigen::Vector3f>& boundi
 
 BoundingBox::Flat
 CameraProjection::getBoundingBoxFlat(
-		const std::vector<Eigen::Vector2d>& bounding_box_corners_projected)
+		const std::vector<Eigen::Vector2i>& bounding_box_corners_projected)
 {
-	Eigen::Vector2d bounding_box_flat_corner_upper_left;
-	Eigen::Vector2d bounding_box_flat_corner_lower_right;
+	Eigen::Vector2i bounding_box_flat_corner_upper_left;
+	Eigen::Vector2i bounding_box_flat_corner_lower_right;
 
-	bounding_box_flat_corner_upper_left.x() = std::numeric_limits<float>::max();
-	bounding_box_flat_corner_lower_right.x() = std::numeric_limits<float>::min();
-	bounding_box_flat_corner_upper_left.y() = std::numeric_limits<float>::max();
-	bounding_box_flat_corner_lower_right.y() = std::numeric_limits<float>::min();
+	bounding_box_flat_corner_upper_left.x() = std::numeric_limits<int>::max();
+	bounding_box_flat_corner_lower_right.x() = std::numeric_limits<int>::min();
+	bounding_box_flat_corner_upper_left.y() = std::numeric_limits<int>::max();
+	bounding_box_flat_corner_lower_right.y() = std::numeric_limits<int>::min();
 
 	// Find flat bounding box boundary
 	for (const auto &bounding_box_corner_projected : bounding_box_corners_projected)
@@ -163,14 +163,14 @@ CameraProjection::getBoundingBoxFlat(
 	}
 
 	// Enforce image boundary
-	bounding_box_flat_corner_upper_left.x() = std::min<float>(
-			std::max<float>(0, bounding_box_flat_corner_upper_left.x()), parameter_.width);
-	bounding_box_flat_corner_lower_right.x() = std::min<float>(
-			std::max<float>(0, bounding_box_flat_corner_lower_right.x()), parameter_.width);
-	bounding_box_flat_corner_upper_left.y() = std::min<float>(
-			std::max<float>(0, bounding_box_flat_corner_upper_left.y()), parameter_.height);
-	bounding_box_flat_corner_lower_right.y() = std::min<float>(
-			std::max<float>(0, bounding_box_flat_corner_lower_right.y()), parameter_.height);
+	bounding_box_flat_corner_upper_left.x() = std::min<int>(
+			std::max<int>(0, bounding_box_flat_corner_upper_left.x()), parameter_.width);
+	bounding_box_flat_corner_lower_right.x() = std::min<int>(
+			std::max<int>(0, bounding_box_flat_corner_lower_right.x()), parameter_.width);
+	bounding_box_flat_corner_upper_left.y() = std::min<int>(
+			std::max<int>(0, bounding_box_flat_corner_upper_left.y()), parameter_.height);
+	bounding_box_flat_corner_lower_right.y() = std::min<int>(
+			std::max<int>(0, bounding_box_flat_corner_lower_right.y()), parameter_.height);
 
 	return std::make_tuple(bounding_box_flat_corner_upper_left,
 			bounding_box_flat_corner_lower_right, 0);
@@ -241,7 +241,7 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 	{
 		std::vector<Eigen::Vector3f> bounding_box_corners_world = getBoundingBoxCornersCube(
 				bounding_box);
-		std::vector<Eigen::Vector2d> bounding_box_corners_projected;
+		std::vector<Eigen::Vector2i> bounding_box_corners_projected;
 		float bounding_box_depth = getBoundingBoxDepth(bounding_box_corners_world);
 		bool bounding_box_invalid = false;
 
@@ -277,7 +277,7 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 
 			// Store projected corner
 			bounding_box_corners_projected.push_back(
-					Eigen::Vector2d(bounding_box_corner_projected(0),
+					Eigen::Vector2i(bounding_box_corner_projected(0),
 							bounding_box_corner_projected(1)));
 		}
 
