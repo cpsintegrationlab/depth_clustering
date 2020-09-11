@@ -85,15 +85,15 @@ Logger::logBoundingBoxFrameCube(const std::string& frame_name)
 		return;
 	}
 
-	if (!bounding_box_->getFrameCube())
+	auto bounding_box_frame_cube = bounding_box_->getFrameCube();
+
+	if (!bounding_box_frame_cube)
 	{
-		std::cout << "[ERROR]: Cube frame missing." << std::endl;
+		std::cout << "[ERROR]: Cube bounding box frame missing." << std::endl;
 		return;
 	}
 
-	auto bounding_box_frame_cube = *(bounding_box_->getFrameCube());
-
-	for (const auto &cube : bounding_box_frame_cube)
+	for (const auto &cube : *bounding_box_frame_cube)
 	{
 		boost::property_tree::ptree cube_array_value;
 		boost::property_tree::ptree cube_array;
@@ -155,15 +155,15 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 		return;
 	}
 
-	if (!bounding_box_->getFramePolygon())
+	auto bounding_box_frame_polygon = bounding_box_->getFramePolygon();
+
+	if (!bounding_box_frame_polygon)
 	{
-		std::cout << "[ERROR]: Polygon frame missing." << std::endl;
+		std::cout << "[ERROR]: Polygon bounding box frame missing." << std::endl;
 		return;
 	}
 
-	auto bounding_box_frame_polygon = *(bounding_box_->getFramePolygon());
-
-	for (const auto &polygon : bounding_box_frame_polygon)
+	for (const auto &polygon : *bounding_box_frame_polygon)
 	{
 		boost::property_tree::ptree cloud_object_array_value;
 		boost::property_tree::ptree cloud_object_array;
@@ -220,6 +220,24 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 void
 Logger::logBoundingBoxFrameFlat(const std::string& frame_name)
 {
+	if (!parameter_.log)
+	{
+		return;
+	}
+
+	if (!camera_projection_)
+	{
+		std::cout << "[ERROR]: Camera projection missing." << std::endl;
+		return;
+	}
+
+	auto bounding_box_frame_flat = camera_projection_->getFrameFlat();
+
+	if (!bounding_box_frame_flat)
+	{
+		std::cout << "[ERROR]: Flat bounding box frame missing." << std::endl;
+		return;
+	}
 }
 
 void
