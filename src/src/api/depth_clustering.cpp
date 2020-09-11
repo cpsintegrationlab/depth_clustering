@@ -148,7 +148,6 @@ DepthClustering::processForDataset()
 
 		bounding_box_->clearFrames();
 		depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
-
 		bounding_box_->produceFrameFlat();
 
 		logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
