@@ -91,7 +91,7 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 }
 
 std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
-DepthClustering::getFrameFlat() const
+DepthClustering::getBoundingBoxFrameFlat() const
 {
 	if (!bounding_box_)
 	{
@@ -216,13 +216,13 @@ DepthClustering::processAllFramesForDataset()
 }
 
 void
-DepthClustering::finishForApollo()
+DepthClustering::logForApollo()
 {
 	logger_->writeBoundingBoxLog(parameter_.bounding_box_type);
 }
 
 void
-DepthClustering::finishForDataset()
+DepthClustering::logForDataset()
 {
 	logger_->writeBoundingBoxLog(parameter_.bounding_box_type);
 	logger_->writeBoundingBoxLog(BoundingBox::Type::Flat);

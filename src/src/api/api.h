@@ -44,7 +44,7 @@ public:
 	initializeForDataset(std::string& dataset_path);
 
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
-	getFrameFlat() const;
+	getBoundingBoxFrameFlat() const;
 
 	void
 	processOneFrameForApollo(const std::string& frame_name,
@@ -63,10 +63,10 @@ public:
 	processAllFramesForDataset();
 
 	void
-	finishForApollo();
+	logForApollo();
 
 	void
-	finishForDataset();
+	logForDataset();
 
 private:
 
