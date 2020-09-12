@@ -264,8 +264,14 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 				bounding_box);
 		std::vector<Eigen::Vector2i> bounding_box_corners_projected;
 		float bounding_box_depth = getBoundingBoxDepth(bounding_box_corners_world);
-		bool bounding_box_invalid = false;
 
+		// Exclude bounding box with invalid depth
+		if (bounding_box_depth < 0)
+		{
+			continue;
+		}
+
+		// Exclude bounding box according to filters
 		if (!filterBoundingBoxHeight(bounding_box.first)
 				|| !filterBoundingBoxTunnel(bounding_box.first, bounding_box_depth))
 		{
@@ -278,13 +284,6 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 			Eigen::Vector4f bounding_box_corner_camera = world_to_camera
 					* Eigen::Vector4f(bounding_box_corner_world(0), bounding_box_corner_world(1),
 							bounding_box_corner_world(2), 1);
-
-			// Exclude bounding box with invalid depth
-			if (bounding_box_corner_camera(2) < 0)
-			{
-				bounding_box_invalid = true;
-				break;
-			}
 
 			// Project from 3D camera frame into 2D
 			Eigen::Vector2f bounding_box_corner_projected(
@@ -308,7 +307,8 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 							bounding_box_corner_projected(1)));
 		}
 
-		if (bounding_box_invalid || bounding_box_corners_projected.empty())
+		// Exclude bounding box with no corners
+		if (bounding_box_corners_projected.empty())
 		{
 			continue;
 		}
@@ -316,6 +316,12 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 		// Obtain 2D flat bounding box
 		BoundingBox::Flat bounding_box_flat = getBoundingBoxFlat(bounding_box_corners_projected);
 		std::get<2>(bounding_box_flat) = bounding_box_depth;
+
+		// Exclude bounding box with no area
+		if (std::get<0>(bounding_box_flat) == std::get<1>(bounding_box_flat))
+		{
+			continue;
+		}
 
 		// Store 2D flat bounding box
 		bounding_box_frame_flat_->push_back(bounding_box_flat);
