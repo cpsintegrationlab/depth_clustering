@@ -1,7 +1,7 @@
 # Add executables
-add_executable(camera_visualizer camera_visualizer.cpp)
 add_executable(depth_clustering depth_clustering.cpp)
+add_executable(camera_visualizer EXCLUDE_FROM_ALL camera_visualizer.cpp)
 
 # Set library link targets
-target_link_libraries(camera_visualizer api)
 target_link_libraries(depth_clustering api)
+target_link_libraries(camera_visualizer api)
