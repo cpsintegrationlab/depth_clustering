@@ -58,9 +58,12 @@ main(int argc, char* argv[])
 		{
 			for (const auto &bounding_box_flat : *bounding_box_frame_flat)
 			{
-				cv::Point2i corner_upper_left(std::get<0>(bounding_box_flat).x(), std::get<0>(bounding_box_flat).y());
-				cv::Point2i corner_lower_right(std::get<1>(bounding_box_flat).x(), std::get<1>(bounding_box_flat).y());
-				cv::rectangle(camera_frame, corner_upper_left, corner_lower_right, cv::Scalar(255, 0, 0), 2);
+				cv::Point2i corner_upper_left(std::get<0>(bounding_box_flat).x(),
+						std::get<0>(bounding_box_flat).y());
+				cv::Point2i corner_lower_right(std::get<1>(bounding_box_flat).x(),
+						std::get<1>(bounding_box_flat).y());
+				cv::rectangle(camera_frame, corner_upper_left, corner_lower_right,
+						cv::Scalar(255, 0, 0), 2);
 			}
 		}
 		else
