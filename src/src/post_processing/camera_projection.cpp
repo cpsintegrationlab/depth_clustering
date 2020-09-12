@@ -317,8 +317,12 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 		BoundingBox::Flat bounding_box_flat = getBoundingBoxFlat(bounding_box_corners_projected);
 		std::get<2>(bounding_box_flat) = bounding_box_depth;
 
+		unsigned bounding_box_flat_width = std::abs(std::get<1>(bounding_box_flat).x() - std::get<0>(bounding_box_flat).x());
+		unsigned bounding_box_flat_height = std::abs(std::get<1>(bounding_box_flat).y() - std::get<0>(bounding_box_flat).y());
+		unsigned bounding_box_flat_area = bounding_box_flat_width * bounding_box_flat_height;
+
 		// Exclude bounding box with no area
-		if (std::get<0>(bounding_box_flat) == std::get<1>(bounding_box_flat))
+		if (bounding_box_flat_area == 0)
 		{
 			continue;
 		}
