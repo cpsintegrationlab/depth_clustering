@@ -176,15 +176,14 @@ CameraProjection::getBoundingBoxFlat(
 			bounding_box_flat_corner_lower_right, 0);
 }
 
-Eigen::Vector2f
-CameraProjection::correctCameraDistortions(const Eigen::Vector2f& point)
+void
+CameraProjection::correctCameraDistortions(Eigen::Vector2f& point)
 {
 	if (!parameter_.correct_distortions)
 	{
-		return point;
+		return;
 	}
 
-	Eigen::Vector2f point_corrected;
 	double k1 = parameter_.intrinsic[4];
 	double k2 = parameter_.intrinsic[5];
 	double p1 = parameter_.intrinsic[6];
@@ -199,12 +198,34 @@ CameraProjection::correctCameraDistortions(const Eigen::Vector2f& point)
 	double tangential_correction_factor_y = 2 * p2 * point.x() * point.y()
 			+ p1 * (std::pow(r, 2) + 2 * std::pow(point.y(), 2));
 
-	point_corrected.x() = point.x() * radial_correction_factor;
-	point_corrected.y() = point.y() * radial_correction_factor;
-	point_corrected.x() += tangential_correction_factor_x;
-	point_corrected.y() += tangential_correction_factor_y;
+	point.x() *= radial_correction_factor;
+	point.y() *= radial_correction_factor;
+	point.x() += tangential_correction_factor_x;
+	point.y() += tangential_correction_factor_y;
+}
 
-	return point_corrected;
+bool
+CameraProjection::filterBoundingBoxHeight(const Eigen::Vector3f& center)
+{
+	if (!parameter_.use_filter_height)
+	{
+		return true;
+	}
+
+	return center.z() < parameter_.filter_height;
+}
+
+bool
+CameraProjection::filterBoundingBoxTunnel(const Eigen::Vector3f& center, const float& depth)
+{
+	if (!parameter_.use_filter_tunnel)
+	{
+		return true;
+	}
+
+	return (center.y() <= parameter_.filter_tunnel_right
+			&& center.y() >= -parameter_.filter_tunnel_left
+			&& depth <= parameter_.filter_tunnel_front);
 }
 
 void
@@ -245,6 +266,12 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 		float bounding_box_depth = getBoundingBoxDepth(bounding_box_corners_world);
 		bool bounding_box_invalid = false;
 
+		if (!filterBoundingBoxHeight(bounding_box.first)
+				|| !filterBoundingBoxTunnel(bounding_box.first, bounding_box_depth))
+		{
+			continue;
+		}
+
 		for (const auto &bounding_box_corner_world : bounding_box_corners_world)
 		{
 			// Project from world frame into camera frame
@@ -265,7 +292,7 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 					bounding_box_corner_camera(1) / bounding_box_corner_camera(2));
 
 			// Correct camera distortions
-			bounding_box_corner_projected = correctCameraDistortions(bounding_box_corner_projected);
+			correctCameraDistortions(bounding_box_corner_projected);
 
 			// Project from 2D camera frame onto image frame by applying camera intrinsic matrix
 			bounding_box_corner_projected.x() = std::round(

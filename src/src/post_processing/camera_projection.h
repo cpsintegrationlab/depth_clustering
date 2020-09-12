@@ -43,8 +43,14 @@ private:
 	BoundingBox::Flat
 	getBoundingBoxFlat(const std::vector<Eigen::Vector2i>& bounding_box_corners_projected);
 
-	Eigen::Vector2f
-	correctCameraDistortions(const Eigen::Vector2f& point);
+	void
+	correctCameraDistortions(Eigen::Vector2f& point);
+
+	bool
+	filterBoundingBoxHeight(const Eigen::Vector3f& center);
+
+	bool
+	filterBoundingBoxTunnel(const Eigen::Vector3f& center, const float& depth);
 
 	void
 	projectFromBoundingBoxFrameCube();
