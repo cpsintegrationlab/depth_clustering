@@ -15,7 +15,7 @@ apt install libopencv-dev libqglviewer-dev freeglut3-dev libqt5-dev cmake
 For Ubuntu 18.04, install the following packages:
 
 ```bash
-apt install libopencv-dev libqglviewer-dev-qt5 freeglut3-dev qtbase5-dev cmake libblkid-dev e2fslibs-dev libboost-all-dev libaudit-dev
+apt install libopencv-dev libqglviewer-dev-qt5 freeglut3-dev qtbase5-dev cmake libblkid-dev e2fslibs-dev libboost-all-dev libaudit-dev libeigen3-dev
 ```
 
 With the above packages installed, navigate under the project folder, then set up and build the project as follows:
