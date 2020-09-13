@@ -47,6 +47,7 @@ ParameterFactory::getDepthClusteringParameter()
 	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
 	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
 	auto dataset_file_type_optional = tree.get_optional<std::string>("dataset_file_type");
+	auto ground_truth_file_name_optional = tree.get_optional<std::string>("ground_truth_file_name");
 
 	if (angle_clustering_optional)
 	{
@@ -94,6 +95,11 @@ ParameterFactory::getDepthClusteringParameter()
 	if (dataset_file_type_optional)
 	{
 		parameter.dataset_file_type = *dataset_file_type_optional;
+	}
+
+	if (ground_truth_file_name_optional)
+	{
+		parameter.ground_truth_file_name = *ground_truth_file_name_optional;
 	}
 
 	return parameter;

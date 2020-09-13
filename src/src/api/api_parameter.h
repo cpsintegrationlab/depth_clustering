@@ -23,11 +23,12 @@ struct DepthClusteringParameter
 	int size_smooth_window;
 	BoundingBox::Type bounding_box_type;
 	std::string dataset_file_type;
+	std::string ground_truth_file_name;
 
 	DepthClusteringParameter() :
 			angle_clustering(10_deg), angle_ground_removal(9_deg), size_cluster_min(10), size_cluster_max(
 					20000), size_smooth_window(5), bounding_box_type(BoundingBox::Type::Cube), dataset_file_type(
-					".tiff")
+					".tiff"), ground_truth_file_name("waymo_ground_truth_cube.json")
 	{
 	}
 };
