@@ -55,48 +55,69 @@ std::vector<Eigen::Vector3f>
 CameraProjection::getBoundingBoxCornersCube(const BoundingBox::Cube& bounding_box)
 {
 	std::vector<Eigen::Vector3f> bounding_box_corners;
+	Eigen::Matrix4f bounding_box_to_world; // Bounding box transformation matrix
+	auto bounding_box_unit_center = Eigen::Vector3f(0, 0, 0);
+	auto bounding_box_unit_extent = Eigen::Vector3f(1, 1, 1);
 	auto bounding_box_center = std::get<0>(bounding_box);
 	auto bounding_box_extent = std::get<1>(bounding_box);
+	auto bounding_box_rotation = std::get<2>(bounding_box);
+
+	// Construct bounding box transformation matrix
+	bounding_box_to_world << bounding_box_extent.x() * cos(bounding_box_rotation), -1
+			* bounding_box_extent.y() * sin(bounding_box_rotation), 0, bounding_box_center.x(), bounding_box_extent.x()
+			* sin(bounding_box_rotation), bounding_box_extent.y() * cos(bounding_box_rotation), 0, bounding_box_center.y(), 0, 0, bounding_box_extent.z(), bounding_box_center.z(), 0, 0, 0, 1;
 
 	bounding_box_corners.push_back(
-			Eigen::Vector3f(bounding_box_center.x() - bounding_box_extent.x() / 2,
-					bounding_box_center.y() - bounding_box_extent.y() / 2,
-					bounding_box_center.z() - bounding_box_extent.z() / 2));
+			Eigen::Vector3f(bounding_box_unit_center.x() - bounding_box_unit_extent.x() / 2,
+					bounding_box_unit_center.y() - bounding_box_unit_extent.y() / 2,
+					bounding_box_unit_center.z() - bounding_box_unit_extent.z() / 2));
 
 	bounding_box_corners.push_back(
-			Eigen::Vector3f(bounding_box_center.x() - bounding_box_extent.x() / 2,
-					bounding_box_center.y() - bounding_box_extent.y() / 2,
-					bounding_box_center.z() + bounding_box_extent.z() / 2));
+			Eigen::Vector3f(bounding_box_unit_center.x() - bounding_box_unit_extent.x() / 2,
+					bounding_box_unit_center.y() - bounding_box_unit_extent.y() / 2,
+					bounding_box_unit_center.z() + bounding_box_unit_extent.z() / 2));
 
 	bounding_box_corners.push_back(
-			Eigen::Vector3f(bounding_box_center.x() - bounding_box_extent.x() / 2,
-					bounding_box_center.y() + bounding_box_extent.y() / 2,
-					bounding_box_center.z() - bounding_box_extent.z() / 2));
+			Eigen::Vector3f(bounding_box_unit_center.x() - bounding_box_unit_extent.x() / 2,
+					bounding_box_unit_center.y() + bounding_box_unit_extent.y() / 2,
+					bounding_box_unit_center.z() - bounding_box_unit_extent.z() / 2));
 
 	bounding_box_corners.push_back(
-			Eigen::Vector3f(bounding_box_center.x() - bounding_box_extent.x() / 2,
-					bounding_box_center.y() + bounding_box_extent.y() / 2,
-					bounding_box_center.z() + bounding_box_extent.z() / 2));
+			Eigen::Vector3f(bounding_box_unit_center.x() - bounding_box_unit_extent.x() / 2,
+					bounding_box_unit_center.y() + bounding_box_unit_extent.y() / 2,
+					bounding_box_unit_center.z() + bounding_box_unit_extent.z() / 2));
 
 	bounding_box_corners.push_back(
-			Eigen::Vector3f(bounding_box_center.x() + bounding_box_extent.x() / 2,
-					bounding_box_center.y() - bounding_box_extent.y() / 2,
-					bounding_box_center.z() - bounding_box_extent.z() / 2));
+			Eigen::Vector3f(bounding_box_unit_center.x() + bounding_box_unit_extent.x() / 2,
+					bounding_box_unit_center.y() - bounding_box_unit_extent.y() / 2,
+					bounding_box_unit_center.z() - bounding_box_unit_extent.z() / 2));
 
 	bounding_box_corners.push_back(
-			Eigen::Vector3f(bounding_box_center.x() + bounding_box_extent.x() / 2,
-					bounding_box_center.y() - bounding_box_extent.y() / 2,
-					bounding_box_center.z() + bounding_box_extent.z() / 2));
+			Eigen::Vector3f(bounding_box_unit_center.x() + bounding_box_unit_extent.x() / 2,
+					bounding_box_unit_center.y() - bounding_box_unit_extent.y() / 2,
+					bounding_box_unit_center.z() + bounding_box_unit_extent.z() / 2));
 
 	bounding_box_corners.push_back(
-			Eigen::Vector3f(bounding_box_center.x() + bounding_box_extent.x() / 2,
-					bounding_box_center.y() + bounding_box_extent.y() / 2,
-					bounding_box_center.z() - bounding_box_extent.z() / 2));
+			Eigen::Vector3f(bounding_box_unit_center.x() + bounding_box_unit_extent.x() / 2,
+					bounding_box_unit_center.y() + bounding_box_unit_extent.y() / 2,
+					bounding_box_unit_center.z() - bounding_box_unit_extent.z() / 2));
 
 	bounding_box_corners.push_back(
-			Eigen::Vector3f(bounding_box_center.x() + bounding_box_extent.x() / 2,
-					bounding_box_center.y() + bounding_box_extent.y() / 2,
-					bounding_box_center.z() + bounding_box_extent.z() / 2));
+			Eigen::Vector3f(bounding_box_unit_center.x() + bounding_box_unit_extent.x() / 2,
+					bounding_box_unit_center.y() + bounding_box_unit_extent.y() / 2,
+					bounding_box_unit_center.z() + bounding_box_unit_extent.z() / 2));
+
+	// Transform unit bounding box corners into world frame
+	for (auto &bounding_box_corner : bounding_box_corners)
+	{
+		auto bounding_box_corner_extended = Eigen::Vector4f(bounding_box_corner.x(),
+				bounding_box_corner.y(), bounding_box_corner.z(), 1);
+
+		bounding_box_corner_extended = bounding_box_to_world * bounding_box_corner_extended;
+		bounding_box_corner.x() = bounding_box_corner_extended.x();
+		bounding_box_corner.y() = bounding_box_corner_extended.y();
+		bounding_box_corner.z() = bounding_box_corner_extended.z();
+	}
 
 	return bounding_box_corners;
 }
