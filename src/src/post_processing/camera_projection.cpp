@@ -273,11 +273,6 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 	// Inverse given camera-to-world extrinsic and transformation axes into camera frame
 	world_to_camera = world_to_camera_axes * world_to_camera.inverse();
 
-	// Remove extrinsic translation vector sicen bounding boxes are already in camera frame
-	world_to_camera(0, 3) = 0;
-	world_to_camera(1, 3) = 0;
-	world_to_camera(2, 3) = 0;
-
 	// Process all bounding boxes in the frame
 	for (const auto &bounding_box : *bounding_box_frame_cube_)
 	{
@@ -285,6 +280,7 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 				bounding_box);
 		std::vector<Eigen::Vector2i> bounding_box_corners_projected;
 		float bounding_box_depth = getBoundingBoxDepth(bounding_box_corners_world);
+		bool bounding_box_invalid = false;
 
 		// Exclude bounding box with invalid depth
 		if (bounding_box_depth < 0)
@@ -305,6 +301,13 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 			Eigen::Vector4f bounding_box_corner_camera = world_to_camera
 					* Eigen::Vector4f(bounding_box_corner_world(0), bounding_box_corner_world(1),
 							bounding_box_corner_world(2), 1);
+
+			// Exclude bounding box outside the camera image plane
+			if (bounding_box_corner_camera.z() < 0)
+			{
+				bounding_box_invalid = true;
+				break;
+			}
 
 			// Project from 3D camera frame into 2D
 			Eigen::Vector2f bounding_box_corner_projected(
@@ -328,8 +331,8 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 							bounding_box_corner_projected(1)));
 		}
 
-		// Exclude bounding box with no corners
-		if (bounding_box_corners_projected.empty())
+		// Exclude invalid bounding box
+		if (bounding_box_invalid || bounding_box_corners_projected.empty())
 		{
 			continue;
 		}

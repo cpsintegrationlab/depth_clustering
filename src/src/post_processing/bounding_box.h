@@ -62,6 +62,15 @@ public:
 	getFrameFlat() const;
 
 	void
+	setFrameCube(std::shared_ptr<Frame<Cube>> frame_cube);
+
+	void
+	setFramePolygon(std::shared_ptr<Frame<Polygon>> frame_polygon);
+
+	void
+	setFrameFlat(std::shared_ptr<Frame<Flat>> frame_flat);
+
+	void
 	clearFrames();
 
 	void

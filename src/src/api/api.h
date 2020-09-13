@@ -43,6 +43,12 @@ public:
 	bool
 	initializeForDataset(std::string& dataset_path);
 
+	const DepthClusteringParameter&
+	getParameter() const;
+
+	const std::string&
+	getDatasetPath() const;
+
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
 	getBoundingBoxFrameFlat() const;
 
@@ -63,6 +69,9 @@ public:
 	processAllFramesForDataset();
 
 	void
+	processGroundTruthForDataset();
+
+	void
 	logForApollo();
 
 	void
@@ -71,6 +80,7 @@ public:
 private:
 
 	DepthClusteringParameter parameter_;
+	std::string dataset_path_;
 	int frame_counter_;
 
 	std::shared_ptr<ParameterFactory> parameter_factory_;

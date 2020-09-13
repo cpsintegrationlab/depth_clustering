@@ -51,6 +51,27 @@ BoundingBox::getFrameFlat() const
 }
 
 void
+BoundingBox::setFrameCube(std::shared_ptr<Frame<Cube>> frame_cube)
+{
+	frame_cube_ = frame_cube;
+	camera_projection_->setFrames(frame_cube_, frame_polygon_, frame_flat_);
+}
+
+void
+BoundingBox::setFramePolygon(std::shared_ptr<Frame<Polygon>> frame_polygon)
+{
+	frame_polygon_ = frame_polygon;
+	camera_projection_->setFrames(frame_cube_, frame_polygon_, frame_flat_);
+}
+
+void
+BoundingBox::setFrameFlat(std::shared_ptr<Frame<Flat>> frame_flat)
+{
+	frame_flat_ = frame_flat;
+	camera_projection_->setFrames(frame_cube_, frame_polygon_, frame_flat_);
+}
+
+void
 BoundingBox::clearFrames()
 {
 	frame_cube_->clear();

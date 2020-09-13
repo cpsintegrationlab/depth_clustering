@@ -5,6 +5,8 @@
  *      Author: simonyu
  */
 
+#include <boost/property_tree/json_parser.hpp>
+
 #include "api/api.h"
 #include "api/parameter_factory.h"
 #include "image_labelers/diff_helpers/diff_factory.h"
@@ -13,6 +15,7 @@
 #include "utils/rich_point.h"
 #include "utils/velodyne_utils.h"
 
+using boost::property_tree::json_parser::read_json;
 using depth_clustering::Cloud;
 using depth_clustering::DiffFactory;
 using depth_clustering::MatFromDepthPng;
@@ -26,7 +29,7 @@ DepthClustering::DepthClustering() :
 }
 
 DepthClustering::DepthClustering(const DepthClusteringParameter& parameter) :
-		parameter_(parameter), frame_counter_(0)
+		parameter_(parameter), dataset_path_("./"), frame_counter_(0)
 {
 }
 
@@ -58,7 +61,9 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 		dataset_path += "/";
 	}
 
-	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path);
+	dataset_path_ = dataset_path;
+
+	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path_);
 	parameter_ = parameter_factory_->getDepthClusteringParameter();
 	projection_parameter_ = parameter_factory_->getLidarProjectionParameter();
 
@@ -67,10 +72,17 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 		return false;
 	}
 
+	auto camera_projection_parameter = parameter_factory_->getCameraProjectionParameter();
 	auto logger_parameter = parameter_factory_->getLoggerParameter();
-	logger_parameter.log_path = dataset_path;
 
-	folder_reader_ = std::make_shared<FolderReader>(dataset_path, parameter_.dataset_file_type,
+	// Remove extrinsic translation vector since bounding boxes are already in camera frame
+	camera_projection_parameter.extrinsic[3] = 0;
+	camera_projection_parameter.extrinsic[7] = 0;
+	camera_projection_parameter.extrinsic[11] = 0;
+
+	logger_parameter.log_path = dataset_path_;
+
+	folder_reader_ = std::make_shared<FolderReader>(dataset_path_, parameter_.dataset_file_type,
 			FolderReader::Order::SORTED);
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
@@ -78,7 +90,7 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(
 			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
-			parameter_factory_->getCameraProjectionParameter());
+			camera_projection_parameter);
 	logger_ = std::make_shared<Logger>(logger_parameter);
 
 	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
@@ -99,6 +111,18 @@ DepthClustering::getBoundingBoxFrameFlat() const
 	}
 
 	return bounding_box_->getFrameFlat();
+}
+
+const DepthClusteringParameter&
+DepthClustering::getParameter() const
+{
+	return parameter_;
+}
+
+const std::string&
+DepthClustering::getDatasetPath() const
+{
+	return dataset_path_;
 }
 
 void
@@ -213,6 +237,60 @@ DepthClustering::processAllFramesForDataset()
 			logger_->logBoundingBoxFrameFlat(frame_name);
 		}
 	}
+}
+
+void
+DepthClustering::processGroundTruthForDataset()
+{
+	boost::property_tree::ptree ground_truth_tree;
+	LoggerParameter parameter_logger;
+
+	parameter_logger.log_path = dataset_path_;
+	parameter_logger.log_file_name_flat = parameter_.ground_truth_flat_file_name;
+	parameter_logger.log = true;
+
+	std::shared_ptr<BoundingBox> bounding_box = std::make_shared<BoundingBox>(
+			BoundingBox::Type::Cube, parameter_factory_->getCameraProjectionParameter());
+	std::shared_ptr<Logger> logger = std::make_shared<Logger>(parameter_logger);
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube =
+			std::make_shared<BoundingBox::Frame<BoundingBox::Cube>>();
+
+	bounding_box->setFrameCube(bounding_box_frame_cube);
+	logger->setBoundingBox(bounding_box);
+
+	boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_file_name,
+			ground_truth_tree);
+
+	for (const auto &bounding_box_frame_cube_pair : ground_truth_tree)
+	{
+		const auto &bounding_box_frame_name_cube = bounding_box_frame_cube_pair.first;
+
+		for (const auto &bounding_box_cube_array_pair : bounding_box_frame_cube_pair.second)
+		{
+			std::vector<float> bounding_box_cube_values;
+			Eigen::Vector3f center;
+			Eigen::Vector3f extent;
+			float rotation;
+
+			for (const auto &bounding_box_cube_value_pair : bounding_box_cube_array_pair.second)
+			{
+				bounding_box_cube_values.push_back(
+						bounding_box_cube_value_pair.second.get_value<float>());
+			}
+
+			center << bounding_box_cube_values[0], bounding_box_cube_values[1], bounding_box_cube_values[2];
+			extent << bounding_box_cube_values[3], bounding_box_cube_values[4], bounding_box_cube_values[5];
+			rotation = bounding_box_cube_values[6];
+
+			bounding_box_frame_cube->push_back(std::make_tuple(center, extent, rotation));
+		}
+
+		bounding_box->produceFrameFlat();
+		logger->logBoundingBoxFrameFlat(bounding_box_frame_name_cube);
+		bounding_box->clearFrames();
+	}
+
+	logger->writeBoundingBoxLog(BoundingBox::Type::Flat);
 }
 
 void
