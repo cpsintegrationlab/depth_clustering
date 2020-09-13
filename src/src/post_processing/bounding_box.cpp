@@ -132,7 +132,7 @@ BoundingBox::CreateCubes(const Cloud& cloud)
 		extent = max_point - min_point;
 	}
 
-	frame_cube_->push_back(std::make_pair(center, extent));
+	frame_cube_->push_back(std::make_tuple(center, extent, 0));
 }
 
 void

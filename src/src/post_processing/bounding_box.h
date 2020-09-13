@@ -37,7 +37,7 @@ public:
 
 	template<typename Type>
 	using Frame = std::vector<Type>;
-	using Cube = std::pair<Eigen::Vector3f, Eigen::Vector3f>;
+	using Cube = std::tuple<Eigen::Vector3f, Eigen::Vector3f, float>;
 	using Polygon = std::pair<AlignedEigenVectors, float>;
 	using Flat = std::tuple<Eigen::Vector2i, Eigen::Vector2i, float>;
 

@@ -55,8 +55,8 @@ std::vector<Eigen::Vector3f>
 CameraProjection::getBoundingBoxCornersCube(const BoundingBox::Cube& bounding_box)
 {
 	std::vector<Eigen::Vector3f> bounding_box_corners;
-	auto bounding_box_center = bounding_box.first;
-	auto bounding_box_extent = bounding_box.second;
+	auto bounding_box_center = std::get<0>(bounding_box);
+	auto bounding_box_extent = std::get<1>(bounding_box);
 
 	bounding_box_corners.push_back(
 			Eigen::Vector3f(bounding_box_center.x() - bounding_box_extent.x() / 2,
@@ -272,8 +272,8 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 		}
 
 		// Exclude bounding box according to filters
-		if (!filterBoundingBoxHeight(bounding_box.first)
-				|| !filterBoundingBoxTunnel(bounding_box.first, bounding_box_depth))
+		if (!filterBoundingBoxHeight(std::get<0>(bounding_box))
+				|| !filterBoundingBoxTunnel(std::get<0>(bounding_box), bounding_box_depth))
 		{
 			continue;
 		}

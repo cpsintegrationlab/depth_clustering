@@ -84,8 +84,8 @@ Logger::logBoundingBoxFrameCube(const std::string& frame_name)
 		boost::property_tree::ptree bounding_box_cube_array_value;
 		boost::property_tree::ptree bounding_box_cube_array;
 
-		auto center = bounding_box_cube.first;
-		auto extent = bounding_box_cube.second;
+		auto center = std::get<0>(bounding_box_cube);
+		auto extent = std::get<1>(bounding_box_cube);
 
 		bounding_box_cube_array_value.put_value(center.x());
 		bounding_box_cube_array.push_back(std::make_pair("", bounding_box_cube_array_value));
