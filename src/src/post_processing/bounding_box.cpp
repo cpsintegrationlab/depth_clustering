@@ -19,6 +19,7 @@ BoundingBox::BoundingBox() :
 BoundingBox::BoundingBox(const Type& type) :
 		type_(type)
 {
+	id_ = 0;
 	frame_cube_ = std::make_shared<Frame<Cube>>();
 	frame_polygon_ = std::make_shared<Frame<Polygon>>();
 	frame_flat_ = std::make_shared<Frame<Flat>>();
@@ -153,7 +154,7 @@ BoundingBox::CreateCubes(const Cloud& cloud)
 		extent = max_point - min_point;
 	}
 
-	frame_cube_->push_back(std::make_tuple(center, extent, 0));
+	frame_cube_->push_back(std::make_tuple(center, extent, 0, std::to_string(id_++)));
 }
 
 void
@@ -193,7 +194,7 @@ BoundingBox::CreatePolygons(const Cloud& cloud)
 		return;
 	}
 
-	frame_polygon_->push_back(std::make_pair(hull, diff_z));
+	frame_polygon_->push_back(std::make_tuple(hull, diff_z, std::to_string(id_++)));
 }
 
 } // namespace depth_clustering

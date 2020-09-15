@@ -31,23 +31,25 @@ getGroundTruthFrameFlat(const boost::property_tree::ptree& ground_truth_tree,
 
 	for (const auto &bounding_box_flat_array_pair : bounding_box_frame_flat_tree)
 	{
-		std::vector<float> bounding_box_flat_values;
+		std::vector<std::string> bounding_box_flat_values;
 		Eigen::Vector2i corner_upper_left;
 		Eigen::Vector2i corner_lower_right;
 		float depth;
+		std::string id;
 
 		for (const auto &bounding_box_flat_value_pair : bounding_box_flat_array_pair.second)
 		{
 			bounding_box_flat_values.push_back(
-					bounding_box_flat_value_pair.second.get_value<float>());
+					bounding_box_flat_value_pair.second.get_value<std::string>());
 		}
 
-		corner_upper_left << bounding_box_flat_values[0], bounding_box_flat_values[1];
-		corner_lower_right << bounding_box_flat_values[2], bounding_box_flat_values[3];
-		depth = bounding_box_flat_values[4];
+		corner_upper_left << std::stoi(bounding_box_flat_values[0]), std::stoi(bounding_box_flat_values[1]);
+		corner_lower_right << std::stoi(bounding_box_flat_values[2]), std::stoi(bounding_box_flat_values[3]);
+		depth = std::stof(bounding_box_flat_values[4]);
+		id = bounding_box_flat_values[5];
 
 		bounding_box_frame_flat->push_back(
-				std::make_tuple(corner_upper_left, corner_lower_right, depth));
+				std::make_tuple(corner_upper_left, corner_lower_right, depth, id));
 	}
 
 	return bounding_box_frame_flat;

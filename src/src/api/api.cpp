@@ -267,22 +267,24 @@ DepthClustering::processGroundTruthForDataset()
 
 		for (const auto &bounding_box_cube_array_pair : bounding_box_frame_cube_pair.second)
 		{
-			std::vector<float> bounding_box_cube_values;
+			std::vector<std::string> bounding_box_cube_values;
 			Eigen::Vector3f center;
 			Eigen::Vector3f extent;
 			float rotation;
+			std::string id;
 
 			for (const auto &bounding_box_cube_value_pair : bounding_box_cube_array_pair.second)
 			{
 				bounding_box_cube_values.push_back(
-						bounding_box_cube_value_pair.second.get_value<float>());
+						bounding_box_cube_value_pair.second.get_value<std::string>());
 			}
 
-			center << bounding_box_cube_values[0], bounding_box_cube_values[1], bounding_box_cube_values[2];
-			extent << bounding_box_cube_values[3], bounding_box_cube_values[4], bounding_box_cube_values[5];
-			rotation = bounding_box_cube_values[6];
+			center << std::stof(bounding_box_cube_values[0]), std::stof(bounding_box_cube_values[1]), std::stof(bounding_box_cube_values[2]);
+			extent << std::stof(bounding_box_cube_values[3]), std::stof(bounding_box_cube_values[4]), std::stof(bounding_box_cube_values[5]);
+			rotation = std::stof(bounding_box_cube_values[6]);
+			id = bounding_box_cube_values[7];
 
-			bounding_box_frame_cube->push_back(std::make_tuple(center, extent, rotation));
+			bounding_box_frame_cube->push_back(std::make_tuple(center, extent, rotation, id));
 		}
 
 		bounding_box->produceFrameFlat();

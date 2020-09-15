@@ -86,6 +86,8 @@ Logger::logBoundingBoxFrameCube(const std::string& frame_name)
 
 		auto center = std::get<0>(bounding_box_cube);
 		auto extent = std::get<1>(bounding_box_cube);
+		auto rotation = std::get<2>(bounding_box_cube);
+		auto id = std::get<3>(bounding_box_cube);
 
 		bounding_box_cube_array_value.put_value(center.x());
 		bounding_box_cube_array.push_back(std::make_pair("", bounding_box_cube_array_value));
@@ -103,6 +105,12 @@ Logger::logBoundingBoxFrameCube(const std::string& frame_name)
 		bounding_box_cube_array.push_back(std::make_pair("", bounding_box_cube_array_value));
 
 		bounding_box_cube_array_value.put_value(extent.z());
+		bounding_box_cube_array.push_back(std::make_pair("", bounding_box_cube_array_value));
+
+		bounding_box_cube_array_value.put_value(rotation);
+		bounding_box_cube_array.push_back(std::make_pair("", bounding_box_cube_array_value));
+
+		bounding_box_cube_array_value.put_value(id);
 		bounding_box_cube_array.push_back(std::make_pair("", bounding_box_cube_array_value));
 
 		auto bounding_box_cube_frame_array_optional =
@@ -158,8 +166,9 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 		boost::property_tree::ptree bounding_box_polygon_hull_vector_array;
 		boost::property_tree::ptree bounding_box_polygon_hull_array;
 
-		auto hull = bounding_box_polygon.first;
-		auto diff_z = bounding_box_polygon.second;
+		auto hull = std::get<0>(bounding_box_polygon);
+		auto diff_z = std::get<1>(bounding_box_polygon);
+		auto id = std::get<2>(bounding_box_polygon);
 
 		for (const auto &hull_vector : hull)
 		{
@@ -172,6 +181,10 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 					std::make_pair("", bounding_box_polygon_hull_vector_array_value));
 
 			bounding_box_polygon_hull_vector_array_value.put_value(hull_vector.z());
+			bounding_box_polygon_hull_vector_array.push_back(
+					std::make_pair("", bounding_box_polygon_hull_vector_array_value));
+
+			bounding_box_polygon_hull_vector_array_value.put_value(id);
 			bounding_box_polygon_hull_vector_array.push_back(
 					std::make_pair("", bounding_box_polygon_hull_vector_array_value));
 
@@ -241,6 +254,7 @@ Logger::logBoundingBoxFrameFlat(const std::string& frame_name)
 		auto corner_upper_left = std::get<0>(bounding_box_flat);
 		auto corner_lower_right = std::get<1>(bounding_box_flat);
 		auto depth = std::get<2>(bounding_box_flat);
+		auto id = std::get<3>(bounding_box_flat);
 
 		bounding_box_flat_array_value.put_value(corner_upper_left.x());
 		bounding_box_flat_array.push_back(std::make_pair("", bounding_box_flat_array_value));
@@ -255,6 +269,9 @@ Logger::logBoundingBoxFrameFlat(const std::string& frame_name)
 		bounding_box_flat_array.push_back(std::make_pair("", bounding_box_flat_array_value));
 
 		bounding_box_flat_array_value.put_value(depth);
+		bounding_box_flat_array.push_back(std::make_pair("", bounding_box_flat_array_value));
+
+		bounding_box_flat_array_value.put_value(id);
 		bounding_box_flat_array.push_back(std::make_pair("", bounding_box_flat_array_value));
 
 		auto bounding_box_flat_frame_array_optional =

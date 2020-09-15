@@ -37,9 +37,9 @@ public:
 
 	template<typename Type>
 	using Frame = std::vector<Type>;
-	using Cube = std::tuple<Eigen::Vector3f, Eigen::Vector3f, float>;
-	using Polygon = std::pair<AlignedEigenVectors, float>;
-	using Flat = std::tuple<Eigen::Vector2i, Eigen::Vector2i, float>;
+	using Cube = std::tuple<Eigen::Vector3f, Eigen::Vector3f, float, std::string>; // <center, extent, rotation, id>
+	using Polygon = std::tuple<AlignedEigenVectors, float, std::string>; // <hull, diff_z, id>
+	using Flat = std::tuple<Eigen::Vector2i, Eigen::Vector2i, float, std::string>; // <upper_left, lower_right, depth, id>
 
 	enum class Type
 	{
@@ -87,7 +87,8 @@ private:
 	void
 	CreatePolygons(const Cloud& cloud);
 
-	Type type_ = Type::Cube;
+	Type type_;
+	int id_;
 
 	std::shared_ptr<Frame<Cube>> frame_cube_;
 	std::shared_ptr<Frame<Polygon>> frame_polygon_;

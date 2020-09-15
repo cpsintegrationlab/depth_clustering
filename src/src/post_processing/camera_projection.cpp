@@ -194,7 +194,7 @@ CameraProjection::getBoundingBoxFlat(
 			std::max<int>(0, bounding_box_flat_corner_lower_right.y()), parameter_.height);
 
 	return std::make_tuple(bounding_box_flat_corner_upper_left,
-			bounding_box_flat_corner_lower_right, 0);
+			bounding_box_flat_corner_lower_right, 0, "");
 }
 
 void
@@ -340,6 +340,7 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 		// Obtain 2D flat bounding box
 		BoundingBox::Flat bounding_box_flat = getBoundingBoxFlat(bounding_box_corners_projected);
 		std::get<2>(bounding_box_flat) = bounding_box_depth;
+		std::get<3>(bounding_box_flat) = std::get<3>(bounding_box);
 
 		unsigned bounding_box_flat_width = std::abs(
 				std::get<1>(bounding_box_flat).x() - std::get<0>(bounding_box_flat).x());
