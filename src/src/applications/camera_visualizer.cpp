@@ -43,8 +43,10 @@ getGroundTruthFrameFlat(const boost::property_tree::ptree& ground_truth_tree,
 					bounding_box_flat_value_pair.second.get_value<std::string>());
 		}
 
-		corner_upper_left << std::stoi(bounding_box_flat_values[0]), std::stoi(bounding_box_flat_values[1]);
-		corner_lower_right << std::stoi(bounding_box_flat_values[2]), std::stoi(bounding_box_flat_values[3]);
+		corner_upper_left << std::stoi(bounding_box_flat_values[0]), std::stoi(
+				bounding_box_flat_values[1]);
+		corner_lower_right << std::stoi(bounding_box_flat_values[2]), std::stoi(
+				bounding_box_flat_values[3]);
 		depth = std::stof(bounding_box_flat_values[4]);
 		id = bounding_box_flat_values[5];
 
@@ -60,17 +62,23 @@ main(int argc, char* argv[])
 {
 	std::string dataset_path =
 			"../../../data/segment-1022527355599519580_4866_960_4886_960_with_camera_labels/";
+	int display_time = 1;
 
 	if (argc > 1)
 	{
 		if (std::string(argv[1]) == "-h")
 		{
-			std::cout << std::endl << "Usage: " << argv[0] << " [dataset path]" << std::endl
-					<< std::endl;
+			std::cout << std::endl << "Usage: " << argv[0] << " [dataset path] [display time]"
+					<< std::endl << std::endl;
 			return 0;
 		}
 
 		dataset_path = argv[1];
+	}
+
+	if (argc > 2)
+	{
+		display_time = std::stoi(std::string(argv[2]));
 	}
 
 	std::shared_ptr<DepthClustering> depth_clustering = std::make_shared<DepthClustering>();
@@ -146,7 +154,7 @@ main(int argc, char* argv[])
 		}
 
 		cv::imshow(argv[0], camera_frame);
-		cv::waitKey(1);
+		cv::waitKey(display_time);
 	}
 
 	return 0;
