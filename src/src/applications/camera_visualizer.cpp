@@ -81,27 +81,27 @@ main(int argc, char* argv[])
 		display_time = std::stoi(std::string(argv[2]));
 	}
 
-	std::shared_ptr<DepthClustering> depth_clustering = std::make_shared<DepthClustering>();
+	DepthClustering depth_clustering;
 	boost::property_tree::ptree ground_truth_tree;
 
-	if (!depth_clustering->initializeForDataset(dataset_path))
+	if (!depth_clustering.initializeForDataset(dataset_path))
 	{
 		std::cout << "[ERROR]: Failed to initialize for dataset. Quit." << std::endl;
 		return -1;
 	}
 
-	depth_clustering->processGroundTruthForDataset();
+	depth_clustering.processGroundTruthForDataset();
 
 	boost::property_tree::read_json(
-			depth_clustering->getDatasetPath()
-					+ depth_clustering->getParameter().ground_truth_flat_file_name,
+			depth_clustering.getDatasetPath()
+					+ depth_clustering.getParameter().ground_truth_flat_file_name,
 			ground_truth_tree);
 
 	cv::namedWindow(argv[0], cv::WINDOW_AUTOSIZE);
 
 	while (1)
 	{
-		const std::string lidar_frame_name = depth_clustering->processNextFrameForDataset();
+		const std::string lidar_frame_name = depth_clustering.processNextFrameForDataset();
 		std::string camera_frame_name = lidar_frame_name;
 
 		if (camera_frame_name.empty())
@@ -116,7 +116,7 @@ main(int argc, char* argv[])
 
 		cv::Mat camera_frame = cv::imread(dataset_path + camera_frame_name, CV_LOAD_IMAGE_COLOR);
 
-		auto bounding_box_frame_flat = depth_clustering->getBoundingBoxFrameFlat();
+		auto bounding_box_frame_flat = depth_clustering.getBoundingBoxFrameFlat();
 		auto ground_truth_frame_flat = getGroundTruthFrameFlat(ground_truth_tree, lidar_frame_name);
 
 		if (bounding_box_frame_flat)
@@ -127,8 +127,13 @@ main(int argc, char* argv[])
 						std::get<0>(bounding_box_flat).y());
 				cv::Point2i corner_lower_right(std::get<1>(bounding_box_flat).x(),
 						std::get<1>(bounding_box_flat).y());
+				cv::Point2i text_depth(std::get<0>(bounding_box_flat).x(),
+						std::get<0>(bounding_box_flat).y() - 10);
 				cv::rectangle(camera_frame, corner_upper_left, corner_lower_right,
 						cv::Scalar(255, 0, 0), 2);
+				cv::putText(camera_frame,
+						"depth: " + std::to_string(std::get<2>(bounding_box_flat)), text_depth,
+						cv::FONT_HERSHEY_PLAIN, 1.2, cv::Scalar(255, 0, 0), 2);
 			}
 		}
 		else
@@ -144,8 +149,13 @@ main(int argc, char* argv[])
 						std::get<0>(ground_truth_flat).y());
 				cv::Point2i corner_lower_right(std::get<1>(ground_truth_flat).x(),
 						std::get<1>(ground_truth_flat).y());
+				cv::Point2i text_depth(std::get<0>(ground_truth_flat).x(),
+						std::get<0>(ground_truth_flat).y() - 10);
 				cv::rectangle(camera_frame, corner_upper_left, corner_lower_right,
 						cv::Scalar(0, 0, 255), 2);
+				cv::putText(camera_frame,
+						"depth: " + std::to_string(std::get<2>(ground_truth_flat)), text_depth,
+						cv::FONT_HERSHEY_PLAIN, 1.2, cv::Scalar(0, 0, 255), 2);
 			}
 		}
 		else
