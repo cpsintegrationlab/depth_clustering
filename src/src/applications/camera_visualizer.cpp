@@ -62,7 +62,7 @@ main(int argc, char* argv[])
 {
 	std::string dataset_path =
 			"../../../data/segment-1022527355599519580_4866_960_4886_960_with_camera_labels/";
-	int display_time = 1;
+	int display_time = 0;
 
 	if (argc > 1)
 	{
