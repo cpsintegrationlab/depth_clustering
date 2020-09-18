@@ -90,8 +90,6 @@ main(int argc, char* argv[])
 		return -1;
 	}
 
-	depth_clustering.processGroundTruthForDataset();
-
 	boost::property_tree::read_json(
 			depth_clustering.getDatasetPath()
 					+ depth_clustering.getParameter().ground_truth_flat_file_name,
