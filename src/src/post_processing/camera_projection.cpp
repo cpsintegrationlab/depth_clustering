@@ -233,7 +233,7 @@ CameraProjection::filterBoundingBoxHeight(const Eigen::Vector3f& center)
 		return true;
 	}
 
-	return center.z() < parameter_.filter_height;
+	return center.z() < parameter_.threshold_filter_height;
 }
 
 bool
@@ -244,9 +244,9 @@ CameraProjection::filterBoundingBoxTunnel(const Eigen::Vector3f& center, const f
 		return true;
 	}
 
-	return (center.y() <= parameter_.filter_tunnel_right
-			&& center.y() >= -parameter_.filter_tunnel_left
-			&& depth <= parameter_.filter_tunnel_front);
+	return (center.y() <= parameter_.threshold_filter_tunnel_right
+			&& center.y() >= -parameter_.threshold_filter_tunnel_left
+			&& depth <= parameter_.threshold_filter_tunnel_front);
 }
 
 void

@@ -185,10 +185,14 @@ ParameterFactory::getCameraProjectionParameter()
 	auto extrinsic_optional = tree.get_child_optional("extrinsic");
 	auto width_optional = tree.get_optional<int>("width");
 	auto height_optional = tree.get_optional<int>("height");
-	auto filter_height_optional = tree.get_optional<double>("filter_height");
-	auto filter_tunnel_left_optional = tree.get_optional<double>("filter_tunnel_left");
-	auto filter_tunnel_right_optional = tree.get_optional<double>("filter_tunnel_right");
-	auto filter_tunnel_front_optional = tree.get_optional<double>("filter_tunnel_front");
+	auto threshold_truncation_optional = tree.get_optional<double>("threshold_truncation");
+	auto threshold_filter_height_optional = tree.get_optional<double>("threshold_filter_height");
+	auto threshold_filter_tunnel_left_optional = tree.get_optional<double>(
+			"threshold_filter_tunnel_left");
+	auto threshold_filter_tunnel_right_optional = tree.get_optional<double>(
+			"threshold_filter_tunnel_right");
+	auto threshold_filter_tunnel_front_optional = tree.get_optional<double>(
+			"threshold_filter_tunnel_front");
 	auto correct_distortions_optional = tree.get_optional<bool>("correct_distortions");
 	auto use_filter_height_optional = tree.get_optional<bool>("use_filter_height");
 	auto use_filter_tunnel_optional = tree.get_optional<bool>("use_filter_tunnel");
@@ -219,24 +223,29 @@ ParameterFactory::getCameraProjectionParameter()
 		parameter.height = *height_optional;
 	}
 
-	if (filter_height_optional)
+	if (threshold_truncation_optional)
 	{
-		parameter.filter_height = *filter_height_optional;
+		parameter.threshold_truncation = *threshold_truncation_optional;
 	}
 
-	if (filter_tunnel_left_optional)
+	if (threshold_filter_height_optional)
 	{
-		parameter.filter_tunnel_left = *filter_tunnel_left_optional;
+		parameter.threshold_filter_height = *threshold_filter_height_optional;
 	}
 
-	if (filter_tunnel_right_optional)
+	if (threshold_filter_tunnel_left_optional)
 	{
-		parameter.filter_tunnel_right = *filter_tunnel_right_optional;
+		parameter.threshold_filter_tunnel_left = *threshold_filter_tunnel_left_optional;
 	}
 
-	if (filter_tunnel_front_optional)
+	if (threshold_filter_tunnel_right_optional)
 	{
-		parameter.filter_tunnel_front = *filter_tunnel_front_optional;
+		parameter.threshold_filter_tunnel_right = *threshold_filter_tunnel_right_optional;
+	}
+
+	if (threshold_filter_tunnel_front_optional)
+	{
+		parameter.threshold_filter_tunnel_front = *threshold_filter_tunnel_front_optional;
 	}
 
 	if (correct_distortions_optional)

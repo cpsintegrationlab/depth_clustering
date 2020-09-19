@@ -16,18 +16,20 @@ struct CameraProjectionParameter
 	std::vector<double> extrinsic;
 	int width;
 	int height;
-	double filter_height;
-	double filter_tunnel_left;
-	double filter_tunnel_right;
-	double filter_tunnel_front;
+	double threshold_truncation;
+	double threshold_filter_height;
+	double threshold_filter_tunnel_left;
+	double threshold_filter_tunnel_right;
+	double threshold_filter_tunnel_front;
 	bool correct_distortions;
 	bool use_filter_height;
 	bool use_filter_tunnel;
 
 	CameraProjectionParameter() :
-			intrinsic(), extrinsic(), width(0), height(0), filter_height(0), filter_tunnel_left(10), filter_tunnel_right(
-					10), filter_tunnel_front(75), correct_distortions(false), use_filter_height(
-					false), use_filter_tunnel(false)
+			intrinsic(), extrinsic(), width(0), height(0), threshold_truncation(0.7), threshold_filter_height(
+					0), threshold_filter_tunnel_left(10), threshold_filter_tunnel_right(10), threshold_filter_tunnel_front(
+					75), correct_distortions(false), use_filter_height(false), use_filter_tunnel(
+					false)
 	{
 	}
 };
