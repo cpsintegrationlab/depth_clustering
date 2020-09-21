@@ -40,7 +40,7 @@ private:
 	float
 	getBoundingBoxDepth(const std::vector<Eigen::Vector3f>& bounding_box_corners);
 
-	BoundingBox::Flat
+	std::shared_ptr<BoundingBox::Flat>
 	getBoundingBoxFlat(const std::vector<Eigen::Vector2i>& bounding_box_corners_projected);
 
 	void

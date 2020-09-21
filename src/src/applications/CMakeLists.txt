@@ -1,7 +1,7 @@
 # Add executables
 add_executable(depth_clustering depth_clustering.cpp)
-add_executable(camera_visualizer EXCLUDE_FROM_ALL camera_visualizer.cpp)
-add_executable(ground_truth_projection EXCLUDE_FROM_ALL ground_truth_projection.cpp)
+add_executable(camera_visualizer camera_visualizer.cpp)
+add_executable(ground_truth_projection ground_truth_projection.cpp)
 
 # Set library link targets
 target_link_libraries(depth_clustering api)

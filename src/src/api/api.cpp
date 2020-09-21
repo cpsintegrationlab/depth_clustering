@@ -243,14 +243,18 @@ void
 DepthClustering::processGroundTruthForDataset()
 {
 	boost::property_tree::ptree ground_truth_tree;
+	CameraProjectionParameter parameter_camera_projection;
 	LoggerParameter parameter_logger;
+
+	parameter_camera_projection = parameter_factory_->getCameraProjectionParameter();
+	parameter_camera_projection.threshold_truncation = 0.7;
 
 	parameter_logger.log_path = dataset_path_;
 	parameter_logger.log_file_name_flat = parameter_.ground_truth_flat_file_name;
 	parameter_logger.log = true;
 
 	std::shared_ptr<BoundingBox> bounding_box = std::make_shared<BoundingBox>(
-			BoundingBox::Type::Cube, parameter_factory_->getCameraProjectionParameter());
+			BoundingBox::Type::Cube, parameter_camera_projection);
 	std::shared_ptr<Logger> logger = std::make_shared<Logger>(parameter_logger);
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube =
 			std::make_shared<BoundingBox::Frame<BoundingBox::Cube>>();

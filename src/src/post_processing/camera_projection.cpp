@@ -147,12 +147,16 @@ CameraProjection::getBoundingBoxDepth(const std::vector<Eigen::Vector3f>& boundi
 	return depth;
 }
 
-BoundingBox::Flat
+std::shared_ptr<BoundingBox::Flat>
 CameraProjection::getBoundingBoxFlat(
 		const std::vector<Eigen::Vector2i>& bounding_box_corners_projected)
 {
 	Eigen::Vector2i bounding_box_flat_corner_upper_left;
 	Eigen::Vector2i bounding_box_flat_corner_lower_right;
+	double bounding_box_flat_area_original;
+	double bounding_box_flat_area;
+	double area_percentage;
+	double truncation;
 
 	bounding_box_flat_corner_upper_left.x() = std::numeric_limits<int>::max();
 	bounding_box_flat_corner_lower_right.x() = std::numeric_limits<int>::min();
@@ -183,6 +187,20 @@ CameraProjection::getBoundingBoxFlat(
 		}
 	}
 
+	// Calculate original dimension
+	double bounding_box_flat_width_original = bounding_box_flat_corner_lower_right.x()
+			- bounding_box_flat_corner_upper_left.x();
+	double bounding_box_flat_height_original = bounding_box_flat_corner_lower_right.y()
+			- bounding_box_flat_corner_upper_left.y();
+	bounding_box_flat_area_original = bounding_box_flat_width_original
+			* bounding_box_flat_height_original;
+
+	// Exclude bounding box with no area
+	if (bounding_box_flat_area_original == 0)
+	{
+		return nullptr;
+	}
+
 	// Enforce image boundary
 	bounding_box_flat_corner_upper_left.x() = std::min<int>(
 			std::max<int>(0, bounding_box_flat_corner_upper_left.x()), parameter_.width);
@@ -193,8 +211,32 @@ CameraProjection::getBoundingBoxFlat(
 	bounding_box_flat_corner_lower_right.y() = std::min<int>(
 			std::max<int>(0, bounding_box_flat_corner_lower_right.y()), parameter_.height);
 
-	return std::make_tuple(bounding_box_flat_corner_upper_left,
-			bounding_box_flat_corner_lower_right, 0, "");
+	// Calculate dimension
+	double bounding_box_flat_width = bounding_box_flat_corner_lower_right.x()
+			- bounding_box_flat_corner_upper_left.x();
+	double bounding_box_flat_height = bounding_box_flat_corner_lower_right.y()
+			- bounding_box_flat_corner_upper_left.y();
+	bounding_box_flat_area = bounding_box_flat_width * bounding_box_flat_height;
+
+	// Exclude bounding box with no area
+	if (bounding_box_flat_area == 0)
+	{
+		return nullptr;
+	}
+
+	// Calculate truncation
+	area_percentage = bounding_box_flat_area / bounding_box_flat_area_original;
+	truncation = 1 - area_percentage;
+
+	// If truncated more than threshold
+	if (truncation >= parameter_.threshold_truncation)
+	{
+		return nullptr;
+	}
+
+	return std::make_shared<BoundingBox::Flat>(
+			std::make_tuple(bounding_box_flat_corner_upper_left,
+					bounding_box_flat_corner_lower_right, 0, ""));
 }
 
 void
@@ -338,24 +380,19 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 		}
 
 		// Obtain 2D flat bounding box
-		BoundingBox::Flat bounding_box_flat = getBoundingBoxFlat(bounding_box_corners_projected);
-		std::get<2>(bounding_box_flat) = bounding_box_depth;
-		std::get<3>(bounding_box_flat) = std::get<3>(bounding_box);
+		auto bounding_box_flat = getBoundingBoxFlat(bounding_box_corners_projected);
 
-		unsigned bounding_box_flat_width = std::abs(
-				std::get<1>(bounding_box_flat).x() - std::get<0>(bounding_box_flat).x());
-		unsigned bounding_box_flat_height = std::abs(
-				std::get<1>(bounding_box_flat).y() - std::get<0>(bounding_box_flat).y());
-		unsigned bounding_box_flat_area = bounding_box_flat_width * bounding_box_flat_height;
-
-		// Exclude bounding box with no area
-		if (bounding_box_flat_area == 0)
+		// Exclude invalid bounding box
+		if (!bounding_box_flat)
 		{
 			continue;
 		}
 
+		std::get<2>(*bounding_box_flat) = bounding_box_depth;
+		std::get<3>(*bounding_box_flat) = std::get<3>(bounding_box);
+
 		// Store 2D flat bounding box
-		bounding_box_frame_flat_->push_back(bounding_box_flat);
+		bounding_box_frame_flat_->push_back(*bounding_box_flat);
 	}
 }
 
