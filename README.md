@@ -20,41 +20,23 @@ cd ../build/release
 make
 ```
 
-To build the camera visualizer, use the following make target:
-
-```bash
-make camera_visualizer
-```
-
-To build the ground truth projection tool, use the following make target:
-
-```bash
-make ground_truth_projection
-```
-
 Then, run the command line application as follows:
 
 ```bash
 cd ../../install/bin
-./depth_clustering
-```
-
-To run with specific dataset, do the following:
-
-```bash
 ./depth_clustering dataset_path
 ```
 
-To visualize the detections, run the camera visualizer as follows:
+To visualize the detections frame by frame, run the camera visualizer as follows:
 
 ```bash
-./camera_visualizer dataset_path
+./camera_visualizer dataset_path 0
 ```
 
-To generate projected ground truth, run the ground truth projection tool as follows:
+To visualize the detections as a video, run the camera visualizer as follows:
 
 ```bash
-./ground_truth_projection dataset_path
+./camera_visualizer dataset_path 1
 ```
 
 After the executions, any resulting output JSON files would be stored under `dataset_path`.

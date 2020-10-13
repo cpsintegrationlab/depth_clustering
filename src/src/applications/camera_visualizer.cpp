@@ -109,7 +109,7 @@ main(int argc, char* argv[])
 		camera_frame_name.replace(camera_frame_name.find("lidar"), std::string("lidar").size(),
 				"camera");
 		camera_frame_name.replace(camera_frame_name.find(".tiff"), std::string(".tiff").size(),
-				".jpg");
+				".png");
 
 		cv::Mat camera_frame = cv::imread(dataset_path + camera_frame_name, CV_LOAD_IMAGE_COLOR);
 
