@@ -12,7 +12,7 @@
 #include <thread>
 #include <string>
 
-#include "api/api_parameter.h"
+#include "api/parameter.h"
 #include "clusterers/image_based_clusterer.h"
 #include "ground_removal/depth_ground_remover.h"
 #include "image_labelers/linear_image_labeler.h"

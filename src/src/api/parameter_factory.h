@@ -10,7 +10,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "api/api_parameter.h"
+#include "api/parameter.h"
 #include "post_processing/logger_parameter.h"
 #include "projections/projection_params.h"
 

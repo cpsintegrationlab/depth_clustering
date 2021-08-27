@@ -5,8 +5,8 @@
  *      Author: simonyu
  */
 
-#ifndef SRC_API_DEPTH_CLUSTERING_PARAMETER_H_
-#define SRC_API_DEPTH_CLUSTERING_PARAMETER_H_
+#ifndef SRC_API_PARAMETER_H_
+#define SRC_API_PARAMETER_H_
 
 #include "post_processing/bounding_box.h"
 #include "utils/radians.h"
@@ -35,4 +35,4 @@ struct DepthClusteringParameter
 	}
 };
 
-#endif /* SRC_API_DEPTH_CLUSTERING_PARAMETER_H_ */
+#endif /* SRC_API_PARAMETER_H_ */
