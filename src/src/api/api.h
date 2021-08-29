@@ -20,6 +20,7 @@
 #include "projections/projection_params.h"
 #include "utils/folder_reader.h"
 
+using depth_clustering::Cloud;
 using depth_clustering::DepthGroundRemover;
 using depth_clustering::FolderReader;
 using depth_clustering::ImageBasedClusterer;
@@ -49,8 +50,26 @@ public:
 	const std::string&
 	getDatasetPath() const;
 
+	const cv::Mat&
+	getCurrentDepthImage() const;
+
+	Cloud::ConstPtr
+	GetCurrentCloud() const;
+
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
 	getBoundingBoxFrameFlat() const;
+
+	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>>
+	getClusterer() const;
+
+	std::shared_ptr<FolderReader>
+	getFolderReader() const;
+
+	std::shared_ptr<ProjectionParams>
+	getProjectionParameter() const;
+
+	void
+	setParameter(const DepthClusteringParameter& parameter);
 
 	void
 	processOneFrameForApollo(const std::string& frame_name,
@@ -79,17 +98,19 @@ public:
 
 private:
 
-	DepthClusteringParameter parameter_;
-	std::string dataset_path_;
-	int frame_counter_;
-
 	std::shared_ptr<ParameterFactory> parameter_factory_;
-	std::unique_ptr<ProjectionParams> projection_parameter_;
+	std::shared_ptr<ProjectionParams> projection_parameter_;
 	std::shared_ptr<FolderReader> folder_reader_;
 	std::shared_ptr<DepthGroundRemover> depth_ground_remover_;
 	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>> clusterer_;
 	std::shared_ptr<BoundingBox> bounding_box_;
 	std::shared_ptr<Logger> logger_;
+
+	DepthClusteringParameter parameter_;
+	cv::Mat current_depth_image_;
+	Cloud::Ptr current_cloud_;
+	std::string dataset_path_;
+	int frame_counter_;
 };
 
 #endif /* SRC_API_DEPTH_CLUSTERING_H_ */

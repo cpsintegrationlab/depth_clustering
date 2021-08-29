@@ -29,11 +29,11 @@ namespace depth_clustering {
 class DiffFactory {
  public:
   enum class DiffType {
-    SIMPLE,
     ANGLES,
     ANGLES_PRECOMPUTED,
     LINE_DIST,
     LINE_DIST_PRECOMPUTED,
+	SIMPLE,
     NONE
   };
 

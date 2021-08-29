@@ -16,7 +16,6 @@
 #include "utils/velodyne_utils.h"
 
 using boost::property_tree::json_parser::read_json;
-using depth_clustering::Cloud;
 using depth_clustering::DiffFactory;
 using depth_clustering::MatFromDepthPng;
 using depth_clustering::MatFromDepthTiff;
@@ -102,17 +101,6 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 	return true;
 }
 
-std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
-DepthClustering::getBoundingBoxFrameFlat() const
-{
-	if (!bounding_box_)
-	{
-		return nullptr;
-	}
-
-	return bounding_box_->getFrameFlat();
-}
-
 const DepthClusteringParameter&
 DepthClustering::getParameter() const
 {
@@ -125,11 +113,74 @@ DepthClustering::getDatasetPath() const
 	return dataset_path_;
 }
 
+const cv::Mat&
+DepthClustering::getCurrentDepthImage() const
+{
+	return current_depth_image_;
+}
+
+Cloud::ConstPtr
+DepthClustering::GetCurrentCloud() const
+{
+	return current_cloud_;
+}
+
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
+DepthClustering::getBoundingBoxFrameFlat() const
+{
+	if (!bounding_box_)
+	{
+		return nullptr;
+	}
+
+	return bounding_box_->getFrameFlat();
+}
+
+std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>>
+DepthClustering::getClusterer() const
+{
+	return clusterer_;
+}
+
+std::shared_ptr<FolderReader>
+DepthClustering::getFolderReader() const
+{
+	return folder_reader_;
+}
+
+std::shared_ptr<ProjectionParams>
+DepthClustering::getProjectionParameter() const
+{
+	return projection_parameter_;
+}
+
+void
+DepthClustering::setParameter(const DepthClusteringParameter& parameter)
+{
+	parameter_ = parameter;
+
+	auto camera_projection_parameter = parameter_factory_->getCameraProjectionParameter();
+	auto logger_parameter = parameter_factory_->getLoggerParameter();
+
+	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
+			parameter_.angle_ground_removal, parameter_.size_smooth_window);
+	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(
+			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
+	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
+			camera_projection_parameter);
+
+	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
+	logger_->setBoundingBox(bounding_box_);
+
+	depth_ground_remover_->AddClient(clusterer_.get());
+	clusterer_->AddClient(bounding_box_.get());
+}
+
 void
 DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)
 {
-	Cloud::Ptr cloud(new Cloud);
+	current_cloud_ = Cloud::Ptr(new Cloud);
 
 	for (const auto &point_eigen : point_cloud)
 	{
@@ -139,13 +190,13 @@ DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 		point_rich.y() = point_eigen.y();
 		point_rich.z() = point_eigen.z();
 
-		cloud->push_back(point_rich);
+		current_cloud_->push_back(point_rich);
 	}
 
-	cloud->InitProjection(*projection_parameter_);
+	current_cloud_->InitProjection(*projection_parameter_);
 
 	bounding_box_->clearFrames();
-	depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
+	depth_ground_remover_->OnNewObjectReceived(*current_cloud_, 0);
 
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 }
@@ -153,7 +204,6 @@ DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 const std::string
 DepthClustering::processOneFrameForDataset(const std::string& frame_path_name)
 {
-	cv::Mat depth_image;
 	std::string frame_name = "";
 	std::stringstream ss(frame_path_name);
 
@@ -163,11 +213,11 @@ DepthClustering::processOneFrameForDataset(const std::string& frame_path_name)
 
 	if (parameter_.dataset_file_type == ".png")
 	{
-		depth_image = MatFromDepthPng(frame_path_name);
+		current_depth_image_ = MatFromDepthPng(frame_path_name);
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		depth_image = MatFromDepthTiff(frame_path_name);
+		current_depth_image_ = MatFromDepthTiff(frame_path_name);
 	}
 	else
 	{
@@ -175,12 +225,12 @@ DepthClustering::processOneFrameForDataset(const std::string& frame_path_name)
 		return "";
 	}
 
-	auto cloud = Cloud::FromImage(depth_image, *projection_parameter_);
+	current_cloud_ = Cloud::FromImage(current_depth_image_, *projection_parameter_);
 
 	std::cout << std::endl << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
 	bounding_box_->clearFrames();
-	depth_ground_remover_->OnNewObjectReceived(*cloud, 0);
+	depth_ground_remover_->OnNewObjectReceived(*current_cloud_, 0);
 	bounding_box_->produceFrameFlat();
 
 	return frame_name;
@@ -283,8 +333,10 @@ DepthClustering::processGroundTruthForDataset()
 						bounding_box_cube_value_pair.second.get_value<std::string>());
 			}
 
-			center << std::stof(bounding_box_cube_values[0]), std::stof(bounding_box_cube_values[1]), std::stof(bounding_box_cube_values[2]);
-			extent << std::stof(bounding_box_cube_values[3]), std::stof(bounding_box_cube_values[4]), std::stof(bounding_box_cube_values[5]);
+			center << std::stof(bounding_box_cube_values[0]), std::stof(
+					bounding_box_cube_values[1]), std::stof(bounding_box_cube_values[2]);
+			extent << std::stof(bounding_box_cube_values[3]), std::stof(
+					bounding_box_cube_values[4]), std::stof(bounding_box_cube_values[5]);
 			rotation = std::stof(bounding_box_cube_values[6]);
 			id = bounding_box_cube_values[7];
 

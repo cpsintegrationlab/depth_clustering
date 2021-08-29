@@ -56,6 +56,7 @@ add_library(
 # Set library link targets
 target_link_libraries(
 	visualization
+	api
 	viewer
 	drawable
 	visualization_utils

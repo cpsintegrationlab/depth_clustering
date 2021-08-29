@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "api/api.h"
 #include "clusterers/image_based_clusterer.h"
 #include "communication/abstract_client.h"
 #include "ground_removal/depth_ground_remover.h"
@@ -49,35 +50,26 @@ protected:
 private slots:
 
 	void
-	onOpenFolderToRead();
+	onOpenFolder();
 
 	void
-	onPlayAllClouds();
+	onVisualizeAllFrames();
 
 	void
-	onSegmentationParamUpdate();
+	onParameterUpdate();
 
 	void
-	onSliderMovedTo(int cloud_number);
+	onSliderMovedTo(int frame_number);
 
 private:
 
 	std::unique_ptr<Ui::Visualization> ui;
-	std::unique_ptr<QGraphicsScene> _scene = nullptr;
-	std::unique_ptr<QGraphicsScene> _scene_labels = nullptr;
-	std::unique_ptr<depth_clustering::ProjectionParams> _proj_params = nullptr;
-	std::unique_ptr<depth_clustering::ImageBasedClusterer<depth_clustering::LinearImageLabeler<>>> _clusterer =
-			nullptr;
-	std::unique_ptr<depth_clustering::DepthGroundRemover> _ground_rem = nullptr;
-	std::unique_ptr<depth_clustering::BoundingBox> _bounding_box = nullptr;
+	std::unique_ptr<QGraphicsScene> scene_ = nullptr;
+	std::unique_ptr<QGraphicsScene> scene_labels_ = nullptr;
+	std::unique_ptr<DepthClustering> depth_clustering_ = nullptr;
 
-	depth_clustering::Cloud::Ptr _cloud;
-	cv::Mat _current_full_depth_image;
-	std::vector<std::string> _file_names;
-	std::vector<std::string> _current_object_labels;
-	int _current_coloring_mode = 0;
-
-	Viewer *_viewer = nullptr;
+	Viewer *viewer_ = nullptr;
+	std::string dataset_path_;
 };
 
 #endif  // SRC_VISUALIZATION_VISUALIZATION_H_

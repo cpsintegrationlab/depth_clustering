@@ -1,3 +1,4 @@
+#include <image_labelers/abstract_image_labeler.h>
 #include <QColor>
 #include <QDebug>
 #include <QFileDialog>
@@ -9,8 +10,9 @@
 #if PCL_FOUND
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
-#endif  // PCL_FOUND
+#endif	// PCL_FOUND
 
+#include "api/parameter.h"
 #include "image_labelers/diff_helpers/diff_factory.h"
 #include "utils/folder_reader.h"
 #include "utils/timer.h"
@@ -22,17 +24,9 @@
 #include "visualization/visualization.h"
 
 using depth_clustering::AbstractImageLabeler;
-using depth_clustering::AngleDiffPrecomputed;
-using depth_clustering::Cloud;
-using depth_clustering::DepthGroundRemover;
 using depth_clustering::DiffFactory;
 using depth_clustering::FolderReader;
-using depth_clustering::ImageBasedClusterer;
-using depth_clustering::LinearImageLabeler;
 using depth_clustering::MatFromDepthPng;
-using depth_clustering::BoundingBox;
-using depth_clustering::ProjectionParams;
-using depth_clustering::Radians;
 using depth_clustering::ReadKittiCloud;
 using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;
@@ -43,35 +37,6 @@ Visualization::Visualization(QWidget* parent) :
 	ui->setupUi(this);
 	ui->sldr_navigate_clouds->setEnabled(false);
 	ui->spnbx_current_cloud->setEnabled(false);
-
-	_viewer = ui->gl_widget;
-	_viewer->installEventFilter(this);
-	_viewer->setAutoFillBackground(true);
-
-	connect(ui->btn_open_folder, SIGNAL(released()), this, SLOT(onOpenFolderToRead()));
-	connect(ui->sldr_navigate_clouds, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
-	connect(ui->btn_play, SIGNAL(released()), this, SLOT(onPlayAllClouds()));
-
-	connect(ui->spnbx_min_cluster_size, SIGNAL(valueChanged(int)), this,
-			SLOT(onSegmentationParamUpdate()));
-	connect(ui->spnbx_max_cluster_size, SIGNAL(valueChanged(int)), this,
-			SLOT(onSegmentationParamUpdate()));
-	connect(ui->spnbx_ground_angle, SIGNAL(valueChanged(double)), this,
-			SLOT(onSegmentationParamUpdate()));
-	connect(ui->spnbx_separation_angle, SIGNAL(valueChanged(double)), this,
-			SLOT(onSegmentationParamUpdate()));
-	connect(ui->spnbx_smooth_window_size, SIGNAL(valueChanged(int)), this,
-			SLOT(onSegmentationParamUpdate()));
-	connect(ui->radio_show_segmentation, SIGNAL(toggled(bool)), this,
-			SLOT(onSegmentationParamUpdate()));
-	connect(ui->radio_show_angles, SIGNAL(toggled(bool)), this, SLOT(onSegmentationParamUpdate()));
-	connect(ui->cmb_diff_type, SIGNAL(activated(int)), this, SLOT(onSegmentationParamUpdate()));
-
-	// setup viewer
-	_cloud.reset(new Cloud);
-
-	_proj_params = ProjectionParams::APOLLO();
-
 	ui->gfx_projection_view->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->gfx_projection_view->setCacheMode(QGraphicsView::CacheBackground);
 	ui->gfx_projection_view->setRenderHints(
@@ -81,13 +46,30 @@ Visualization::Visualization(QWidget* parent) :
 	ui->gfx_labels->setCacheMode(QGraphicsView::CacheBackground);
 	ui->gfx_labels->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
-	_bounding_box.reset(new BoundingBox
-	{ BoundingBox::Type::Cube });
-	this->onSegmentationParamUpdate();
+	viewer_ = ui->gl_widget;
+	viewer_->installEventFilter(this);
+	viewer_->setAutoFillBackground(true);
+
+	connect(ui->btn_open_folder, SIGNAL(released()), this, SLOT(onOpenFolder()));
+	connect(ui->sldr_navigate_clouds, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
+	connect(ui->btn_play, SIGNAL(released()), this, SLOT(onVisualizeAllFrames()));
+
+	connect(ui->spnbx_min_cluster_size, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdate()));
+	connect(ui->spnbx_max_cluster_size, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdate()));
+	connect(ui->spnbx_ground_angle, SIGNAL(valueChanged(double)), this, SLOT(onParameterUpdate()));
+	connect(ui->spnbx_separation_angle, SIGNAL(valueChanged(double)), this,
+			SLOT(onParameterUpdate()));
+	connect(ui->spnbx_smooth_window_size, SIGNAL(valueChanged(int)), this,
+			SLOT(onParameterUpdate()));
+	connect(ui->radio_show_segmentation, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdate()));
+	connect(ui->radio_show_angles, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdate()));
+	connect(ui->cmb_diff_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdate()));
+
+	depth_clustering_ = std::unique_ptr<DepthClustering>(new DepthClustering());
 }
 
 void
-Visualization::OnNewObjectReceived(const cv::Mat& image, int)
+Visualization::OnNewObjectReceived(const cv::Mat& image, int client_id)
 {
 	QImage qimage;
 	fprintf(stderr, "[INFO] Received Mat with type: %d\n", image.type());
@@ -130,7 +112,8 @@ Visualization::OnNewObjectReceived(const cv::Mat& image, int)
 			diff_type = DiffFactory::DiffType::SIMPLE;
 		}
 		}
-		auto diff_helper_ptr = DiffFactory::Build(diff_type, &image, _proj_params.get());
+		auto projection_parameter = depth_clustering_->getProjectionParameter();
+		auto diff_helper_ptr = DiffFactory::Build(diff_type, &image, projection_parameter.get());
 		qimage = MatToQImage(diff_helper_ptr->Visualize());
 		break;
 	}
@@ -147,10 +130,10 @@ Visualization::OnNewObjectReceived(const cv::Mat& image, int)
 		return;
 	}
 	}
-	_scene_labels.reset(new QGraphicsScene);
-	_scene_labels->addPixmap(QPixmap::fromImage(qimage));
-	ui->gfx_labels->setScene(_scene_labels.get());
-	ui->gfx_labels->fitInView(_scene_labels->itemsBoundingRect());
+	scene_labels_.reset(new QGraphicsScene);
+	scene_labels_->addPixmap(QPixmap::fromImage(qimage));
+	ui->gfx_labels->setScene(scene_labels_.get());
+	ui->gfx_labels->fitInView(scene_labels_->itemsBoundingRect());
 }
 
 Visualization::~Visualization()
@@ -163,6 +146,7 @@ Visualization::eventFilter(QObject* object, QEvent* event)
 	if (event->type() == QEvent::KeyPress)
 	{
 		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+
 		if (keyEvent->key() == Qt::Key_Right || keyEvent->key() == Qt::Key_Left)
 		{
 			keyPressEvent(keyEvent);
@@ -173,6 +157,7 @@ Visualization::eventFilter(QObject* object, QEvent* event)
 			return false;
 		}
 	}
+
 	return false;
 }
 
@@ -182,55 +167,61 @@ Visualization::keyPressEvent(QKeyEvent* event)
 	switch (event->key())
 	{
 	case Qt::Key_Right:
+	{
 		ui->spnbx_current_cloud->setValue(ui->spnbx_current_cloud->value() + 1);
 		break;
+	}
 	case Qt::Key_Left:
+	{
 		ui->spnbx_current_cloud->setValue(ui->spnbx_current_cloud->value() - 1);
 		break;
+	}
 	}
 }
 
 void
-Visualization::onOpenFolderToRead()
+Visualization::onOpenFolder()
 {
-	// create a dialog here
-	QString folder_name = QFileDialog::getExistingDirectory(this);
-	qDebug() << "Picked path:" << folder_name;
+	dataset_path_ = QFileDialog::getExistingDirectory(this).toStdString();
 
-	_file_names.clear();
-	FolderReader::Order order = FolderReader::Order::SORTED;
-	FolderReader cloud_reader(folder_name.toStdString(),
-			ui->cmb_extension->currentText().toStdString(), order);
-	_file_names = cloud_reader.GetAllFilePaths();
-	if (_file_names.empty())
+	if (!depth_clustering_)
 	{
+		std::cerr << "[ERROR]: API missing." << std::endl;
 		return;
 	}
 
-	FolderReader config_reader(folder_name.toStdString(), "img.cfg");
-	auto config_file_name = config_reader.GetNextFilePath();
+	depth_clustering_->initializeForDataset(dataset_path_);
 
-	if (!config_file_name.empty())
+	auto folder_reader = depth_clustering_->getFolderReader();
+	const auto &parameter = depth_clustering_->getParameter();
+	const auto &frame_paths_names = folder_reader->GetAllFilePaths();
+
+	if (frame_paths_names.empty())
 	{
-		_proj_params = ProjectionParams::FromConfigFile(config_file_name);
-		qDebug() << "Using img.cfg";
+		std::cerr << "[ERROR]: Empty folder at \"" << dataset_path_ << "\"." << std::endl;
+		return;
 	}
 
-	// update the slider
-	ui->sldr_navigate_clouds->setMaximum(_file_names.size() - 1);
-	ui->spnbx_current_cloud->setMaximum(_file_names.size() - 1);
-
-	// set current value
+	ui->sldr_navigate_clouds->setMaximum(frame_paths_names.size() - 1);
+	ui->spnbx_current_cloud->setMaximum(frame_paths_names.size() - 1);
 	ui->sldr_navigate_clouds->setValue(1);
 	ui->sldr_navigate_clouds->setEnabled(true);
 	ui->spnbx_current_cloud->setEnabled(true);
 
-	// focus on the cloud
-	_viewer->update();
+	ui->spnbx_smooth_window_size->setValue(parameter.size_smooth_window);
+	ui->spnbx_ground_angle->setValue(parameter.angle_ground_removal.val());
+	ui->spnbx_separation_angle->setValue(parameter.angle_clustering.val());
+	ui->spnbx_min_cluster_size->setValue(parameter.size_cluster_min);
+	ui->spnbx_max_cluster_size->setValue(parameter.size_cluster_max);
+	ui->cmb_diff_type->setCurrentIndex(static_cast<int>(DiffFactory::DiffType::ANGLES));
+
+	viewer_->update();
+
+	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
 }
 
 void
-Visualization::onPlayAllClouds()
+Visualization::onVisualizeAllFrames()
 {
 	for (int i = ui->sldr_navigate_clouds->minimum(); i < ui->sldr_navigate_clouds->maximum(); ++i)
 	{
@@ -239,118 +230,117 @@ Visualization::onPlayAllClouds()
 		QApplication::processEvents();
 	}
 
-	qDebug() << "All clouds shown!";
+	std::cout << "[INFO]: All frames visualized." << std::endl;
 }
 
 void
-Visualization::onSegmentationParamUpdate()
+Visualization::onParameterUpdate()
 {
-	// setup segmentation
-	fprintf(stderr, "Info: update segmentation parameters\n");
-	int smooth_window_size = ui->spnbx_smooth_window_size->value();
-	Radians ground_remove_angle = Radians::FromDegrees(ui->spnbx_ground_angle->value());
-	Radians angle_tollerance = Radians::FromDegrees(ui->spnbx_separation_angle->value());
-	int min_cluster_size = ui->spnbx_min_cluster_size->value();
-	int max_cluster_size = ui->spnbx_max_cluster_size->value();
+	DepthClusteringParameter parameter = depth_clustering_->getParameter();
 
-	// create objects
+	parameter.size_smooth_window = ui->spnbx_smooth_window_size->value();
+	parameter.angle_ground_removal = Radians::FromDegrees(ui->spnbx_ground_angle->value());
+	parameter.angle_clustering = Radians::FromDegrees(ui->spnbx_separation_angle->value());
+	parameter.size_cluster_min = ui->spnbx_min_cluster_size->value();
+	parameter.size_cluster_max = ui->spnbx_max_cluster_size->value();
+
+	depth_clustering_->setParameter(parameter);
 
 	DiffFactory::DiffType diff_type = DiffFactory::DiffType::NONE;
+
 	switch (ui->cmb_diff_type->currentIndex())
 	{
 	case 0:
 	{
-		fprintf(stderr, "Using DiffFactory::DiffType::ANGLES\n");
 		diff_type = DiffFactory::DiffType::ANGLES;
 		break;
 	}
 	case 1:
 	{
-		fprintf(stderr, "Using DiffFactory::DiffType::ANGLES_PRECOMPUTED\n");
 		diff_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 		break;
 	}
 	case 2:
 	{
-		fprintf(stderr, "Using DiffFactory::DiffType::LINE_DIST\n");
 		diff_type = DiffFactory::DiffType::LINE_DIST;
 		break;
 	}
 	case 3:
 	{
-		fprintf(stderr, "Using DiffFactory::DiffType::LINE_DIST_PRECOMPUTED\n");
 		diff_type = DiffFactory::DiffType::LINE_DIST_PRECOMPUTED;
 		break;
 	}
 	default:
 	{
-		fprintf(stderr, "Using DiffFactory::DiffType::SIMPLE\n");
 		diff_type = DiffFactory::DiffType::SIMPLE;
+		break;
 	}
 	}
-	_clusterer.reset(
-			new ImageBasedClusterer<LinearImageLabeler<>>(angle_tollerance, min_cluster_size,
-					max_cluster_size));
-	ui->spnbx_line_dist_threshold->setValue(angle_tollerance.val());
-	_clusterer->SetDiffType(diff_type);
-	_ground_rem.reset(
-			new DepthGroundRemover(*_proj_params, ground_remove_angle, smooth_window_size));
-	// configure wires
-	_ground_rem->AddClient(_clusterer.get());
-	_clusterer->AddClient(_bounding_box.get());
+
+	auto clusterer = depth_clustering_->getClusterer();
+
+	clusterer->SetDiffType(diff_type);
+
 	if (ui->radio_show_segmentation->isChecked())
 	{
-		fprintf(stderr, "Info: ready to receive labels\n");
-		_clusterer->SetLabelImageClient(this);
+		clusterer->SetLabelImageClient(this);
 	}
 	else
 	{
-		_scene_labels.reset();
+		scene_labels_.reset();
 	}
+
+	ui->spnbx_line_dist_threshold->setValue(parameter.angle_clustering.val());
+
 	this->onSliderMovedTo(ui->sldr_navigate_clouds->value());
+
+	std::cout << "[INFO]: Updated parameters." << std::endl;
 }
 
 void
-Visualization::onSliderMovedTo(int cloud_number)
+Visualization::onSliderMovedTo(int frame_number)
 {
-	if (_file_names.empty())
+	Timer timer;
+	auto folder_reader = depth_clustering_->getFolderReader();
+	const auto &frame_paths_names = folder_reader->GetAllFilePaths();
+
+	if (frame_paths_names.empty())
 	{
+		std::cerr << "[ERROR]: Empty folder at \"" << dataset_path_ << "\"." << std::endl;
 		return;
 	}
-	fprintf(stderr, "slider moved to: %d\n", cloud_number);
-	fprintf(stderr, "loading cloud from: %s\n", _file_names[cloud_number].c_str());
-	Timer timer;
-	const auto &file_name = _file_names[cloud_number];
-	_cloud = CloudFromFile(file_name, *_proj_params);
-	fprintf(stderr, "[TIMER]: load cloud in %lu microsecs\n", timer.measure(Timer::Units::Micro));
-	_current_full_depth_image = _cloud->projection_ptr()->depth_image();
 
-	ui->lbl_cloud_name->setText(QString::fromStdString(file_name));
+	std::cout << "[INFO]: Visualizing frame \"" << frame_paths_names[frame_number] << "\"." << std::endl;
+
+	const auto &frame_path_name = frame_paths_names[frame_number];
+
+	depth_clustering_->processOneFrameForDataset(frame_path_name);
+
+	auto current_depth_image = depth_clustering_->getCurrentDepthImage();
+	auto current_cloud = depth_clustering_->GetCurrentCloud();
+
+	ui->lbl_cloud_name->setText(QString::fromStdString(frame_path_name));
 
 	timer.start();
-	QImage qimage = MatToQImage(_current_full_depth_image);
-	_scene.reset(new QGraphicsScene);
-	_scene->addPixmap(QPixmap::fromImage(qimage));
-	ui->gfx_projection_view->setScene(_scene.get());
-	ui->gfx_projection_view->fitInView(_scene->itemsBoundingRect());
+	QImage current_depth_qimage = MatToQImage(current_depth_image);
+	scene_.reset(new QGraphicsScene);
+	scene_->addPixmap(QPixmap::fromImage(current_depth_qimage));
+	ui->gfx_projection_view->setScene(scene_.get());
+	ui->gfx_projection_view->fitInView(scene_->itemsBoundingRect());
+
 	fprintf(stderr, "[TIMER]: depth image set to gui in %lu microsecs\n",
 			timer.measure(Timer::Units::Micro));
+
 	if (ui->radio_show_angles->isChecked())
 	{
-		this->OnNewObjectReceived(_current_full_depth_image);
+		this->OnNewObjectReceived(current_depth_image);
 	}
 	fprintf(stderr, "[TIMER]: angles shown in %lu microsecs\n", timer.measure(Timer::Units::Micro));
 
-	_viewer->Clear();
-	_viewer->AddDrawable(DrawableCloud::FromCloud(_cloud));
-	_viewer->update();
+	viewer_->Clear();
+	viewer_->AddDrawable(DrawableCloud::FromCloud(current_cloud));
+	viewer_->update();
 
 	fprintf(stderr, "[TIMER]: add cloud to gui in %lu microsecs\n",
 			timer.measure(Timer::Units::Micro));
-
-	// label cloud and show labels
-	_ground_rem->OnNewObjectReceived(*_cloud, 0);
-
-	fprintf(stderr, "[TIMER]: full segmentation took %lu milliseconds\n",
-			timer.measure(Timer::Units::Milli));
 }
