@@ -42,8 +42,8 @@ using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;
 using std::vector;
 
-OpenGlFolderPlayer::OpenGlFolderPlayer(QWidget* parent) :
-		QWidget(parent), ui(new Ui::OpenGlFolderPlayer)
+Visualization::Visualization(QWidget* parent) :
+		QWidget(parent), ui(new Ui::Visualization)
 {
 	ui->setupUi(this);
 	ui->sldr_navigate_clouds->setEnabled(false);
@@ -92,7 +92,7 @@ OpenGlFolderPlayer::OpenGlFolderPlayer(QWidget* parent) :
 }
 
 void
-OpenGlFolderPlayer::onPlayAllClouds()
+Visualization::onPlayAllClouds()
 {
 	for (int i = ui->sldr_navigate_clouds->minimum(); i < ui->sldr_navigate_clouds->maximum(); ++i)
 	{
@@ -105,7 +105,7 @@ OpenGlFolderPlayer::onPlayAllClouds()
 }
 
 void
-OpenGlFolderPlayer::OnNewObjectReceived(const cv::Mat& image, int)
+Visualization::OnNewObjectReceived(const cv::Mat& image, int)
 {
 	QImage qimage;
 	fprintf(stderr, "[INFO] Received Mat with type: %d\n", image.type());
@@ -172,7 +172,7 @@ OpenGlFolderPlayer::OnNewObjectReceived(const cv::Mat& image, int)
 }
 
 void
-OpenGlFolderPlayer::onSegmentationParamUpdate()
+Visualization::onSegmentationParamUpdate()
 {
 	// setup segmentation
 	fprintf(stderr, "Info: update segmentation parameters\n");
@@ -240,7 +240,7 @@ OpenGlFolderPlayer::onSegmentationParamUpdate()
 }
 
 void
-OpenGlFolderPlayer::onSliderMovedTo(int cloud_number)
+Visualization::onSliderMovedTo(int cloud_number)
 {
 	if (_file_names.empty())
 	{
@@ -285,7 +285,7 @@ OpenGlFolderPlayer::onSliderMovedTo(int cloud_number)
 }
 
 void
-OpenGlFolderPlayer::onOpenFolderToRead()
+Visualization::onOpenFolderToRead()
 {
 	// create a dialog here
 	QString folder_name = QFileDialog::getExistingDirectory(this);
@@ -324,7 +324,7 @@ OpenGlFolderPlayer::onOpenFolderToRead()
 }
 
 void
-OpenGlFolderPlayer::keyPressEvent(QKeyEvent* event)
+Visualization::keyPressEvent(QKeyEvent* event)
 {
 	switch (event->key())
 	{
@@ -338,7 +338,7 @@ OpenGlFolderPlayer::keyPressEvent(QKeyEvent* event)
 }
 
 bool
-OpenGlFolderPlayer::eventFilter(QObject* object, QEvent* event)
+Visualization::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
@@ -356,6 +356,6 @@ OpenGlFolderPlayer::eventFilter(QObject* object, QEvent* event)
 	return false;
 }
 
-OpenGlFolderPlayer::~OpenGlFolderPlayer()
+Visualization::~Visualization()
 {
 }

@@ -7,9 +7,9 @@ int
 main(int argc, char* argv[])
 {
 	QApplication a(argc, argv);
-	OpenGlFolderPlayer folder_player_widget;
+	Visualization visualization;
 
-	folder_player_widget.show();
+	visualization.show();
 
 	return a.exec();
 }

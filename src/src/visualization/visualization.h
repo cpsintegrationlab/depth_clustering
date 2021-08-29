@@ -24,20 +24,20 @@
 
 namespace Ui
 {
-class OpenGlFolderPlayer;
+class Visualization;
 }
 
-class OpenGlFolderPlayer: public QWidget, public depth_clustering::AbstractClient<cv::Mat>
+class Visualization: public QWidget, public depth_clustering::AbstractClient<cv::Mat>
 {
 	Q_OBJECT
 
 public:
 	explicit
-	OpenGlFolderPlayer(QWidget* parent = 0);
+	Visualization(QWidget* parent = 0);
 	void
 	OnNewObjectReceived(const cv::Mat& labels, int client_id = 0) override;
 	virtual
-	~OpenGlFolderPlayer();
+	~Visualization();
 
 protected:
 	void
@@ -58,7 +58,7 @@ private slots:
 
 private:
 	// we cannot allocate anything now as this is an incomplete type
-	std::unique_ptr<Ui::OpenGlFolderPlayer> ui;
+	std::unique_ptr<Ui::Visualization> ui;
 
 	std::unique_ptr<QGraphicsScene> _scene = nullptr;
 	std::unique_ptr<QGraphicsScene> _scene_labels = nullptr;
