@@ -16,14 +16,14 @@
 #endif  // PCL_FOUND
 
 #include "image_labelers/diff_helpers/diff_factory.h"
-#include "opengl_folder_player.h"
 #include "utils/folder_reader.h"
 #include "utils/timer.h"
 #include "utils/velodyne_utils.h"
 #include "visualization/drawables/drawable_cloud.h"
 #include "visualization/drawables/drawable_cube.h"
 #include "visualization/utils/utils.h"
-#include "visualization/widgets/ui_opengl_folder_player.h"
+#include "visualization/ui_visualization.h"
+#include "visualization/visualization.h"
 
 using depth_clustering::AbstractImageLabeler;
 using depth_clustering::AngleDiffPrecomputed;
@@ -43,7 +43,7 @@ using depth_clustering::time_utils::Timer;
 using std::vector;
 
 OpenGlFolderPlayer::OpenGlFolderPlayer(QWidget* parent) :
-		BaseViewerWidget(parent), ui(new Ui::OpenGlFolderPlayer)
+		QWidget(parent), ui(new Ui::OpenGlFolderPlayer)
 {
 	ui->setupUi(this);
 	ui->sldr_navigate_clouds->setEnabled(false);
@@ -335,6 +335,25 @@ OpenGlFolderPlayer::keyPressEvent(QKeyEvent* event)
 		ui->spnbx_current_cloud->setValue(ui->spnbx_current_cloud->value() - 1);
 		break;
 	}
+}
+
+bool
+OpenGlFolderPlayer::eventFilter(QObject* object, QEvent* event)
+{
+	if (event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+		if (keyEvent->key() == Qt::Key_Right || keyEvent->key() == Qt::Key_Left)
+		{
+			keyPressEvent(keyEvent);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	return false;
 }
 
 OpenGlFolderPlayer::~OpenGlFolderPlayer()

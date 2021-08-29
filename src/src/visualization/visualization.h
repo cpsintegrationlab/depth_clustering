@@ -21,16 +21,15 @@
 #include "projections/spherical_projection.h"
 #include "utils/cloud.h"
 #include "visualization/viewer/viewer.h"
-#include "visualization/widgets/base_viewer_widget.h"
 
 namespace Ui
 {
 class OpenGlFolderPlayer;
 }
 
-class OpenGlFolderPlayer: public BaseViewerWidget, public depth_clustering::AbstractClient<cv::Mat>
+class OpenGlFolderPlayer: public QWidget, public depth_clustering::AbstractClient<cv::Mat>
 {
-Q_OBJECT
+	Q_OBJECT
 
 public:
 	explicit
@@ -43,6 +42,9 @@ public:
 protected:
 	void
 	keyPressEvent(QKeyEvent* event) override;
+
+	bool
+	eventFilter(QObject* obj, QEvent* event) override;
 
 private slots:
 	void
@@ -75,6 +77,8 @@ private:
 	int _current_coloring_mode = 0;
 
 	std::vector<std::string> _current_object_labels;
+
+	Viewer *_viewer = nullptr;
 };
 
 #endif  // SRC_QT_PCL_FOLDER_PLAYER_H_
