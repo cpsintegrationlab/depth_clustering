@@ -1,7 +1,3 @@
-// Copyright Igor Bogoslavskyi, year 2017.
-// In case of any problems with the code please contact me.
-// Email: igor.bogoslavskyi@uni-bonn.de.
-
 #include <QColor>
 #include <QDebug>
 #include <QFileDialog>
@@ -40,7 +36,6 @@ using depth_clustering::Radians;
 using depth_clustering::ReadKittiCloud;
 using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;
-using std::vector;
 
 Visualization::Visualization(QWidget* parent) :
 		QWidget(parent), ui(new Ui::Visualization)
@@ -89,19 +84,6 @@ Visualization::Visualization(QWidget* parent) :
 	_bounding_box.reset(new BoundingBox
 	{ BoundingBox::Type::Cube });
 	this->onSegmentationParamUpdate();
-}
-
-void
-Visualization::onPlayAllClouds()
-{
-	for (int i = ui->sldr_navigate_clouds->minimum(); i < ui->sldr_navigate_clouds->maximum(); ++i)
-	{
-		ui->sldr_navigate_clouds->setValue(i);
-		ui->gl_widget->update();
-		QApplication::processEvents();
-	}
-
-	qDebug() << "All clouds shown!";
 }
 
 void
@@ -169,6 +151,95 @@ Visualization::OnNewObjectReceived(const cv::Mat& image, int)
 	_scene_labels->addPixmap(QPixmap::fromImage(qimage));
 	ui->gfx_labels->setScene(_scene_labels.get());
 	ui->gfx_labels->fitInView(_scene_labels->itemsBoundingRect());
+}
+
+Visualization::~Visualization()
+{
+}
+
+bool
+Visualization::eventFilter(QObject* object, QEvent* event)
+{
+	if (event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+		if (keyEvent->key() == Qt::Key_Right || keyEvent->key() == Qt::Key_Left)
+		{
+			keyPressEvent(keyEvent);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	return false;
+}
+
+void
+Visualization::keyPressEvent(QKeyEvent* event)
+{
+	switch (event->key())
+	{
+	case Qt::Key_Right:
+		ui->spnbx_current_cloud->setValue(ui->spnbx_current_cloud->value() + 1);
+		break;
+	case Qt::Key_Left:
+		ui->spnbx_current_cloud->setValue(ui->spnbx_current_cloud->value() - 1);
+		break;
+	}
+}
+
+void
+Visualization::onOpenFolderToRead()
+{
+	// create a dialog here
+	QString folder_name = QFileDialog::getExistingDirectory(this);
+	qDebug() << "Picked path:" << folder_name;
+
+	_file_names.clear();
+	FolderReader::Order order = FolderReader::Order::SORTED;
+	FolderReader cloud_reader(folder_name.toStdString(),
+			ui->cmb_extension->currentText().toStdString(), order);
+	_file_names = cloud_reader.GetAllFilePaths();
+	if (_file_names.empty())
+	{
+		return;
+	}
+
+	FolderReader config_reader(folder_name.toStdString(), "img.cfg");
+	auto config_file_name = config_reader.GetNextFilePath();
+
+	if (!config_file_name.empty())
+	{
+		_proj_params = ProjectionParams::FromConfigFile(config_file_name);
+		qDebug() << "Using img.cfg";
+	}
+
+	// update the slider
+	ui->sldr_navigate_clouds->setMaximum(_file_names.size() - 1);
+	ui->spnbx_current_cloud->setMaximum(_file_names.size() - 1);
+
+	// set current value
+	ui->sldr_navigate_clouds->setValue(1);
+	ui->sldr_navigate_clouds->setEnabled(true);
+	ui->spnbx_current_cloud->setEnabled(true);
+
+	// focus on the cloud
+	_viewer->update();
+}
+
+void
+Visualization::onPlayAllClouds()
+{
+	for (int i = ui->sldr_navigate_clouds->minimum(); i < ui->sldr_navigate_clouds->maximum(); ++i)
+	{
+		ui->sldr_navigate_clouds->setValue(i);
+		ui->gl_widget->update();
+		QApplication::processEvents();
+	}
+
+	qDebug() << "All clouds shown!";
 }
 
 void
@@ -282,80 +353,4 @@ Visualization::onSliderMovedTo(int cloud_number)
 
 	fprintf(stderr, "[TIMER]: full segmentation took %lu milliseconds\n",
 			timer.measure(Timer::Units::Milli));
-}
-
-void
-Visualization::onOpenFolderToRead()
-{
-	// create a dialog here
-	QString folder_name = QFileDialog::getExistingDirectory(this);
-	qDebug() << "Picked path:" << folder_name;
-
-	_file_names.clear();
-	FolderReader::Order order = FolderReader::Order::SORTED;
-	FolderReader cloud_reader(folder_name.toStdString(),
-			ui->cmb_extension->currentText().toStdString(), order);
-	_file_names = cloud_reader.GetAllFilePaths();
-	if (_file_names.empty())
-	{
-		return;
-	}
-
-	FolderReader config_reader(folder_name.toStdString(), "img.cfg");
-	auto config_file_name = config_reader.GetNextFilePath();
-
-	if (!config_file_name.empty())
-	{
-		_proj_params = ProjectionParams::FromConfigFile(config_file_name);
-		qDebug() << "Using img.cfg";
-	}
-
-	// update the slider
-	ui->sldr_navigate_clouds->setMaximum(_file_names.size() - 1);
-	ui->spnbx_current_cloud->setMaximum(_file_names.size() - 1);
-
-	// set current value
-	ui->sldr_navigate_clouds->setValue(1);
-	ui->sldr_navigate_clouds->setEnabled(true);
-	ui->spnbx_current_cloud->setEnabled(true);
-
-	// focus on the cloud
-	_viewer->update();
-}
-
-void
-Visualization::keyPressEvent(QKeyEvent* event)
-{
-	switch (event->key())
-	{
-	case Qt::Key_Right:
-		ui->spnbx_current_cloud->setValue(ui->spnbx_current_cloud->value() + 1);
-		break;
-	case Qt::Key_Left:
-		ui->spnbx_current_cloud->setValue(ui->spnbx_current_cloud->value() - 1);
-		break;
-	}
-}
-
-bool
-Visualization::eventFilter(QObject* object, QEvent* event)
-{
-	if (event->type() == QEvent::KeyPress)
-	{
-		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-		if (keyEvent->key() == Qt::Key_Right || keyEvent->key() == Qt::Key_Left)
-		{
-			keyPressEvent(keyEvent);
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	return false;
-}
-
-Visualization::~Visualization()
-{
 }
