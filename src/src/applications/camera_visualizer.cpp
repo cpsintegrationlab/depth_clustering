@@ -94,7 +94,7 @@ main(int argc, char* argv[])
 					+ depth_clustering.getParameter().ground_truth_flat_file_name,
 			ground_truth_tree);
 
-	cv::namedWindow(argv[0], cv::WINDOW_AUTOSIZE);
+	cv::namedWindow(depth_clustering.getParameter().dataset_name.c_str(), cv::WINDOW_AUTOSIZE);
 
 	while (1)
 	{
@@ -160,7 +160,7 @@ main(int argc, char* argv[])
 			std::cout << "[WARN]: Flat ground truth frame missing." << std::endl;
 		}
 
-		cv::imshow(argv[0], camera_frame);
+		cv::imshow(depth_clustering.getParameter().dataset_name.c_str(), camera_frame);
 		cv::waitKey(display_time);
 	}
 

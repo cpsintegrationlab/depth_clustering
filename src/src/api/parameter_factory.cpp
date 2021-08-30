@@ -6,6 +6,7 @@
  */
 
 #include <boost/property_tree/json_parser.hpp>
+#include <image_labelers/diff_helpers/diff_factory.h>
 
 #include "api/parameter_factory.h"
 
@@ -46,7 +47,9 @@ ParameterFactory::getDepthClusteringParameter()
 	auto size_cluster_max_optional = tree.get_optional<int>("size_cluster_max");
 	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
 	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
+	auto difference_type_optional = tree.get_optional<std::string>("difference_type");
 	auto dataset_file_type_optional = tree.get_optional<std::string>("dataset_file_type");
+	auto dataset_name_optional = tree.get_optional<std::string>("dataset_name");
 	auto ground_truth_file_name_optional = tree.get_optional<std::string>("ground_truth_file_name");
 	auto ground_truth_flat_file_name_optional = tree.get_optional<std::string>(
 			"ground_truth_flat_file_name");
@@ -94,9 +97,44 @@ ParameterFactory::getDepthClusteringParameter()
 		}
 	}
 
+	if (difference_type_optional)
+	{
+		std::string difference_type_string = *difference_type_optional;
+
+		if (difference_type_string == "angles")
+		{
+			parameter.difference_type = DiffFactory::DiffType::ANGLES;
+		}
+		else if (difference_type_string == "angles_precomputed")
+		{
+			parameter.difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
+		}
+		else if (difference_type_string == "line_dist")
+		{
+			parameter.difference_type = DiffFactory::DiffType::LINE_DIST;
+		}
+		else if (difference_type_string == "line_dist_precomputed")
+		{
+			parameter.difference_type = DiffFactory::DiffType::LINE_DIST_PRECOMPUTED;
+		}
+		else if (difference_type_string == "simple")
+		{
+			parameter.difference_type = DiffFactory::DiffType::SIMPLE;
+		}
+		else
+		{
+			parameter.difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
+		}
+	}
+
 	if (dataset_file_type_optional)
 	{
 		parameter.dataset_file_type = *dataset_file_type_optional;
+	}
+
+	if (dataset_name_optional)
+	{
+		parameter.dataset_name = *dataset_name_optional;
 	}
 
 	if (ground_truth_file_name_optional)
