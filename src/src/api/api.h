@@ -54,7 +54,10 @@ public:
 	getCurrentDepthImage() const;
 
 	Cloud::ConstPtr
-	GetCurrentCloud() const;
+	getCurrentCloud() const;
+
+	std::shared_ptr<BoundingBox>
+	getBoundingBox() const;
 
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
 	getBoundingBoxFrameFlat() const;

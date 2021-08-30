@@ -14,12 +14,15 @@
 #include "utils/velodyne_utils.h"
 #include "visualization/drawables/drawable_cloud.h"
 #include "visualization/drawables/drawable_cube.h"
+#include "visualization/drawables/drawable_polygon3d.h"
 #include "visualization/utils/utils.h"
 #include "visualization/ui_visualization.h"
 #include "visualization/visualization.h"
 
 using depth_clustering::AbstractImageLabeler;
 using depth_clustering::DiffFactory;
+using depth_clustering::DrawableCube;
+using depth_clustering::DrawablePolygon3d;
 using depth_clustering::FolderReader;
 using depth_clustering::MatFromDepthPng;
 using depth_clustering::ReadKittiCloud;
@@ -297,7 +300,6 @@ Visualization::onSliderMovedTo(int frame_number)
 	depth_clustering_->processOneFrameForDataset(frame_path_name);
 
 	auto current_depth_image = depth_clustering_->getCurrentDepthImage();
-	auto current_cloud = depth_clustering_->GetCurrentCloud();
 
 	timer.start();
 
@@ -317,10 +319,78 @@ Visualization::onSliderMovedTo(int frame_number)
 	std::cout << "[INFO]: Displayed depth image in " << timer.measure(Timer::Units::Micro) << "us."
 			<< std::endl;
 
-	viewer_->Clear();
-	viewer_->AddDrawable(DrawableCloud::FromCloud(current_cloud));
-	viewer_->update();
+	updateViewer();
 
 	std::cout << "[INFO]: Displayed point cloud in " << timer.measure(Timer::Units::Micro) << "us."
 			<< std::endl;
+}
+
+void
+Visualization::updateViewer()
+{
+	auto current_cloud = depth_clustering_->getCurrentCloud();
+	auto bounding_box = depth_clustering_->getBoundingBox();
+	const auto &parameter = depth_clustering_->getParameter();
+
+	viewer_->Clear();
+	viewer_->AddDrawable(DrawableCloud::FromCloud(current_cloud));
+
+	switch (parameter.bounding_box_type)
+	{
+	case BoundingBox::Type::Cube:
+	{
+		auto frame_cube = bounding_box->getFrameCube();
+
+		if (!frame_cube)
+		{
+			std::cerr << "[ERROR]: Cube frame missing." << std::endl;
+			break;
+		}
+
+		for (const auto &cube : *frame_cube)
+		{
+			auto center = std::get<0>(cube);
+			auto extent = std::get<1>(cube);
+
+			auto cube_drawable = DrawableCube::Create(center, extent);
+
+			viewer_->AddDrawable(std::move(cube_drawable));
+		}
+
+		break;
+	}
+	case BoundingBox::Type::Polygon:
+	{
+		auto frame_polygon = bounding_box->getFramePolygon();
+
+		if (!frame_polygon)
+		{
+			std::cerr << "[ERROR]: Polygon frame missing." << std::endl;
+			break;
+		}
+
+		for (const auto &polygon : *frame_polygon)
+		{
+			auto hull = std::get<0>(polygon);
+			auto diff_z = std::get<1>(polygon);
+
+			auto polygon_drawable = DrawablePolygon3d::Create(hull, diff_z);
+
+			viewer_->AddDrawable(std::move(polygon_drawable));
+		}
+
+		break;
+	}
+	case BoundingBox::Type::Flat:
+	{
+		std::cerr << "[ERROR]: Cannot display flat bounding box in lidar visualizer." << std::endl;
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+
+	viewer_->update();
 }

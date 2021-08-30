@@ -120,9 +120,15 @@ DepthClustering::getCurrentDepthImage() const
 }
 
 Cloud::ConstPtr
-DepthClustering::GetCurrentCloud() const
+DepthClustering::getCurrentCloud() const
 {
 	return current_cloud_;
+}
+
+std::shared_ptr<BoundingBox>
+DepthClustering::getBoundingBox() const
+{
+	return bounding_box_;
 }
 
 std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>

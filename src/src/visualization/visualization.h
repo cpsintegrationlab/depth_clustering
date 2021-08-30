@@ -63,6 +63,9 @@ private slots:
 
 private:
 
+	void
+	updateViewer();
+
 	std::unique_ptr<Ui::Visualization> ui;
 	std::unique_ptr<QGraphicsScene> scene_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_labels_ = nullptr;
