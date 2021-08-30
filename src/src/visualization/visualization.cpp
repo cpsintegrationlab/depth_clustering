@@ -209,8 +209,8 @@ Visualization::onOpenFolder()
 	ui->spnbx_current_cloud->setEnabled(true);
 
 	ui->spnbx_smooth_window_size->setValue(parameter.size_smooth_window);
-	ui->spnbx_ground_angle->setValue(parameter.angle_ground_removal.val());
-	ui->spnbx_separation_angle->setValue(parameter.angle_clustering.val());
+	ui->spnbx_ground_angle->setValue(parameter.angle_ground_removal.ToDegrees());
+	ui->spnbx_separation_angle->setValue(parameter.angle_clustering.ToDegrees());
 	ui->spnbx_min_cluster_size->setValue(parameter.size_cluster_min);
 	ui->spnbx_max_cluster_size->setValue(parameter.size_cluster_max);
 	ui->cmb_diff_type->setCurrentIndex(static_cast<int>(DiffFactory::DiffType::ANGLES));
@@ -289,8 +289,6 @@ Visualization::onParameterUpdate()
 	{
 		scene_labels_.reset();
 	}
-
-	ui->spnbx_line_dist_threshold->setValue(parameter.angle_clustering.val());
 
 	this->onSliderMovedTo(ui->sldr_navigate_clouds->value());
 
