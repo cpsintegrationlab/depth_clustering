@@ -219,8 +219,6 @@ Visualization::onParameterUpdated()
 	parameter.size_cluster_min = ui->spnbx_min_cluster_size->value();
 	parameter.size_cluster_max = ui->spnbx_max_cluster_size->value();
 
-	depth_clustering_->setParameter(parameter);
-
 	DiffFactory::DiffType difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 
 	switch (ui->cmb_diff_type->currentIndex())
@@ -262,6 +260,10 @@ Visualization::onParameterUpdated()
 		break;
 	}
 	}
+
+	parameter.difference_type = difference_type;
+
+	depth_clustering_->setParameter(parameter);
 
 	auto clusterer = depth_clustering_->getClusterer();
 
