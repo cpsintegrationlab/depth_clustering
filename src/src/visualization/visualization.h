@@ -26,7 +26,7 @@ class Visualization;
 
 class Visualization: public QWidget, public depth_clustering::AbstractClient<cv::Mat>
 {
-	Q_OBJECT
+Q_OBJECT
 
 public:
 
@@ -34,7 +34,7 @@ public:
 	Visualization(QWidget* parent = 0);
 
 	void
-	OnNewObjectReceived(const cv::Mat& labels, int client_id = 0) override;
+	OnNewObjectReceived(const cv::Mat& image_segmentation, int client_id = 0) override;
 
 	virtual
 	~Visualization();
@@ -42,7 +42,7 @@ public:
 protected:
 
 	bool
-	eventFilter(QObject* obj, QEvent* event) override;
+	eventFilter(QObject* object, QEvent* event) override;
 
 	void
 	keyPressEvent(QKeyEvent* event) override;
@@ -56,22 +56,33 @@ private slots:
 	onPlay();
 
 	void
-	onParameterUpdated();
+	onPause();
+
+	void
+	onStop();
 
 	void
 	onSliderMovedTo(int frame_number);
 
+	void
+	onParameterUpdated();
+
 private:
 
 	void
-	updateViewer();
+	updateViewerPointCloud();
+
+	void
+	updateViewerImage();
 
 	std::unique_ptr<Ui::Visualization> ui;
-	std::unique_ptr<QGraphicsScene> scene_ = nullptr;
-	std::unique_ptr<QGraphicsScene> scene_labels_ = nullptr;
+	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
+	std::unique_ptr<QGraphicsScene> scene_segmentation_ = nullptr;
+	std::unique_ptr<QGraphicsScene> scene_depth_ = nullptr;
 	std::unique_ptr<DepthClustering> depth_clustering_ = nullptr;
 
 	std::string dataset_path_;
+	volatile bool play_;
 };
 
 #endif  // SRC_VISUALIZATION_VISUALIZATION_H_

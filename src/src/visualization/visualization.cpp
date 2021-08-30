@@ -30,83 +30,60 @@ using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
-		QWidget(parent), ui(new Ui::Visualization)
+		QWidget(parent), ui(new Ui::Visualization), play_(false)
 {
 	ui->setupUi(this);
+	ui->button_play->setEnabled(false);
+	ui->button_pause->setEnabled(false);
+	ui->button_stop->setEnabled(false);
 	ui->slider_frame->setEnabled(false);
 	ui->spin_frame->setEnabled(false);
+	ui->viewer_image_difference->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_difference->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_difference->setRenderHints(
+			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+	ui->viewer_image_segmentation->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_segmentation->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_segmentation->setRenderHints(
+			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	ui->viewer_image_depth->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_depth->setCacheMode(QGraphicsView::CacheBackground);
 	ui->viewer_image_depth->setRenderHints(
 			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-
-	ui->viewer_image_label->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	ui->viewer_image_label->setCacheMode(QGraphicsView::CacheBackground);
-	ui->viewer_image_label->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-
-	setWindowTitle(QCoreApplication::arguments().at(0));
-
 	ui->viewer_point_cloud->installEventFilter(this);
 	ui->viewer_point_cloud->setAutoFillBackground(true);
 
-	connect(ui->button_open, SIGNAL(released()), this, SLOT(onOpen()));
-	connect(ui->slider_frame, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
-	connect(ui->button_play, SIGNAL(released()), this, SLOT(onPlay()));
+	setWindowTitle(QCoreApplication::arguments().at(0));
 
-	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this,
-			SLOT(onParameterUpdated()));
-	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this,
-			SLOT(onParameterUpdated()));
-	connect(ui->spin_angle_ground_removal, SIGNAL(valueChanged(double)), this, SLOT(onParameterUpdated()));
-	connect(ui->spin_angle_clustering, SIGNAL(valueChanged(double)), this,
+	connect(ui->button_open, SIGNAL(released()), this, SLOT(onOpen()));
+	connect(ui->button_play, SIGNAL(released()), this, SLOT(onPlay()));
+	connect(ui->button_pause, SIGNAL(released()), this, SLOT(onPause()));
+	connect(ui->button_stop, SIGNAL(released()), this, SLOT(onStop()));
+	connect(ui->slider_frame, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
+	connect(ui->spin_angle_ground_removal, SIGNAL(valueChanged(double)), this,
 			SLOT(onParameterUpdated()));
 	connect(ui->spin_size_smooth_window, SIGNAL(valueChanged(int)), this,
 			SLOT(onParameterUpdated()));
-	connect(ui->radio_show_segmentation, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdated()));
-	connect(ui->radio_show_angles, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdated()));
+	connect(ui->spin_angle_clustering, SIGNAL(valueChanged(double)), this,
+			SLOT(onParameterUpdated()));
 	connect(ui->combo_difference_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 
 	depth_clustering_ = std::unique_ptr<DepthClustering>(new DepthClustering());
 }
 
 void
-Visualization::OnNewObjectReceived(const cv::Mat& image, int client_id)
+Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client_id)
 {
-	QImage qimage;
+	QImage qimage_segmentation = MatToQImage(
+			AbstractImageLabeler::LabelsToColor(image_segmentation));
 
-	switch (image.type())
-	{
-	case cv::DataType<float>::type:
-	{
-		std::cout << "[INFO]: Received angle image." << std::endl;
-
-		auto difference_type = depth_clustering_->getParameter().difference_type;
-		auto projection_parameter = depth_clustering_->getProjectionParameter();
-		auto difference_helper = DiffFactory::Build(difference_type, &image,
-				projection_parameter.get());
-
-		qimage = MatToQImage(difference_helper->Visualize());
-
-		break;
-	}
-	case cv::DataType<uint16_t>::type:
-	{
-		std::cout << "[INFO]: Received segmentation image." << std::endl;
-
-		qimage = MatToQImage(AbstractImageLabeler::LabelsToColor(image));
-		break;
-	}
-	default:
-	{
-		std::cerr << "[ERROR]: Received unknown image." << std::endl;
-		return;
-	}
-	}
-
-	scene_labels_.reset(new QGraphicsScene);
-	scene_labels_->addPixmap(QPixmap::fromImage(qimage));
-	ui->viewer_image_label->setScene(scene_labels_.get());
-	ui->viewer_image_label->fitInView(scene_labels_->itemsBoundingRect());
+	scene_segmentation_.reset(new QGraphicsScene);
+	scene_segmentation_->addPixmap(QPixmap::fromImage(qimage_segmentation));
+	ui->viewer_image_segmentation->setScene(scene_segmentation_.get());
+	ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
 }
 
 Visualization::~Visualization()
@@ -155,6 +132,7 @@ Visualization::keyPressEvent(QKeyEvent* event)
 void
 Visualization::onOpen()
 {
+	play_ = false;
 	dataset_path_ = QFileDialog::getExistingDirectory(this).toStdString();
 
 	if (!depth_clustering_)
@@ -180,6 +158,9 @@ Visualization::onOpen()
 	ui->slider_frame->setMaximum(frame_paths_names.size() - 1);
 	ui->spin_frame->setMaximum(frame_paths_names.size() - 1);
 	ui->slider_frame->setValue(0);
+
+	ui->button_play->setEnabled(true);
+	ui->button_stop->setEnabled(true);
 	ui->slider_frame->setEnabled(true);
 	ui->spin_frame->setEnabled(true);
 
@@ -190,9 +171,7 @@ Visualization::onOpen()
 	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
 	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
 
-	setWindowTitle(QString::fromUtf8(parameter.dataset_name.c_str()));
-
-	ui->viewer_point_cloud->update();
+	onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
 }
@@ -200,14 +179,88 @@ Visualization::onOpen()
 void
 Visualization::onPlay()
 {
-	for (int i = ui->slider_frame->minimum(); i <= ui->slider_frame->maximum(); ++i)
+	if (play_)
 	{
+		return;
+	}
+	else
+	{
+		ui->button_play->setEnabled(false);
+		ui->button_pause->setEnabled(true);
+		play_ = true;
+	}
+
+	for (int i = ui->slider_frame->value(); i <= ui->slider_frame->maximum(); ++i)
+	{
+		if (!play_)
+		{
+			std::cout << "[INFO]: Visualization stopped." << std::endl;
+			return;
+		}
+
 		ui->slider_frame->setValue(i);
 		ui->viewer_point_cloud->update();
 		QApplication::processEvents();
 	}
 
-	std::cout << "[INFO]: All frames visualized." << std::endl;
+	onPause();
+
+	std::cout << "[INFO]: Visualization completed." << std::endl;
+}
+
+void
+Visualization::onPause()
+{
+	if (play_)
+	{
+		play_ = false;
+		ui->button_play->setEnabled(true);
+		ui->button_pause->setEnabled(false);
+	}
+}
+
+void
+Visualization::onStop()
+{
+	onPause();
+
+	ui->slider_frame->setValue(0);
+	ui->viewer_point_cloud->update();
+	QApplication::processEvents();
+}
+
+void
+Visualization::onSliderMovedTo(int frame_number)
+{
+	Timer timer;
+	auto folder_reader = depth_clustering_->getFolderReader();
+	const auto &frame_paths_names = folder_reader->GetAllFilePaths();
+
+	if (frame_paths_names.empty())
+	{
+		std::cerr << "[ERROR]: Empty folder at \"" << dataset_path_ << "\"." << std::endl;
+		return;
+	}
+
+	std::cout << "[INFO]: Visualizing frame \"" << frame_paths_names[frame_number] << "\"."
+			<< std::endl;
+
+	const auto &frame_path_name = frame_paths_names[frame_number];
+	setWindowTitle(QString::fromStdString(frame_path_name));
+
+	depth_clustering_->processOneFrameForDataset(frame_path_name);
+
+	timer.start();
+
+	updateViewerImage();
+
+	std::cout << "[INFO]: Updated difference and depth image viewers in "
+			<< timer.measure(Timer::Units::Micro) << " us." << std::endl;
+
+	updateViewerPointCloud();
+
+	std::cout << "[INFO]: Updated point cloud viewer in " << timer.measure(Timer::Units::Micro)
+			<< " us." << std::endl;
 }
 
 void
@@ -215,11 +268,37 @@ Visualization::onParameterUpdated()
 {
 	DepthClusteringParameter parameter = depth_clustering_->getParameter();
 
-	parameter.size_smooth_window = ui->spin_size_smooth_window->value();
-	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
 	parameter.angle_clustering = Radians::FromDegrees(ui->spin_angle_clustering->value());
+	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
 	parameter.size_cluster_min = ui->spin_size_cluster_min->value();
 	parameter.size_cluster_max = ui->spin_size_cluster_max->value();
+	parameter.size_smooth_window = ui->spin_size_smooth_window->value();
+
+	BoundingBox::Type bounding_box_type = BoundingBox::Type::Cube;
+
+	switch (ui->combo_bounding_box_type->currentIndex())
+	{
+	case 0:
+	{
+		std::cout << "[INFO]: Bounding box type: cube." << std::endl;
+		bounding_box_type = BoundingBox::Type::Cube;
+		break;
+	}
+	case 1:
+	{
+		std::cout << "[INFO]: Bounding box type: polygon." << std::endl;
+		bounding_box_type = BoundingBox::Type::Polygon;
+		break;
+	}
+	default:
+	{
+		std::cout << "[INFO]: Bounding box type: cube." << std::endl;
+		bounding_box_type = BoundingBox::Type::Cube;
+		break;
+	}
+	}
+
+	parameter.bounding_box_type = bounding_box_type;
 
 	DiffFactory::DiffType difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 
@@ -278,54 +357,7 @@ Visualization::onParameterUpdated()
 }
 
 void
-Visualization::onSliderMovedTo(int frame_number)
-{
-	Timer timer;
-	auto folder_reader = depth_clustering_->getFolderReader();
-	const auto &frame_paths_names = folder_reader->GetAllFilePaths();
-
-	if (frame_paths_names.empty())
-	{
-		std::cerr << "[ERROR]: Empty folder at \"" << dataset_path_ << "\"." << std::endl;
-		return;
-	}
-
-	std::cout << "[INFO]: Visualizing frame \"" << frame_paths_names[frame_number] << "\"."
-			<< std::endl;
-
-	const auto &frame_path_name = frame_paths_names[frame_number];
-
-	ui->label_frame->setText(QString::fromStdString(frame_path_name));
-	depth_clustering_->processOneFrameForDataset(frame_path_name);
-
-	auto current_depth_image = depth_clustering_->getCurrentDepthImage();
-
-	timer.start();
-
-	if (ui->radio_show_angles->isChecked())
-	{
-		OnNewObjectReceived(current_depth_image);
-		std::cout << "[INFO]: Displayed angle image in " << timer.measure(Timer::Units::Micro)
-				<< "us." << std::endl;
-	}
-
-	QImage current_depth_qimage = MatToQImage(current_depth_image);
-	scene_.reset(new QGraphicsScene);
-	scene_->addPixmap(QPixmap::fromImage(current_depth_qimage));
-	ui->viewer_image_depth->setScene(scene_.get());
-	ui->viewer_image_depth->fitInView(scene_->itemsBoundingRect());
-
-	std::cout << "[INFO]: Displayed depth image in " << timer.measure(Timer::Units::Micro) << "us."
-			<< std::endl;
-
-	updateViewer();
-
-	std::cout << "[INFO]: Displayed point cloud in " << timer.measure(Timer::Units::Micro) << "us."
-			<< std::endl;
-}
-
-void
-Visualization::updateViewer()
+Visualization::updateViewerPointCloud()
 {
 	auto current_cloud = depth_clustering_->getCurrentCloud();
 	auto bounding_box = depth_clustering_->getBoundingBox();
@@ -392,4 +424,26 @@ Visualization::updateViewer()
 	}
 
 	ui->viewer_point_cloud->update();
+}
+
+void
+Visualization::updateViewerImage()
+{
+	auto image_depth = depth_clustering_->getCurrentDepthImage();
+	auto difference_type = depth_clustering_->getParameter().difference_type;
+	auto projection_parameter = depth_clustering_->getProjectionParameter();
+	auto difference_helper = DiffFactory::Build(difference_type, &image_depth,
+			projection_parameter.get());
+	QImage qimage_difference = MatToQImage(difference_helper->Visualize());
+	QImage qimage_depth = MatToQImage(image_depth);
+
+	scene_difference_.reset(new QGraphicsScene);
+	scene_difference_->addPixmap(QPixmap::fromImage(qimage_difference));
+	ui->viewer_image_difference->setScene(scene_difference_.get());
+	ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
+
+	scene_depth_.reset(new QGraphicsScene);
+	scene_depth_->addPixmap(QPixmap::fromImage(qimage_depth));
+	ui->viewer_image_depth->setScene(scene_depth_.get());
+	ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
 }
