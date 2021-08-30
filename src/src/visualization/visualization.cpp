@@ -171,6 +171,8 @@ Visualization::onOpen()
 	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
 	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
 
+	setWindowTitle(QString::fromStdString(dataset_path_));
+
 	onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
@@ -246,7 +248,6 @@ Visualization::onSliderMovedTo(int frame_number)
 			<< std::endl;
 
 	const auto &frame_path_name = frame_paths_names[frame_number];
-	setWindowTitle(QString::fromStdString(frame_path_name));
 
 	depth_clustering_->processOneFrameForDataset(frame_path_name);
 
