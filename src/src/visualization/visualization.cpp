@@ -7,11 +7,6 @@
 #include <QUuid>
 #include <vector>
 
-#if PCL_FOUND
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_cloud.h>
-#endif	// PCL_FOUND
-
 #include "api/parameter.h"
 #include "image_labelers/diff_helpers/diff_factory.h"
 #include "utils/folder_reader.h"
@@ -52,20 +47,22 @@ Visualization::Visualization(QWidget* parent) :
 	viewer_->installEventFilter(this);
 	viewer_->setAutoFillBackground(true);
 
-	connect(ui->btn_open_folder, SIGNAL(released()), this, SLOT(onOpenFolder()));
+	connect(ui->btn_open_folder, SIGNAL(released()), this, SLOT(onOpen()));
 	connect(ui->sldr_navigate_clouds, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
-	connect(ui->btn_play, SIGNAL(released()), this, SLOT(onVisualizeAllFrames()));
+	connect(ui->btn_play, SIGNAL(released()), this, SLOT(onPlay()));
 
-	connect(ui->spnbx_min_cluster_size, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdate()));
-	connect(ui->spnbx_max_cluster_size, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdate()));
-	connect(ui->spnbx_ground_angle, SIGNAL(valueChanged(double)), this, SLOT(onParameterUpdate()));
+	connect(ui->spnbx_min_cluster_size, SIGNAL(valueChanged(int)), this,
+			SLOT(onParameterUpdated()));
+	connect(ui->spnbx_max_cluster_size, SIGNAL(valueChanged(int)), this,
+			SLOT(onParameterUpdated()));
+	connect(ui->spnbx_ground_angle, SIGNAL(valueChanged(double)), this, SLOT(onParameterUpdated()));
 	connect(ui->spnbx_separation_angle, SIGNAL(valueChanged(double)), this,
-			SLOT(onParameterUpdate()));
+			SLOT(onParameterUpdated()));
 	connect(ui->spnbx_smooth_window_size, SIGNAL(valueChanged(int)), this,
-			SLOT(onParameterUpdate()));
-	connect(ui->radio_show_segmentation, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdate()));
-	connect(ui->radio_show_angles, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdate()));
-	connect(ui->cmb_diff_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdate()));
+			SLOT(onParameterUpdated()));
+	connect(ui->radio_show_segmentation, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdated()));
+	connect(ui->radio_show_angles, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdated()));
+	connect(ui->cmb_diff_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 
 	depth_clustering_ = std::unique_ptr<DepthClustering>(new DepthClustering());
 }
@@ -154,7 +151,7 @@ Visualization::keyPressEvent(QKeyEvent* event)
 }
 
 void
-Visualization::onOpenFolder()
+Visualization::onOpen()
 {
 	dataset_path_ = QFileDialog::getExistingDirectory(this).toStdString();
 
@@ -175,6 +172,8 @@ Visualization::onOpenFolder()
 		std::cerr << "[ERROR]: Empty folder at \"" << dataset_path_ << "\"." << std::endl;
 		return;
 	}
+
+	depth_clustering_->getClusterer()->SetLabelImageClient(this);
 
 	ui->sldr_navigate_clouds->setMaximum(frame_paths_names.size() - 1);
 	ui->spnbx_current_cloud->setMaximum(frame_paths_names.size() - 1);
@@ -197,7 +196,7 @@ Visualization::onOpenFolder()
 }
 
 void
-Visualization::onVisualizeAllFrames()
+Visualization::onPlay()
 {
 	for (int i = ui->sldr_navigate_clouds->minimum(); i <= ui->sldr_navigate_clouds->maximum(); ++i)
 	{
@@ -210,7 +209,7 @@ Visualization::onVisualizeAllFrames()
 }
 
 void
-Visualization::onParameterUpdate()
+Visualization::onParameterUpdated()
 {
 	DepthClusteringParameter parameter = depth_clustering_->getParameter();
 
@@ -222,43 +221,54 @@ Visualization::onParameterUpdate()
 
 	depth_clustering_->setParameter(parameter);
 
-	DiffFactory::DiffType diff_type = DiffFactory::DiffType::NONE;
+	DiffFactory::DiffType difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 
 	switch (ui->cmb_diff_type->currentIndex())
 	{
 	case 0:
 	{
-		diff_type = DiffFactory::DiffType::ANGLES;
+		std::cout << "[INFO]: Difference type: angles." << std::endl;
+		difference_type = DiffFactory::DiffType::ANGLES;
 		break;
 	}
 	case 1:
 	{
-		diff_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
+		std::cout << "[INFO]: Difference type: precomputed angles." << std::endl;
+		difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 		break;
 	}
 	case 2:
 	{
-		diff_type = DiffFactory::DiffType::LINE_DIST;
+		std::cout << "[INFO]: Difference type: line distance." << std::endl;
+		difference_type = DiffFactory::DiffType::LINE_DIST;
 		break;
 	}
 	case 3:
 	{
-		diff_type = DiffFactory::DiffType::LINE_DIST_PRECOMPUTED;
+		std::cout << "[INFO]: Difference type: precomputed line distance." << std::endl;
+		difference_type = DiffFactory::DiffType::LINE_DIST_PRECOMPUTED;
+		break;
+	}
+	case 4:
+	{
+		std::cout << "[INFO]: Difference type: simple." << std::endl;
+		difference_type = DiffFactory::DiffType::SIMPLE;
 		break;
 	}
 	default:
 	{
-		diff_type = DiffFactory::DiffType::SIMPLE;
+		std::cout << "[INFO]: Difference type: precomputed angles." << std::endl;
+		difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 		break;
 	}
 	}
 
 	auto clusterer = depth_clustering_->getClusterer();
 
-	clusterer->SetDiffType(diff_type);
+	clusterer->SetDiffType(difference_type);
 	clusterer->SetLabelImageClient(this);
 
-	onSliderMovedTo(ui->sldr_navigate_clouds->value());
+	this->onSliderMovedTo(ui->sldr_navigate_clouds->value());
 
 	std::cout << "[INFO]: Updated parameters." << std::endl;
 }

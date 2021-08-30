@@ -50,13 +50,13 @@ protected:
 private slots:
 
 	void
-	onOpenFolder();
+	onOpen();
 
 	void
-	onVisualizeAllFrames();
+	onPlay();
 
 	void
-	onParameterUpdate();
+	onParameterUpdated();
 
 	void
 	onSliderMovedTo(int frame_number);
