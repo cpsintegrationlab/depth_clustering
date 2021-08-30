@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">
+  <layout class="QGridLayout" name="gridLayout" columnstretch="0,0">
    <property name="leftMargin">
     <number>9</number>
    </property>
@@ -32,65 +32,28 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="hor_lay_controls">
      <item>
-      <widget class="QPushButton" name="btn_open_folder">
+      <widget class="QPushButton" name="button_open">
        <property name="text">
-        <string>Open Folder</string>
+        <string>Open</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="cmb_extension">
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>.tiff</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>.txt</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>.pcd</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>.png</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>.bin</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>.exr</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_play">
+      <widget class="QPushButton" name="button_play">
        <property name="text">
         <string>Play</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="sldr_navigate_clouds">
+      <widget class="QSlider" name="slider_frame">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="spnbx_current_cloud"/>
+      <widget class="QSpinBox" name="spin_frame"/>
      </item>
     </layout>
    </item>
@@ -102,16 +65,16 @@
         <enum>QLayout::SetNoConstraint</enum>
        </property>
        <item>
-        <widget class="QLabel" name="lbl_cloud_name_explain">
+        <widget class="QLabel" name="label_frame_label">
          <property name="text">
-          <string>Cloud name:</string>
+          <string>Current Frame:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="lbl_cloud_name">
+        <widget class="QLabel" name="label_frame">
          <property name="text">
-          <string>&lt;cloud_name&gt;</string>
+          <string>N/A</string>
          </property>
          <property name="textFormat">
           <enum>Qt::PlainText</enum>
@@ -124,7 +87,7 @@
       </layout>
      </item>
      <item>
-      <widget class="Viewer" name="gl_widget" native="true">
+      <widget class="Viewer" name="viewer_point_cloud" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -143,7 +106,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QGraphicsView" name="gfx_labels">
+      <widget class="QGraphicsView" name="viewer_image_label">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -171,7 +134,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QGraphicsView" name="gfx_projection_view">
+      <widget class="QGraphicsView" name="viewer_image_depth">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -194,17 +157,10 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="2" rowspan="2">
+   <item row="0" column="1" rowspan="2">
     <layout class="QVBoxLayout" name="ver_lay_segment">
      <item>
-      <widget class="Line" name="line_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="label_parameter">
        <property name="font">
         <font>
          <pointsize>14</pointsize>
@@ -213,7 +169,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Segmentation Params&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Parameters&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::AutoText</enum>
@@ -221,16 +177,9 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_8">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QRadioButton" name="radio_show_angles">
        <property name="text">
-        <string>Show angles</string>
+        <string>Show angle image</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -240,28 +189,21 @@
      <item>
       <widget class="QRadioButton" name="radio_show_segmentation">
        <property name="text">
-        <string>Show segmentation</string>
+        <string>Show segmentation image</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_9">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="label_difference_type">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Difference type&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Clustering Threshold Type&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="cmb_diff_type">
+      <widget class="QComboBox" name="combo_difference_type">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <item>
         <property name="text">
@@ -270,17 +212,17 @@
        </item>
        <item>
         <property name="text">
-         <string>AnglePrecomputed</string>
+         <string>Precomputed Angle</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>LineDistance</string>
+         <string>Line Distance</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>LineDistancePrecomputed</string>
+         <string>Precomputed Line Distance</string>
         </property>
        </item>
        <item>
@@ -291,16 +233,9 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_10">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="label_angle_clustering_m">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Separation line dist [m]&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#656565;&quot;&gt;used if DiffType is LineDistance&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Clustering Threshold (m)&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#656565;&quot;&gt;used if DiffType is LineDistance&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -321,21 +256,14 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_11">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lbl_separation_angle">
+      <widget class="QLabel" name="label_angle_clustering">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Separation angle [deg]&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#656565;&quot;&gt;used if DiffType is Angle&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Clustering Threshold (deg)&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#656565;&quot;&gt;used if DiffType is Angle&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="spnbx_separation_angle">
+      <widget class="QDoubleSpinBox" name="spin_angle_clustering">
        <property name="minimum">
         <double>1.000000000000000</double>
        </property>
@@ -348,21 +276,14 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lbl_ground_angle">
+      <widget class="QLabel" name="label_angle_ground_removal">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Ground remove angle [deg]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Ground Removal Threshold (deg)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="spnbx_ground_angle">
+      <widget class="QDoubleSpinBox" name="spin_angle_ground_removal">
        <property name="minimum">
         <double>1.000000000000000</double>
        </property>
@@ -375,21 +296,14 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_size_cluster_min">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Min cluster size&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Minimum Cluster Size&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="spnbx_min_cluster_size">
+      <widget class="QSpinBox" name="spin_size_cluster_min">
        <property name="maximum">
         <number>100000</number>
        </property>
@@ -399,21 +313,14 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="label_size_cluster_max">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Max cluster size&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Maximum Cluster Size&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="spnbx_max_cluster_size">
+      <widget class="QSpinBox" name="spin_size_cluster_max">
        <property name="maximum">
         <number>1000000</number>
        </property>
@@ -423,21 +330,14 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_5">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="label_size_smooth_window">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Smoothing window size&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Ground Removal Filter Window Size&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="spnbx_smooth_window_size">
+      <widget class="QSpinBox" name="spin_size_smooth_window">
        <property name="minimum">
         <number>5</number>
        </property>
@@ -453,14 +353,7 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_6">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
+      <spacer name="spacer_vertical">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -473,13 +366,6 @@
       </spacer>
      </item>
     </layout>
-   </item>
-   <item row="0" column="1" rowspan="2">
-    <widget class="Line" name="line_7">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>
@@ -494,9 +380,9 @@
  <resources/>
  <connections>
   <connection>
-   <sender>sldr_navigate_clouds</sender>
+   <sender>slider_frame</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>spnbx_current_cloud</receiver>
+   <receiver>spin_frame</receiver>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -510,9 +396,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>spnbx_current_cloud</sender>
+   <sender>spin_frame</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>sldr_navigate_clouds</receiver>
+   <receiver>slider_frame</receiver>
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">

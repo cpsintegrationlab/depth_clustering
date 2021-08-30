@@ -33,39 +33,38 @@ Visualization::Visualization(QWidget* parent) :
 		QWidget(parent), ui(new Ui::Visualization)
 {
 	ui->setupUi(this);
-	ui->sldr_navigate_clouds->setEnabled(false);
-	ui->spnbx_current_cloud->setEnabled(false);
-	ui->gfx_projection_view->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	ui->gfx_projection_view->setCacheMode(QGraphicsView::CacheBackground);
-	ui->gfx_projection_view->setRenderHints(
+	ui->slider_frame->setEnabled(false);
+	ui->spin_frame->setEnabled(false);
+	ui->viewer_image_depth->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_depth->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_depth->setRenderHints(
 			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
-	ui->gfx_labels->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	ui->gfx_labels->setCacheMode(QGraphicsView::CacheBackground);
-	ui->gfx_labels->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+	ui->viewer_image_label->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_label->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_label->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
 	setWindowTitle(QCoreApplication::arguments().at(0));
 
-	viewer_ = ui->gl_widget;
-	viewer_->installEventFilter(this);
-	viewer_->setAutoFillBackground(true);
+	ui->viewer_point_cloud->installEventFilter(this);
+	ui->viewer_point_cloud->setAutoFillBackground(true);
 
-	connect(ui->btn_open_folder, SIGNAL(released()), this, SLOT(onOpen()));
-	connect(ui->sldr_navigate_clouds, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
-	connect(ui->btn_play, SIGNAL(released()), this, SLOT(onPlay()));
+	connect(ui->button_open, SIGNAL(released()), this, SLOT(onOpen()));
+	connect(ui->slider_frame, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
+	connect(ui->button_play, SIGNAL(released()), this, SLOT(onPlay()));
 
-	connect(ui->spnbx_min_cluster_size, SIGNAL(valueChanged(int)), this,
+	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this,
 			SLOT(onParameterUpdated()));
-	connect(ui->spnbx_max_cluster_size, SIGNAL(valueChanged(int)), this,
+	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this,
 			SLOT(onParameterUpdated()));
-	connect(ui->spnbx_ground_angle, SIGNAL(valueChanged(double)), this, SLOT(onParameterUpdated()));
-	connect(ui->spnbx_separation_angle, SIGNAL(valueChanged(double)), this,
+	connect(ui->spin_angle_ground_removal, SIGNAL(valueChanged(double)), this, SLOT(onParameterUpdated()));
+	connect(ui->spin_angle_clustering, SIGNAL(valueChanged(double)), this,
 			SLOT(onParameterUpdated()));
-	connect(ui->spnbx_smooth_window_size, SIGNAL(valueChanged(int)), this,
+	connect(ui->spin_size_smooth_window, SIGNAL(valueChanged(int)), this,
 			SLOT(onParameterUpdated()));
 	connect(ui->radio_show_segmentation, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdated()));
 	connect(ui->radio_show_angles, SIGNAL(toggled(bool)), this, SLOT(onParameterUpdated()));
-	connect(ui->cmb_diff_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_difference_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 
 	depth_clustering_ = std::unique_ptr<DepthClustering>(new DepthClustering());
 }
@@ -106,8 +105,8 @@ Visualization::OnNewObjectReceived(const cv::Mat& image, int client_id)
 
 	scene_labels_.reset(new QGraphicsScene);
 	scene_labels_->addPixmap(QPixmap::fromImage(qimage));
-	ui->gfx_labels->setScene(scene_labels_.get());
-	ui->gfx_labels->fitInView(scene_labels_->itemsBoundingRect());
+	ui->viewer_image_label->setScene(scene_labels_.get());
+	ui->viewer_image_label->fitInView(scene_labels_->itemsBoundingRect());
 }
 
 Visualization::~Visualization()
@@ -142,12 +141,12 @@ Visualization::keyPressEvent(QKeyEvent* event)
 	{
 	case Qt::Key_Right:
 	{
-		ui->spnbx_current_cloud->setValue(ui->spnbx_current_cloud->value() + 1);
+		ui->spin_frame->setValue(ui->spin_frame->value() + 1);
 		break;
 	}
 	case Qt::Key_Left:
 	{
-		ui->spnbx_current_cloud->setValue(ui->spnbx_current_cloud->value() - 1);
+		ui->spin_frame->setValue(ui->spin_frame->value() - 1);
 		break;
 	}
 	}
@@ -178,22 +177,22 @@ Visualization::onOpen()
 
 	depth_clustering_->getClusterer()->SetLabelImageClient(this);
 
-	ui->sldr_navigate_clouds->setMaximum(frame_paths_names.size() - 1);
-	ui->spnbx_current_cloud->setMaximum(frame_paths_names.size() - 1);
-	ui->sldr_navigate_clouds->setValue(0);
-	ui->sldr_navigate_clouds->setEnabled(true);
-	ui->spnbx_current_cloud->setEnabled(true);
+	ui->slider_frame->setMaximum(frame_paths_names.size() - 1);
+	ui->spin_frame->setMaximum(frame_paths_names.size() - 1);
+	ui->slider_frame->setValue(0);
+	ui->slider_frame->setEnabled(true);
+	ui->spin_frame->setEnabled(true);
 
-	ui->spnbx_smooth_window_size->setValue(parameter.size_smooth_window);
-	ui->spnbx_ground_angle->setValue(parameter.angle_ground_removal.ToDegrees());
-	ui->spnbx_separation_angle->setValue(parameter.angle_clustering.ToDegrees());
-	ui->spnbx_min_cluster_size->setValue(parameter.size_cluster_min);
-	ui->spnbx_max_cluster_size->setValue(parameter.size_cluster_max);
-	ui->cmb_diff_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
+	ui->spin_size_smooth_window->setValue(parameter.size_smooth_window);
+	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
+	ui->spin_angle_clustering->setValue(parameter.angle_clustering.ToDegrees());
+	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
+	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
+	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
 
 	setWindowTitle(QString::fromUtf8(parameter.dataset_name.c_str()));
 
-	viewer_->update();
+	ui->viewer_point_cloud->update();
 
 	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
 }
@@ -201,10 +200,10 @@ Visualization::onOpen()
 void
 Visualization::onPlay()
 {
-	for (int i = ui->sldr_navigate_clouds->minimum(); i <= ui->sldr_navigate_clouds->maximum(); ++i)
+	for (int i = ui->slider_frame->minimum(); i <= ui->slider_frame->maximum(); ++i)
 	{
-		ui->sldr_navigate_clouds->setValue(i);
-		viewer_->update();
+		ui->slider_frame->setValue(i);
+		ui->viewer_point_cloud->update();
 		QApplication::processEvents();
 	}
 
@@ -216,15 +215,15 @@ Visualization::onParameterUpdated()
 {
 	DepthClusteringParameter parameter = depth_clustering_->getParameter();
 
-	parameter.size_smooth_window = ui->spnbx_smooth_window_size->value();
-	parameter.angle_ground_removal = Radians::FromDegrees(ui->spnbx_ground_angle->value());
-	parameter.angle_clustering = Radians::FromDegrees(ui->spnbx_separation_angle->value());
-	parameter.size_cluster_min = ui->spnbx_min_cluster_size->value();
-	parameter.size_cluster_max = ui->spnbx_max_cluster_size->value();
+	parameter.size_smooth_window = ui->spin_size_smooth_window->value();
+	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
+	parameter.angle_clustering = Radians::FromDegrees(ui->spin_angle_clustering->value());
+	parameter.size_cluster_min = ui->spin_size_cluster_min->value();
+	parameter.size_cluster_max = ui->spin_size_cluster_max->value();
 
 	DiffFactory::DiffType difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 
-	switch (ui->cmb_diff_type->currentIndex())
+	switch (ui->combo_difference_type->currentIndex())
 	{
 	case 0:
 	{
@@ -273,7 +272,7 @@ Visualization::onParameterUpdated()
 	clusterer->SetDiffType(difference_type);
 	clusterer->SetLabelImageClient(this);
 
-	this->onSliderMovedTo(ui->sldr_navigate_clouds->value());
+	this->onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Updated parameters." << std::endl;
 }
@@ -296,7 +295,7 @@ Visualization::onSliderMovedTo(int frame_number)
 
 	const auto &frame_path_name = frame_paths_names[frame_number];
 
-	ui->lbl_cloud_name->setText(QString::fromStdString(frame_path_name));
+	ui->label_frame->setText(QString::fromStdString(frame_path_name));
 	depth_clustering_->processOneFrameForDataset(frame_path_name);
 
 	auto current_depth_image = depth_clustering_->getCurrentDepthImage();
@@ -313,8 +312,8 @@ Visualization::onSliderMovedTo(int frame_number)
 	QImage current_depth_qimage = MatToQImage(current_depth_image);
 	scene_.reset(new QGraphicsScene);
 	scene_->addPixmap(QPixmap::fromImage(current_depth_qimage));
-	ui->gfx_projection_view->setScene(scene_.get());
-	ui->gfx_projection_view->fitInView(scene_->itemsBoundingRect());
+	ui->viewer_image_depth->setScene(scene_.get());
+	ui->viewer_image_depth->fitInView(scene_->itemsBoundingRect());
 
 	std::cout << "[INFO]: Displayed depth image in " << timer.measure(Timer::Units::Micro) << "us."
 			<< std::endl;
@@ -332,8 +331,8 @@ Visualization::updateViewer()
 	auto bounding_box = depth_clustering_->getBoundingBox();
 	const auto &parameter = depth_clustering_->getParameter();
 
-	viewer_->Clear();
-	viewer_->AddDrawable(DrawableCloud::FromCloud(current_cloud));
+	ui->viewer_point_cloud->Clear();
+	ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(current_cloud));
 
 	switch (parameter.bounding_box_type)
 	{
@@ -354,7 +353,7 @@ Visualization::updateViewer()
 
 			auto cube_drawable = DrawableCube::Create(center, extent);
 
-			viewer_->AddDrawable(std::move(cube_drawable));
+			ui->viewer_point_cloud->AddDrawable(std::move(cube_drawable));
 		}
 
 		break;
@@ -376,7 +375,7 @@ Visualization::updateViewer()
 
 			auto polygon_drawable = DrawablePolygon3d::Create(hull, diff_z);
 
-			viewer_->AddDrawable(std::move(polygon_drawable));
+			ui->viewer_point_cloud->AddDrawable(std::move(polygon_drawable));
 		}
 
 		break;
@@ -392,5 +391,5 @@ Visualization::updateViewer()
 	}
 	}
 
-	viewer_->update();
+	ui->viewer_point_cloud->update();
 }

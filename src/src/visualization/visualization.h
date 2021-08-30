@@ -71,7 +71,6 @@ private:
 	std::unique_ptr<QGraphicsScene> scene_labels_ = nullptr;
 	std::unique_ptr<DepthClustering> depth_clustering_ = nullptr;
 
-	Viewer *viewer_ = nullptr;
 	std::string dataset_path_;
 };
 
