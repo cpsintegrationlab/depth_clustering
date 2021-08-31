@@ -60,19 +60,26 @@ getGroundTruthFrameFlat(const boost::property_tree::ptree& ground_truth_tree,
 int
 main(int argc, char* argv[])
 {
-	std::string dataset_path = "../../../data/segment-2506799708748258165_6455_000_6475_000/";
+	std::string dataset_path;
 	int display_time = 0;
 
 	if (argc > 1)
 	{
 		if (std::string(argv[1]) == "-h")
 		{
-			std::cout << std::endl << "Usage: " << argv[0] << " [dataset path] [display time]"
-					<< std::endl << std::endl;
+			std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset path]" << std::endl;
+			std::cout << "\t" << argv[0] << " [dataset path] [display time]" << std::endl
+					<< std::endl;
 			return 0;
 		}
 
 		dataset_path = argv[1];
+	}
+	else
+	{
+		std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset path]" << std::endl;
+		std::cout << "\t" << argv[0] << " [dataset path] [display time]" << std::endl << std::endl;
+		return 0;
 	}
 
 	if (argc > 2)
