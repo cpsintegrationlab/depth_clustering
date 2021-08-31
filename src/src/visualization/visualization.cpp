@@ -72,6 +72,13 @@ Visualization::Visualization(QWidget* parent) :
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 
 	depth_clustering_ = std::unique_ptr<DepthClustering>(new DepthClustering());
+
+	auto dataset_path = QCoreApplication::arguments().at(1).toStdString();
+
+	if (dataset_path != "")
+	{
+		openDataset(dataset_path);
+	}
 }
 
 void
@@ -130,52 +137,20 @@ Visualization::keyPressEvent(QKeyEvent* event)
 }
 
 void
+Visualization::showEvent(QShowEvent* event)
+{
+	QWidget::showEvent(event);
+
+	ui->viewer_point_cloud->update();
+	ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
+	ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
+	ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
+}
+
+void
 Visualization::onOpen()
 {
-	play_ = false;
-	dataset_path_ = QFileDialog::getExistingDirectory(this).toStdString();
-
-	if (!depth_clustering_)
-	{
-		std::cerr << "[ERROR]: API missing." << std::endl;
-		return;
-	}
-
-	depth_clustering_->initializeForDataset(dataset_path_);
-
-	auto folder_reader = depth_clustering_->getFolderReader();
-	const auto &parameter = depth_clustering_->getParameter();
-	const auto &frame_paths_names = folder_reader->GetAllFilePaths();
-
-	if (frame_paths_names.empty())
-	{
-		std::cerr << "[ERROR]: Empty folder at \"" << dataset_path_ << "\"." << std::endl;
-		return;
-	}
-
-	depth_clustering_->getClusterer()->SetLabelImageClient(this);
-
-	ui->slider_frame->setMaximum(frame_paths_names.size() - 1);
-	ui->spin_frame->setMaximum(frame_paths_names.size() - 1);
-	ui->slider_frame->setValue(0);
-
-	ui->button_play->setEnabled(true);
-	ui->button_stop->setEnabled(true);
-	ui->slider_frame->setEnabled(true);
-	ui->spin_frame->setEnabled(true);
-
-	ui->spin_size_smooth_window->setValue(parameter.size_smooth_window);
-	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
-	ui->spin_angle_clustering->setValue(parameter.angle_clustering.ToDegrees());
-	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
-	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
-	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
-
-	setWindowTitle(QString::fromStdString(dataset_path_));
-
-	onSliderMovedTo(ui->slider_frame->value());
-
-	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
+	openDataset(QFileDialog::getExistingDirectory(this).toStdString());
 }
 
 void
@@ -355,6 +330,55 @@ Visualization::onParameterUpdated()
 	this->onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Updated parameters." << std::endl;
+}
+
+void
+Visualization::openDataset(const std::string& dataset_path)
+{
+	dataset_path_ = dataset_path;
+	play_ = false;
+
+	if (!depth_clustering_)
+	{
+		std::cerr << "[ERROR]: API missing." << std::endl;
+		return;
+	}
+
+	depth_clustering_->initializeForDataset(dataset_path_);
+
+	auto folder_reader = depth_clustering_->getFolderReader();
+	const auto &parameter = depth_clustering_->getParameter();
+	const auto &frame_paths_names = folder_reader->GetAllFilePaths();
+
+	if (frame_paths_names.empty())
+	{
+		std::cerr << "[ERROR]: Empty folder at \"" << dataset_path_ << "\"." << std::endl;
+		return;
+	}
+
+	depth_clustering_->getClusterer()->SetLabelImageClient(this);
+
+	ui->slider_frame->setMaximum(frame_paths_names.size() - 1);
+	ui->spin_frame->setMaximum(frame_paths_names.size() - 1);
+	ui->slider_frame->setValue(0);
+
+	ui->button_play->setEnabled(true);
+	ui->button_stop->setEnabled(true);
+	ui->slider_frame->setEnabled(true);
+	ui->spin_frame->setEnabled(true);
+
+	ui->spin_size_smooth_window->setValue(parameter.size_smooth_window);
+	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
+	ui->spin_angle_clustering->setValue(parameter.angle_clustering.ToDegrees());
+	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
+	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
+	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
+
+	setWindowTitle(QString::fromStdString(dataset_path_));
+
+	onSliderMovedTo(ui->slider_frame->value());
+
+	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
 }
 
 void

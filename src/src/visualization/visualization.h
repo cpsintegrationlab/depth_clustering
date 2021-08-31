@@ -47,6 +47,9 @@ protected:
 	void
 	keyPressEvent(QKeyEvent* event) override;
 
+	void
+	showEvent(QShowEvent* event) override;
+
 private slots:
 
 	void
@@ -68,6 +71,9 @@ private slots:
 	onParameterUpdated();
 
 private:
+
+	void
+	openDataset(const std::string& dataset_path);
 
 	void
 	updateViewerPointCloud();

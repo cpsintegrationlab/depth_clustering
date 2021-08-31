@@ -25,7 +25,7 @@ void Viewer::draw() {
 }
 
 void Viewer::init() {
-  setSceneRadius(100.0);
+  setSceneRadius(75.0);
   setBackgroundColor(QColor(0, 0, 0));
   camera()->showEntireScene();
   glDisable(GL_LIGHTING);
