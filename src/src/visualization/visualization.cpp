@@ -33,11 +33,20 @@ Visualization::Visualization(QWidget* parent) :
 		QWidget(parent), ui(new Ui::Visualization), play_(false)
 {
 	ui->setupUi(this);
+
 	ui->button_play->setEnabled(false);
 	ui->button_pause->setEnabled(false);
 	ui->button_stop->setEnabled(false);
 	ui->slider_frame->setEnabled(false);
 	ui->spin_frame->setEnabled(false);
+	ui->spin_angle_ground_removal->setEnabled(false);
+	ui->spin_size_smooth_window->setEnabled(false);
+	ui->spin_clustering_threshold->setEnabled(false);
+	ui->combo_difference_type->setEnabled(false);
+	ui->spin_size_cluster_min->setEnabled(false);
+	ui->spin_size_cluster_max->setEnabled(false);
+	ui->combo_bounding_box_type->setEnabled(false);
+
 	ui->viewer_image_difference->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_difference->setCacheMode(QGraphicsView::CacheBackground);
 	ui->viewer_image_difference->setRenderHints(
@@ -438,6 +447,13 @@ Visualization::openDataset(const std::string& dataset_path)
 	ui->button_stop->setEnabled(true);
 	ui->slider_frame->setEnabled(true);
 	ui->spin_frame->setEnabled(true);
+	ui->spin_angle_ground_removal->setEnabled(true);
+	ui->spin_size_smooth_window->setEnabled(true);
+	ui->spin_clustering_threshold->setEnabled(true);
+	ui->combo_difference_type->setEnabled(true);
+	ui->spin_size_cluster_min->setEnabled(true);
+	ui->spin_size_cluster_max->setEnabled(true);
+	ui->combo_bounding_box_type->setEnabled(true);
 
 	ui->spin_size_smooth_window->setValue(parameter.size_smooth_window);
 	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
