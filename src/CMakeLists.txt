@@ -10,11 +10,22 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -fPIC -Wno-unused-parameter")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-# Set CMake parameters
+# Set CMake module path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../cmake")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/bin)
+
+# Set debug installation paths
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/debug/lib)
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/debug/lib)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/debug/bin)
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+# Set release installation paths
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/release/lib)
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/release/lib)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/release/bin)
+endif (CMAKE_BUILD_TYPE STREQUAL "Release")
 
 # Find packages
 find_package(Threads REQUIRED)
