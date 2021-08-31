@@ -72,13 +72,25 @@ Visualization::Visualization(QWidget* parent) :
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 
+	scene_difference_.reset(new QGraphicsScene);
+	scene_difference_->addPixmap(QPixmap::fromImage(QImage()));
+	scene_segmentation_.reset(new QGraphicsScene);
+	scene_segmentation_->addPixmap(QPixmap::fromImage(QImage()));
+	scene_depth_.reset(new QGraphicsScene);
+	scene_depth_->addPixmap(QPixmap::fromImage(QImage()));
+
 	depth_clustering_ = std::unique_ptr<DepthClustering>(new DepthClustering());
 
-	auto dataset_path = QCoreApplication::arguments().at(1).toStdString();
+	const auto &arguments = QCoreApplication::arguments();
 
-	if (dataset_path != "")
+	if (arguments.size() > 1)
 	{
-		openDataset(dataset_path);
+		auto dataset_path = arguments.at(1).toStdString();
+
+		if (dataset_path != "")
+		{
+			openDataset(dataset_path);
+		}
 	}
 }
 
@@ -143,8 +155,11 @@ Visualization::showEvent(QShowEvent* event)
 	QWidget::showEvent(event);
 
 	ui->viewer_point_cloud->update();
+	ui->viewer_image_difference->setScene(scene_difference_.get());
 	ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
+	ui->viewer_image_segmentation->setScene(scene_segmentation_.get());
 	ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
+	ui->viewer_image_depth->setScene(scene_depth_.get());
 	ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
 }
 
@@ -419,6 +434,7 @@ Visualization::openDataset(const std::string& dataset_path)
 	ui->slider_frame->setValue(0);
 
 	ui->button_play->setEnabled(true);
+	ui->button_pause->setEnabled(false);
 	ui->button_stop->setEnabled(true);
 	ui->slider_frame->setEnabled(true);
 	ui->spin_frame->setEnabled(true);
@@ -463,6 +479,8 @@ Visualization::openDataset(const std::string& dataset_path)
 		break;
 	}
 	}
+
+	ui->combo_bounding_box_type->setCurrentIndex(static_cast<int>(parameter.bounding_box_type));
 
 	setWindowTitle(QString::fromStdString(dataset_path_));
 

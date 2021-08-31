@@ -33,7 +33,7 @@ ParameterFactory::getDepthClusteringParameter()
 {
 	if (!depth_clustering_tree_)
 	{
-		std::cout << "[ERROR]: Depth clustering configuration missing." << std::endl;
+		std::cout << "[WARN]: Depth clustering configuration missing." << std::endl;
 		return DepthClusteringParameter();
 	}
 
@@ -161,11 +161,10 @@ ParameterFactory::getLidarProjectionParameter()
 {
 	if (!lidar_projection_tree_)
 	{
-		std::cout << "[ERROR]: Lidar projection configuration missing." << std::endl;
-		return nullptr;
+		std::cout << "[WARN]: Lidar projection configuration missing." << std::endl;
+		return std::unique_ptr<ProjectionParams>(new ProjectionParams());
 	}
 
-	ProjectionParams parameter;
 	int horizontal_steps;
 	int beams;
 	int horizontal_angle_start;
@@ -217,7 +216,7 @@ ParameterFactory::getCameraProjectionParameter()
 {
 	if (!camera_projection_tree_)
 	{
-		std::cout << "[ERROR]: Camera projection configuration missing." << std::endl;
+		std::cout << "[WARN]: Camera projection configuration missing." << std::endl;
 		return CameraProjectionParameter();
 	}
 
@@ -315,7 +314,7 @@ ParameterFactory::getLoggerParameter()
 {
 	if (!logger_tree_)
 	{
-		std::cout << "[ERROR]: Logger configuration missing." << std::endl;
+		std::cout << "[WARN]: Logger configuration missing." << std::endl;
 		return LoggerParameter();
 	}
 

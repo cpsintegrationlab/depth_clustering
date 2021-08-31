@@ -112,9 +112,12 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 	auto logger_parameter = parameter_factory_->getLoggerParameter();
 
 	// Remove extrinsic translation vector since bounding boxes are already in camera frame
-	camera_projection_parameter.extrinsic[3] = 0;
-	camera_projection_parameter.extrinsic[7] = 0;
-	camera_projection_parameter.extrinsic[11] = 0;
+	if (camera_projection_parameter.extrinsic.size() >= 12)
+	{
+		camera_projection_parameter.extrinsic[3] = 0;
+		camera_projection_parameter.extrinsic[7] = 0;
+		camera_projection_parameter.extrinsic[11] = 0;
+	}
 
 	logger_parameter.log_path = dataset_path_;
 
