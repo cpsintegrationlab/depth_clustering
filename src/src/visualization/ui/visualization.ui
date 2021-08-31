@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1284</width>
-    <height>919</height>
+    <height>1194</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -138,7 +138,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="group_angle_clustering">
+        <widget class="QGroupBox" name="group_clustering_threshold">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -153,12 +153,15 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
-           <widget class="QDoubleSpinBox" name="spin_angle_clustering">
+           <widget class="QDoubleSpinBox" name="spin_clustering_threshold">
             <property name="minimum">
-             <double>1.000000000000000</double>
+             <double>0.000000000000000</double>
             </property>
             <property name="maximum">
              <double>180.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
             </property>
             <property name="value">
              <double>10.000000000000000</double>
@@ -192,7 +195,7 @@
             </item>
             <item>
              <property name="text">
-              <string>Simple (m)</string>
+              <string>Simple Distance (m)</string>
              </property>
             </item>
            </widget>

@@ -41,6 +41,7 @@ ParameterFactory::getDepthClusteringParameter()
 
 	auto tree = *depth_clustering_tree_;
 
+	auto distance_clustering_optional = tree.get_optional<float>("distance_clustering");
 	auto angle_clustering_optional = tree.get_optional<float>("angle_clustering");
 	auto angle_ground_removal_optional = tree.get_optional<float>("angle_ground_removal");
 	auto size_cluster_min_optional = tree.get_optional<int>("size_cluster_min");
@@ -53,6 +54,11 @@ ParameterFactory::getDepthClusteringParameter()
 	auto ground_truth_file_name_optional = tree.get_optional<std::string>("ground_truth_file_name");
 	auto ground_truth_flat_file_name_optional = tree.get_optional<std::string>(
 			"ground_truth_flat_file_name");
+
+	if (distance_clustering_optional)
+	{
+		parameter.distance_clustering = *distance_clustering_optional;
+	}
 
 	if (angle_clustering_optional)
 	{

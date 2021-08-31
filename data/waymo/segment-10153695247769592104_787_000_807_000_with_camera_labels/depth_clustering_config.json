@@ -1,5 +1,6 @@
 {
     "depth_clustering": {
+        "distance_clustering": 5,
         "angle_clustering": 10,
         "angle_ground_removal": 9,
         "size_cluster_min": 10,

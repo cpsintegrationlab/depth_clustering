@@ -70,6 +70,9 @@ private slots:
 	void
 	onParameterUpdated();
 
+	void
+	onDifferenceTypeUpdated();
+
 private:
 
 	void

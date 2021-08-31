@@ -18,6 +18,7 @@ using depth_clustering::Radians;
 
 struct DepthClusteringParameter
 {
+	double distance_clustering;
 	Radians angle_clustering;
 	Radians angle_ground_removal;
 	int size_cluster_min;
@@ -31,8 +32,9 @@ struct DepthClusteringParameter
 	std::string ground_truth_flat_file_name;
 
 	DepthClusteringParameter() :
-			angle_clustering(10_deg), angle_ground_removal(9_deg), size_cluster_min(10), size_cluster_max(
-					20000), size_smooth_window(5), bounding_box_type(BoundingBox::Type::Cube), difference_type(
+			distance_clustering(0.17), angle_clustering(10_deg), angle_ground_removal(9_deg), size_cluster_min(
+					10), size_cluster_max(20000), size_smooth_window(5), bounding_box_type(
+					BoundingBox::Type::Cube), difference_type(
 					DiffFactory::DiffType::ANGLES_PRECOMPUTED), dataset_file_type(".tiff"), dataset_name(
 					""), ground_truth_file_name("waymo_ground_truth_cube.json"), ground_truth_flat_file_name(
 					"depth_clustering_ground_truth_flat.json")

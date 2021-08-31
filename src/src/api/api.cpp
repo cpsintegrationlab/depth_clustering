@@ -38,12 +38,49 @@ DepthClustering::initializeForApollo()
 	projection_parameter_ = ProjectionParams::APOLLO();
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
-	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(
-			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type);
 	logger_ = std::make_shared<Logger>();
 
-	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
+	Radians clustering_threshold;
+
+	switch (parameter_.difference_type)
+	{
+	case DiffFactory::DiffType::ANGLES:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	case DiffFactory::DiffType::ANGLES_PRECOMPUTED:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST_PRECOMPUTED:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::SIMPLE:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	default:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	}
+
+	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(clustering_threshold,
+			parameter_.size_cluster_min, parameter_.size_cluster_max);
+
+	clusterer_->SetDiffType(parameter_.difference_type);
 	logger_->setBoundingBox(bounding_box_);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
@@ -86,13 +123,50 @@ DepthClustering::initializeForDataset(std::string& dataset_path)
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
-	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(
-			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
 			camera_projection_parameter);
 	logger_ = std::make_shared<Logger>(logger_parameter);
 
-	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
+	Radians clustering_threshold;
+
+	switch (parameter_.difference_type)
+	{
+	case DiffFactory::DiffType::ANGLES:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	case DiffFactory::DiffType::ANGLES_PRECOMPUTED:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST_PRECOMPUTED:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::SIMPLE:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	default:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	}
+
+	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(clustering_threshold,
+			parameter_.size_cluster_min, parameter_.size_cluster_max);
+
+	clusterer_->SetDiffType(parameter_.difference_type);
 	logger_->setBoundingBox(bounding_box_);
 
 	depth_ground_remover_->AddClient(clusterer_.get());
@@ -170,12 +244,49 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
-	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(
-			parameter_.angle_clustering, parameter_.size_cluster_min, parameter_.size_cluster_max);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
 			camera_projection_parameter);
 
-	clusterer_->SetDiffType(DiffFactory::DiffType::ANGLES);
+	Radians clustering_threshold;
+
+	switch (parameter_.difference_type)
+	{
+	case DiffFactory::DiffType::ANGLES:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	case DiffFactory::DiffType::ANGLES_PRECOMPUTED:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST_PRECOMPUTED:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::SIMPLE:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	default:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	}
+
+	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(clustering_threshold,
+			parameter_.size_cluster_min, parameter_.size_cluster_max);
+
+	clusterer_->SetDiffType(parameter_.difference_type);
 	logger_->setBoundingBox(bounding_box_);
 
 	depth_ground_remover_->AddClient(clusterer_.get());

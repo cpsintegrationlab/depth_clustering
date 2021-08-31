@@ -64,9 +64,10 @@ Visualization::Visualization(QWidget* parent) :
 			SLOT(onParameterUpdated()));
 	connect(ui->spin_size_smooth_window, SIGNAL(valueChanged(int)), this,
 			SLOT(onParameterUpdated()));
-	connect(ui->spin_angle_clustering, SIGNAL(valueChanged(double)), this,
+	connect(ui->spin_clustering_threshold, SIGNAL(valueChanged(double)), this,
 			SLOT(onParameterUpdated()));
-	connect(ui->combo_difference_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_difference_type, SIGNAL(activated(int)), this,
+			SLOT(onDifferenceTypeUpdated()));
 	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
@@ -244,7 +245,6 @@ Visualization::onParameterUpdated()
 {
 	DepthClusteringParameter parameter = depth_clustering_->getParameter();
 
-	parameter.angle_clustering = Radians::FromDegrees(ui->spin_angle_clustering->value());
 	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
 	parameter.size_cluster_min = ui->spin_size_cluster_min->value();
 	parameter.size_cluster_max = ui->spin_size_cluster_max->value();
@@ -276,6 +276,56 @@ Visualization::onParameterUpdated()
 
 	parameter.bounding_box_type = bounding_box_type;
 
+	switch (ui->combo_difference_type->currentIndex())
+	{
+	case 0:
+	{
+		parameter.angle_clustering = Radians::FromDegrees(ui->spin_clustering_threshold->value());
+		break;
+	}
+	case 1:
+	{
+		parameter.angle_clustering = Radians::FromDegrees(ui->spin_clustering_threshold->value());
+		break;
+	}
+	case 2:
+	{
+		parameter.distance_clustering = ui->spin_clustering_threshold->value();
+		break;
+	}
+	case 3:
+	{
+		parameter.distance_clustering = ui->spin_clustering_threshold->value();
+		break;
+	}
+	case 4:
+	{
+		parameter.distance_clustering = ui->spin_clustering_threshold->value();
+		break;
+	}
+	default:
+	{
+		parameter.angle_clustering = Radians::FromDegrees(ui->spin_clustering_threshold->value());
+		break;
+	}
+	}
+
+	depth_clustering_->setParameter(parameter);
+
+	auto clusterer = depth_clustering_->getClusterer();
+
+	clusterer->SetLabelImageClient(this);
+
+	this->onSliderMovedTo(ui->slider_frame->value());
+
+	std::cout << "[INFO]: Updated parameters." << std::endl;
+}
+
+void
+Visualization::onDifferenceTypeUpdated()
+{
+	DepthClusteringParameter parameter = depth_clustering_->getParameter();
+
 	DiffFactory::DiffType difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 
 	switch (ui->combo_difference_type->currentIndex())
@@ -284,36 +334,42 @@ Visualization::onParameterUpdated()
 	{
 		std::cout << "[INFO]: Difference type: angles." << std::endl;
 		difference_type = DiffFactory::DiffType::ANGLES;
+		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	case 1:
 	{
 		std::cout << "[INFO]: Difference type: precomputed angles." << std::endl;
 		difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
+		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	case 2:
 	{
 		std::cout << "[INFO]: Difference type: line distance." << std::endl;
 		difference_type = DiffFactory::DiffType::LINE_DIST;
+		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	case 3:
 	{
 		std::cout << "[INFO]: Difference type: precomputed line distance." << std::endl;
 		difference_type = DiffFactory::DiffType::LINE_DIST_PRECOMPUTED;
+		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	case 4:
 	{
-		std::cout << "[INFO]: Difference type: simple." << std::endl;
+		std::cout << "[INFO]: Difference type: simple distance." << std::endl;
 		difference_type = DiffFactory::DiffType::SIMPLE;
+		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	default:
 	{
 		std::cout << "[INFO]: Difference type: precomputed angles." << std::endl;
 		difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
+		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	}
@@ -329,7 +385,7 @@ Visualization::onParameterUpdated()
 
 	this->onSliderMovedTo(ui->slider_frame->value());
 
-	std::cout << "[INFO]: Updated parameters." << std::endl;
+	std::cout << "[INFO]: Updated difference type." << std::endl;
 }
 
 void
@@ -369,10 +425,44 @@ Visualization::openDataset(const std::string& dataset_path)
 
 	ui->spin_size_smooth_window->setValue(parameter.size_smooth_window);
 	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
-	ui->spin_angle_clustering->setValue(parameter.angle_clustering.ToDegrees());
 	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
 	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
+
 	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
+
+	switch (parameter.difference_type)
+	{
+	case DiffFactory::DiffType::ANGLES:
+	{
+		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
+		break;
+	}
+	case DiffFactory::DiffType::ANGLES_PRECOMPUTED:
+	{
+		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST:
+	{
+		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST_PRECOMPUTED:
+	{
+		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::SIMPLE:
+	{
+		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
+		break;
+	}
+	default:
+	{
+		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
+		break;
+	}
+	}
 
 	setWindowTitle(QString::fromStdString(dataset_path_));
 
