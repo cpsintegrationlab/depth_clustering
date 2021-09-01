@@ -1,42 +1,82 @@
 # Depth Clustering
 
-This application depends on the installation of packages as follows:
+## Core Applications
+
+The core applications depend on the installation of the following packages:
 
 ```bash
-apt install libopencv-dev libqglviewer-dev-qt5 freeglut3-dev qtbase5-dev cmake libblkid-dev e2fslibs-dev libboost-all-dev libaudit-dev libeigen3-dev
+apt install cmake libboost-all-dev libeigen3-dev libopencv-dev freeglut3-dev
 ```
 
-With the above packages installed, navigate under the project folder, then set up the project as follows:
+With the above packages installed, navigate under the project folder, and then set up the project as follows:
 
 ```bash
 cd scripts
 ./setup.bash
 ```
 
-Then, build the project as follows:
+Then, navigate under the build folder, and build the core applications as follows:
 
 ```bash
-cd ../build/release
+cd build/release
 make
 ```
 
-Then, run the command line application as follows:
+To run the depth clustering application, do as follows:
 
 ```bash
-cd ../../install/bin
+cd install/release/bin
 ./depth_clustering dataset_path
 ```
 
-To visualize the detections frame by frame, run the camera visualizer as follows:
+To run the ground truth projection application, do as follows:
 
 ```bash
+cd install/release/bin
+./ground_truth_projection dataset_path
+```
+
+To run the camera visualizer application frame by frame, do as follows:
+
+```bash
+cd install/release/bin
 ./camera_visualizer dataset_path 0
 ```
 
-To visualize the detections as a video, run the camera visualizer as follows:
+To run the camera visualizer application as a video, do as follows:
 
 ```bash
+cd install/release/bin
 ./camera_visualizer dataset_path 1
 ```
 
-After the executions, any resulting output JSON files would be stored under `dataset_path`.
+## Lidar Visualizer Application
+
+The lidar visualizer application depends on the additional installation of the following packages:
+
+```bash
+apt install qtbase5-dev libqglviewer-dev-qt5
+```
+
+The lidar visualizer application is built independently. With the above packages installed, navigate under the build folder, and then build the lidar visualizer application as follows:
+
+```bash
+cd build/release
+make lidar_visualizer
+```
+
+To run the lidar visualizer application, do as follows:
+
+```bash
+cd install/release/bin
+./lidar_visualizer
+```
+
+To run the lidar visualizer application with a dataset path, do as follows:
+
+```bash
+cd install/release/bin
+./lidar_visualizer dataset_path
+```
+
+Note: any resulting output JSON files would be stored under the provided `dataset_path` folder.
