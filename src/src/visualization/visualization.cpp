@@ -100,12 +100,7 @@ Visualization::Visualization(QWidget* parent) :
 
 	if (arguments.size() > 1)
 	{
-		auto dataset_path = arguments.at(1).toStdString();
-
-		if (dataset_path != "")
-		{
-			openDataset(dataset_path);
-		}
+		openDataset(arguments.at(1).toStdString());
 	}
 }
 
@@ -423,6 +418,12 @@ Visualization::onDifferenceTypeUpdated()
 void
 Visualization::openDataset(const std::string& dataset_path)
 {
+	if (dataset_path == "")
+	{
+		std::cerr << "[ERROR]: Empty dataset path." << std::endl;
+		return;
+	}
+
 	dataset_path_ = dataset_path;
 	play_ = false;
 
