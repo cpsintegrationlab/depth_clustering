@@ -8,14 +8,14 @@ The core applications depend on the installation of the following packages:
 apt install cmake libboost-all-dev libeigen3-dev libopencv-dev freeglut3-dev
 ```
 
-With the above packages installed, navigate under the project folder, and then set up the project as follows:
+With the above packages installed, set up the project as follows:
 
 ```bash
 cd scripts
 ./setup.bash
 ```
 
-Then, navigate under the build folder, and build the core applications as follows:
+Then, build the core applications as follows:
 
 ```bash
 cd build/release
@@ -36,11 +36,11 @@ cd install/release/bin
 ./ground_truth_projection dataset_path
 ```
 
-To run the camera visualizer application frame by frame, do as follows:
+To run the camera visualizer application, do as follows:
 
 ```bash
 cd install/release/bin
-./camera_visualizer dataset_path 0
+./camera_visualizer dataset_path
 ```
 
 To run the camera visualizer application as a video, do as follows:
@@ -58,7 +58,7 @@ The lidar visualizer application depends on the additional installation of the f
 apt install qtbase5-dev libqglviewer-dev-qt5
 ```
 
-The lidar visualizer application is built independently. With the above packages installed, navigate under the build folder, and then build the lidar visualizer application as follows:
+The lidar visualizer application is built independently. With the above packages installed, build the lidar visualizer application as follows:
 
 ```bash
 cd build/release

@@ -74,6 +74,11 @@ main(int argc, char* argv[])
 		}
 
 		dataset_path = argv[1];
+
+		if (dataset_path[dataset_path.size() - 1] != '/')
+		{
+			dataset_path += "/";
+		}
 	}
 	else
 	{
