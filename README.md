@@ -79,4 +79,4 @@ cd install/release/bin
 ./lidar_visualizer dataset_path
 ```
 
-Note: any resulting output JSON files would be stored under the provided `dataset_path` folder.
+Note: any resulting output JSON files would be stored under the provided `dataset_path` folder. Two example datasets are provided under the `data` folder.
