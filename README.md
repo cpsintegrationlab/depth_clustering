@@ -52,7 +52,7 @@ cd install/release/bin
 
 ## Lidar Visualizer Application
 
-The lidar visualizer application depends on the additional installation of the following packages:
+The lidar visualizer application depends on the installation of the following additional packages:
 
 ```bash
 apt install qtbase5-dev libqglviewer-dev-qt5
