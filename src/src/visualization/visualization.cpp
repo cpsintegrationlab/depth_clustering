@@ -34,6 +34,12 @@ Visualization::Visualization(QWidget* parent) :
 {
 	ui->setupUi(this);
 
+	ui->frame_control->setFixedHeight(ui->frame_control->minimumHeight());
+	ui->frame_parameter->setFixedHeight(ui->frame_parameter->minimumHeight());
+	ui->viewer_image_difference->setFixedHeight(ui->viewer_image_difference->minimumHeight());
+	ui->viewer_image_segmentation->setFixedHeight(ui->viewer_image_segmentation->minimumHeight());
+	ui->viewer_image_depth->setFixedHeight(ui->viewer_image_depth->minimumHeight());
+
 	ui->button_play->setEnabled(false);
 	ui->button_pause->setEnabled(false);
 	ui->button_stop->setEnabled(false);

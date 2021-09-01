@@ -19,63 +19,130 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_7">
+  <layout class="QGridLayout" name="gridLayout_9">
    <item row="0" column="0">
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" name="">
-      <layout class="QHBoxLayout" name="layout_horizontal_control">
-       <item>
+     <widget class="QFrame" name="frame_control">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>46</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <item row="0" column="0">
         <widget class="QPushButton" name="button_open">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>25</height>
+          </size>
+         </property>
          <property name="text">
           <string>Open</string>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="0" column="1">
         <widget class="QPushButton" name="button_play">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>25</height>
+          </size>
+         </property>
          <property name="text">
           <string>Play</string>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="0" column="2">
         <widget class="QPushButton" name="button_pause">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>25</height>
+          </size>
+         </property>
          <property name="text">
           <string>Pause</string>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="0" column="3">
         <widget class="QPushButton" name="button_stop">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>25</height>
+          </size>
+         </property>
          <property name="text">
           <string>Stop</string>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="0" column="4">
         <widget class="QSlider" name="slider_frame">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>16</height>
+          </size>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QSpinBox" name="spin_frame"/>
+       <item row="0" column="5">
+        <widget class="QSpinBox" name="spin_frame">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>26</height>
+          </size>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
-      <layout class="QHBoxLayout" name="layout_horizontal_parameter">
-       <item>
+     <widget class="QFrame" name="frame_parameter">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>90</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_8">
+       <item row="0" column="0">
         <widget class="QGroupBox" name="group_angle_ground_removal">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>70</height>
+          </size>
          </property>
          <property name="title">
           <string>Ground Removal Threshold (°)</string>
@@ -103,13 +170,19 @@
          </layout>
         </widget>
        </item>
-       <item>
+       <item row="0" column="1">
         <widget class="QGroupBox" name="group_size_smooth_window">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>70</height>
+          </size>
          </property>
          <property name="title">
           <string>Ground Removal Filter Window Size</string>
@@ -137,13 +210,19 @@
          </layout>
         </widget>
        </item>
-       <item>
+       <item row="0" column="2">
         <widget class="QGroupBox" name="group_clustering_threshold">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>70</height>
+          </size>
          </property>
          <property name="title">
           <string>Clustering Threshold</string>
@@ -203,13 +282,19 @@
          </layout>
         </widget>
        </item>
-       <item>
+       <item row="0" column="3">
         <widget class="QGroupBox" name="group_size_cluster">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>70</height>
+          </size>
          </property>
          <property name="title">
           <string>Cluster Size Threshold Range</string>
@@ -229,7 +314,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLabel" name="label_size_cluster_min_2">
+           <widget class="QLabel" name="label_size_cluster_range">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;-&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -248,13 +333,19 @@
          </layout>
         </widget>
        </item>
-       <item>
+       <item row="0" column="4">
         <widget class="QGroupBox" name="group_bounding_box_type">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>70</height>
+          </size>
          </property>
          <property name="title">
           <string>Bounding Box Type</string>
@@ -285,7 +376,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QFrame" name="frame">
+     <widget class="QFrame" name="frame_point_cloud">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
         <horstretch>0</horstretch>
