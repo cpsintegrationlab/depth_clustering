@@ -169,13 +169,15 @@ Visualization::showEvent(QShowEvent* event)
 {
 	QWidget::showEvent(event);
 
-	ui->viewer_point_cloud->update();
-	ui->viewer_image_difference->setScene(scene_difference_.get());
-	ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
-	ui->viewer_image_segmentation->setScene(scene_segmentation_.get());
-	ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
-	ui->viewer_image_depth->setScene(scene_depth_.get());
-	ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
+	refreshViewer();
+}
+
+void
+Visualization::resizeEvent(QResizeEvent* event)
+{
+	QWidget::resizeEvent(event);
+
+	refreshViewer();
 }
 
 void
@@ -599,6 +601,18 @@ Visualization::updateViewerImage()
 
 	scene_depth_.reset(new QGraphicsScene);
 	scene_depth_->addPixmap(QPixmap::fromImage(qimage_depth));
+	ui->viewer_image_depth->setScene(scene_depth_.get());
+	ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
+}
+
+void
+Visualization::refreshViewer()
+{
+	ui->viewer_point_cloud->update();
+	ui->viewer_image_difference->setScene(scene_difference_.get());
+	ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
+	ui->viewer_image_segmentation->setScene(scene_segmentation_.get());
+	ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
 	ui->viewer_image_depth->setScene(scene_depth_.get());
 	ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
 }

@@ -50,6 +50,9 @@ protected:
 	void
 	showEvent(QShowEvent* event) override;
 
+	void
+	resizeEvent(QResizeEvent* event) override;
+
 private slots:
 
 	void
@@ -83,6 +86,9 @@ private:
 
 	void
 	updateViewerImage();
+
+	void
+	refreshViewer();
 
 	std::unique_ptr<Ui::Visualization> ui;
 	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
