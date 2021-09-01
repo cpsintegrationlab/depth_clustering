@@ -37,7 +37,7 @@ using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
-		QWidget(parent), ui(new Ui::Visualization), play_(false)
+		QWidget(parent), ui(new Ui::Visualization), play_(false), show_bounding_box_(true)
 {
 	ui->setupUi(this);
 
@@ -300,18 +300,28 @@ Visualization::onParameterUpdated()
 	{
 		std::cout << "[INFO]: Bounding box type: cube." << std::endl;
 		bounding_box_type = BoundingBox::Type::Cube;
+		show_bounding_box_ = true;
 		break;
 	}
 	case 1:
 	{
 		std::cout << "[INFO]: Bounding box type: polygon." << std::endl;
 		bounding_box_type = BoundingBox::Type::Polygon;
+		show_bounding_box_ = true;
+		break;
+	}
+	case 2:
+	{
+		std::cout << "[INFO]: Bounding box type: none." << std::endl;
+		bounding_box_type = parameter.bounding_box_type;
+		show_bounding_box_ = false;
 		break;
 	}
 	default:
 	{
 		std::cout << "[INFO]: Bounding box type: cube." << std::endl;
 		bounding_box_type = BoundingBox::Type::Cube;
+		show_bounding_box_ = true;
 		break;
 	}
 	}
@@ -583,61 +593,65 @@ Visualization::updateViewerPointCloud()
 	ui->viewer_point_cloud->AddDrawable(
 			DrawableCloud::FromCloud(cloud_no_ground, Eigen::Vector3f(255, 255, 255)));
 
-	switch (parameter.bounding_box_type)
+	if (show_bounding_box_)
 	{
-	case BoundingBox::Type::Cube:
-	{
-		auto frame_cube = bounding_box->getFrameCube();
-
-		if (!frame_cube)
+		switch (parameter.bounding_box_type)
 		{
-			std::cerr << "[ERROR]: Cube frame missing." << std::endl;
+		case BoundingBox::Type::Cube:
+		{
+			auto frame_cube = bounding_box->getFrameCube();
+
+			if (!frame_cube)
+			{
+				std::cerr << "[ERROR]: Cube frame missing." << std::endl;
+				break;
+			}
+
+			for (const auto &cube : *frame_cube)
+			{
+				auto center = std::get<0>(cube);
+				auto extent = std::get<1>(cube);
+
+				auto cube_drawable = DrawableCube::Create(center, extent);
+
+				ui->viewer_point_cloud->AddDrawable(std::move(cube_drawable));
+			}
+
 			break;
 		}
-
-		for (const auto &cube : *frame_cube)
+		case BoundingBox::Type::Polygon:
 		{
-			auto center = std::get<0>(cube);
-			auto extent = std::get<1>(cube);
+			auto frame_polygon = bounding_box->getFramePolygon();
 
-			auto cube_drawable = DrawableCube::Create(center, extent);
+			if (!frame_polygon)
+			{
+				std::cerr << "[ERROR]: Polygon frame missing." << std::endl;
+				break;
+			}
 
-			ui->viewer_point_cloud->AddDrawable(std::move(cube_drawable));
-		}
+			for (const auto &polygon : *frame_polygon)
+			{
+				auto hull = std::get<0>(polygon);
+				auto diff_z = std::get<1>(polygon);
 
-		break;
-	}
-	case BoundingBox::Type::Polygon:
-	{
-		auto frame_polygon = bounding_box->getFramePolygon();
+				auto polygon_drawable = DrawablePolygon3d::Create(hull, diff_z);
 
-		if (!frame_polygon)
-		{
-			std::cerr << "[ERROR]: Polygon frame missing." << std::endl;
+				ui->viewer_point_cloud->AddDrawable(std::move(polygon_drawable));
+			}
+
 			break;
 		}
-
-		for (const auto &polygon : *frame_polygon)
+		case BoundingBox::Type::Flat:
 		{
-			auto hull = std::get<0>(polygon);
-			auto diff_z = std::get<1>(polygon);
-
-			auto polygon_drawable = DrawablePolygon3d::Create(hull, diff_z);
-
-			ui->viewer_point_cloud->AddDrawable(std::move(polygon_drawable));
+			std::cerr << "[ERROR]: Cannot display flat bounding box in lidar visualizer."
+					<< std::endl;
+			break;
 		}
-
-		break;
-	}
-	case BoundingBox::Type::Flat:
-	{
-		std::cerr << "[ERROR]: Cannot display flat bounding box in lidar visualizer." << std::endl;
-		break;
-	}
-	default:
-	{
-		break;
-	}
+		default:
+		{
+			break;
+		}
+		}
 	}
 
 	ui->viewer_point_cloud->update();

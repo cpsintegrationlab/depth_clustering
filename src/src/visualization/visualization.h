@@ -116,6 +116,7 @@ private:
 	cv::Mat current_depth_image_no_ground_;
 	mutable std::mutex current_depth_image_mutex_;
 	volatile bool play_;
+	bool show_bounding_box_;
 };
 
 #endif  // SRC_VISUALIZATION_VISUALIZATION_H_
