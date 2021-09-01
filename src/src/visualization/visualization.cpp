@@ -159,18 +159,21 @@ Visualization::eventFilter(QObject* object, QEvent* event)
 void
 Visualization::keyPressEvent(QKeyEvent* event)
 {
-	switch (event->key())
+	if (!play_)
 	{
-	case Qt::Key_Right:
-	{
-		ui->spin_frame->setValue(ui->spin_frame->value() + 1);
-		break;
-	}
-	case Qt::Key_Left:
-	{
-		ui->spin_frame->setValue(ui->spin_frame->value() - 1);
-		break;
-	}
+		switch (event->key())
+		{
+		case Qt::Key_Right:
+		{
+			ui->spin_frame->setValue(ui->spin_frame->value() + 1);
+			break;
+		}
+		case Qt::Key_Left:
+		{
+			ui->spin_frame->setValue(ui->spin_frame->value() - 1);
+			break;
+		}
+		}
 	}
 }
 
@@ -207,7 +210,14 @@ Visualization::onPlay()
 	{
 		ui->button_play->setEnabled(false);
 		ui->button_pause->setEnabled(true);
+		ui->slider_frame->setEnabled(false);
+		ui->spin_frame->setEnabled(false);
 		play_ = true;
+	}
+
+	if (ui->slider_frame->value() >= ui->slider_frame->maximum())
+	{
+		ui->slider_frame->setValue(ui->slider_frame->minimum());
 	}
 
 	for (int i = ui->slider_frame->value(); i <= ui->slider_frame->maximum(); ++i)
@@ -236,6 +246,8 @@ Visualization::onPause()
 		play_ = false;
 		ui->button_play->setEnabled(true);
 		ui->button_pause->setEnabled(false);
+		ui->slider_frame->setEnabled(true);
+		ui->spin_frame->setEnabled(true);
 	}
 }
 
@@ -244,7 +256,7 @@ Visualization::onStop()
 {
 	onPause();
 
-	ui->slider_frame->setValue(0);
+	ui->slider_frame->setValue(ui->slider_frame->minimum());
 	ui->viewer_point_cloud->update();
 	QApplication::processEvents();
 }
@@ -473,7 +485,7 @@ Visualization::openDataset(const std::string& dataset_path)
 
 	ui->slider_frame->setMaximum(frame_paths_names.size() - 1);
 	ui->spin_frame->setMaximum(frame_paths_names.size() - 1);
-	ui->slider_frame->setValue(0);
+	ui->slider_frame->setValue(ui->slider_frame->minimum());
 
 	ui->button_play->setEnabled(true);
 	ui->button_pause->setEnabled(false);
