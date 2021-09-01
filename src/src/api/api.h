@@ -42,7 +42,7 @@ public:
 	initializeForApollo();
 
 	bool
-	initializeForDataset(std::string& dataset_path);
+	initializeForDataset(std::string dataset_path);
 
 	const DepthClusteringParameter&
 	getParameter() const;

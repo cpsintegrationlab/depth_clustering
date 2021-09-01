@@ -90,14 +90,14 @@ DepthClustering::initializeForApollo()
 }
 
 bool
-DepthClustering::initializeForDataset(std::string& dataset_path)
+DepthClustering::initializeForDataset(std::string dataset_path)
 {
-	if (dataset_path[dataset_path.size() - 1] != '/')
-	{
-		dataset_path += "/";
-	}
-
 	dataset_path_ = dataset_path;
+
+	if (dataset_path_[dataset_path_.size() - 1] != '/')
+	{
+		dataset_path_ += "/";
+	}
 
 	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path_);
 	parameter_ = parameter_factory_->getDepthClusteringParameter();
