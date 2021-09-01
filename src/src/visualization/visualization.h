@@ -31,7 +31,9 @@ namespace Ui
 class Visualization;
 }
 
-class Visualization: public QWidget, public depth_clustering::AbstractClient<cv::Mat>
+class Visualization: public QWidget,
+		public depth_clustering::AbstractClient<cv::Mat>,
+		public depth_clustering::AbstractClient<Cloud>
 {
 Q_OBJECT
 
@@ -42,6 +44,9 @@ public:
 
 	void
 	OnNewObjectReceived(const cv::Mat& image_segmentation, int client_id = 0) override;
+
+	void
+	OnNewObjectReceived(const Cloud& cloud_no_ground, int client_id = 0) override;
 
 	virtual
 	~Visualization();
@@ -88,6 +93,9 @@ private:
 	void
 	openDataset(const std::string& dataset_path);
 
+	std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
+	separatePointCloud();
+
 	void
 	updateViewerPointCloud();
 
@@ -104,6 +112,9 @@ private:
 	std::unique_ptr<DepthClustering> depth_clustering_ = nullptr;
 
 	std::string dataset_path_;
+	cv::Mat current_depth_image_;
+	cv::Mat current_depth_image_no_ground_;
+	mutable std::mutex current_depth_image_mutex_;
 	volatile bool play_;
 };
 

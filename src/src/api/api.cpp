@@ -237,6 +237,12 @@ DepthClustering::getProjectionParameter() const
 	return projection_parameter_;
 }
 
+std::shared_ptr<DepthGroundRemover>
+DepthClustering::getDepthGroundRemover() const
+{
+	return depth_ground_remover_;
+}
+
 void
 DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 {

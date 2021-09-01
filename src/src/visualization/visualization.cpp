@@ -123,6 +123,14 @@ Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client
 	ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
 }
 
+void
+Visualization::OnNewObjectReceived(const Cloud& cloud_no_ground, int client_id)
+{
+	std::lock_guard<std::mutex> lock_guard(current_depth_image_mutex_);
+	current_depth_image_ = depth_clustering_->getCurrentDepthImage();
+	current_depth_image_no_ground_ = cloud_no_ground.projection_ptr()->depth_image();
+}
+
 Visualization::~Visualization()
 {
 }
@@ -346,9 +354,8 @@ Visualization::onParameterUpdated()
 
 	depth_clustering_->setParameter(parameter);
 
-	auto clusterer = depth_clustering_->getClusterer();
-
-	clusterer->SetLabelImageClient(this);
+	depth_clustering_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_->getClusterer()->SetLabelImageClient(this);
 
 	this->onSliderMovedTo(ui->slider_frame->value());
 
@@ -412,10 +419,9 @@ Visualization::onDifferenceTypeUpdated()
 
 	depth_clustering_->setParameter(parameter);
 
-	auto clusterer = depth_clustering_->getClusterer();
-
-	clusterer->SetDiffType(difference_type);
-	clusterer->SetLabelImageClient(this);
+	depth_clustering_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_->getClusterer()->SetDiffType(difference_type);
+	depth_clustering_->getClusterer()->SetLabelImageClient(this);
 
 	this->onSliderMovedTo(ui->slider_frame->value());
 
@@ -452,6 +458,7 @@ Visualization::openDataset(const std::string& dataset_path)
 		return;
 	}
 
+	depth_clustering_->getDepthGroundRemover()->AddClient(this);
 	depth_clustering_->getClusterer()->SetLabelImageClient(this);
 
 	ui->slider_frame->setMaximum(frame_paths_names.size() - 1);
@@ -521,6 +528,44 @@ Visualization::openDataset(const std::string& dataset_path)
 	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
 }
 
+std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
+Visualization::separatePointCloud()
+{
+	cv::Mat current_depth_image;
+	cv::Mat current_depth_image_no_ground;
+	const ProjectionParams projection_parameter = *depth_clustering_->getProjectionParameter();
+
+	{
+		std::lock_guard<std::mutex> lock_guard(current_depth_image_mutex_);
+		current_depth_image = current_depth_image_;
+		current_depth_image_no_ground = current_depth_image_no_ground_;
+	}
+
+	auto current_depth_image_ground = current_depth_image;
+
+	for (int row = 0; row < current_depth_image.rows; row++)
+	{
+		for (int col = 0; col < current_depth_image.cols; col++)
+		{
+			if (current_depth_image.at<float>(row, col)
+					!= current_depth_image_no_ground.at<float>(row, col))
+			{
+				current_depth_image_ground.at<float>(row, col) = current_depth_image.at<float>(row,
+						col);
+			}
+			else
+			{
+				current_depth_image_ground.at<float>(row, col) = 0.0;
+			}
+		}
+	}
+
+	auto cloud_ground = Cloud::FromImage(current_depth_image_ground, projection_parameter);
+	auto cloud_no_ground = Cloud::FromImage(current_depth_image_no_ground, projection_parameter);
+
+	return std::make_pair(cloud_ground, cloud_no_ground);
+}
+
 void
 Visualization::updateViewerPointCloud()
 {
@@ -528,8 +573,15 @@ Visualization::updateViewerPointCloud()
 	auto bounding_box = depth_clustering_->getBoundingBox();
 	const auto &parameter = depth_clustering_->getParameter();
 
+	const auto cloud_separated = separatePointCloud();
+	const auto cloud_ground = cloud_separated.first;
+	const auto cloud_no_ground = cloud_separated.second;
+
 	ui->viewer_point_cloud->Clear();
-	ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(current_cloud));
+	ui->viewer_point_cloud->AddDrawable(
+			DrawableCloud::FromCloud(cloud_ground, Eigen::Vector3f(255, 0, 0)));
+	ui->viewer_point_cloud->AddDrawable(
+			DrawableCloud::FromCloud(cloud_no_ground, Eigen::Vector3f(255, 255, 255)));
 
 	switch (parameter.bounding_box_type)
 	{

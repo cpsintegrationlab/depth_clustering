@@ -71,6 +71,9 @@ public:
 	std::shared_ptr<ProjectionParams>
 	getProjectionParameter() const;
 
+	std::shared_ptr<DepthGroundRemover>
+	getDepthGroundRemover() const;
+
 	void
 	setParameter(const DepthClusteringParameter& parameter);
 
