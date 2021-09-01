@@ -185,26 +185,39 @@
           </size>
          </property>
          <property name="title">
-          <string>Ground Removal Filter Window Size</string>
+          <string>Ground Removal Filter</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
-           <widget class="QSpinBox" name="spin_size_smooth_window">
-            <property name="minimum">
-             <number>5</number>
-            </property>
-            <property name="maximum">
-             <number>11</number>
-            </property>
-            <property name="singleStep">
-             <number>2</number>
-            </property>
-            <property name="value">
-             <number>5</number>
-            </property>
+           <widget class="QComboBox" name="combo_size_smooth_window">
+            <item>
+             <property name="text">
+              <string>Window Size 5</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Window Size 7</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Window Size 9</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Window Size 11</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>

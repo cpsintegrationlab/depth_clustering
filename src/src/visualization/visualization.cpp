@@ -53,7 +53,7 @@ Visualization::Visualization(QWidget* parent) :
 	ui->slider_frame->setEnabled(false);
 	ui->spin_frame->setEnabled(false);
 	ui->spin_angle_ground_removal->setEnabled(false);
-	ui->spin_size_smooth_window->setEnabled(false);
+	ui->combo_size_smooth_window->setEnabled(false);
 	ui->spin_clustering_threshold->setEnabled(false);
 	ui->combo_difference_type->setEnabled(false);
 	ui->spin_size_cluster_min->setEnabled(false);
@@ -84,8 +84,7 @@ Visualization::Visualization(QWidget* parent) :
 	connect(ui->slider_frame, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
 	connect(ui->spin_angle_ground_removal, SIGNAL(valueChanged(double)), this,
 			SLOT(onParameterUpdated()));
-	connect(ui->spin_size_smooth_window, SIGNAL(valueChanged(int)), this,
-			SLOT(onParameterUpdated()));
+	connect(ui->combo_size_smooth_window, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->spin_clustering_threshold, SIGNAL(valueChanged(double)), this,
 			SLOT(onParameterUpdated()));
 	connect(ui->combo_difference_type, SIGNAL(activated(int)), this,
@@ -302,7 +301,7 @@ Visualization::onParameterUpdated()
 	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
 	parameter.size_cluster_min = ui->spin_size_cluster_min->value();
 	parameter.size_cluster_max = ui->spin_size_cluster_max->value();
-	parameter.size_smooth_window = ui->spin_size_smooth_window->value();
+	parameter.size_smooth_window = ui->combo_size_smooth_window->currentIndex() * 2 + 5;
 
 	BoundingBox::Type bounding_box_type = BoundingBox::Type::Cube;
 
@@ -493,14 +492,14 @@ Visualization::openDataset(const std::string& dataset_path)
 	ui->slider_frame->setEnabled(true);
 	ui->spin_frame->setEnabled(true);
 	ui->spin_angle_ground_removal->setEnabled(true);
-	ui->spin_size_smooth_window->setEnabled(true);
+	ui->combo_size_smooth_window->setEnabled(true);
 	ui->spin_clustering_threshold->setEnabled(true);
 	ui->combo_difference_type->setEnabled(true);
 	ui->spin_size_cluster_min->setEnabled(true);
 	ui->spin_size_cluster_max->setEnabled(true);
 	ui->combo_bounding_box_type->setEnabled(true);
 
-	ui->spin_size_smooth_window->setValue(parameter.size_smooth_window);
+	ui->combo_size_smooth_window->setCurrentIndex((parameter.size_smooth_window - 5) / 2);
 	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
 	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
 	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);

@@ -46,11 +46,24 @@ DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int sender_id)
 		fprintf(stderr, "No projection in cloud. Skipping ground removal.\n");
 		return;
 	}
+
 	Cloud cloud_copy(cloud);
+	cv::Mat smoothed_image;
 	const cv::Mat &depth_image = RepairDepth(cloud.projection_ptr()->depth_image(), 5, 1.0f);
 	Timer total_timer;
 	auto angle_image = CreateAngleImage(depth_image);
-	auto smoothed_image = ApplySavitskyGolaySmoothing(angle_image, _window_size);
+
+	if (_window_size != 5 && _window_size != 7 && _window_size != 9 && _window_size != 11)
+	{
+		fprintf(stderr, "[INFO]: Skipped ground removal filtering.\n");
+		smoothed_image = angle_image;
+	}
+	else
+	{
+		fprintf(stderr, "[INFO]: Ground removal filter window size: %i.\n", _window_size);
+		smoothed_image = ApplySavitskyGolaySmoothing(angle_image, _window_size);
+	}
+
 	auto no_ground_image = ZeroOutGroundBFS(depth_image, smoothed_image, _ground_remove_angle,
 			_window_size);
 	fprintf(stderr, "[INFO]: Ground removed: %lu us.\n", total_timer.measure());
