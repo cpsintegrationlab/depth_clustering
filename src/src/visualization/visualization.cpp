@@ -1,3 +1,10 @@
+/*
+ * visualization.cpp
+ *
+ *  Created on: Aug 29, 2021
+ *      Author: simonyu
+ */
+
 #include <QColor>
 #include <QDebug>
 #include <QFileDialog>
