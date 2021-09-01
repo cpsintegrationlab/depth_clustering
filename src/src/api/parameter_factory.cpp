@@ -87,6 +87,13 @@ ParameterFactory::getDepthClusteringParameter()
 	if (size_smooth_window_optional)
 	{
 		parameter.size_smooth_window = *size_smooth_window_optional;
+
+		if (parameter.size_smooth_window != 5 && parameter.size_smooth_window != 7
+				&& parameter.size_smooth_window != 9 && parameter.size_smooth_window != 11)
+		{
+			std::cout << "[WARN]: Invalid ground removal filter window size." << std::endl;
+			parameter.size_smooth_window = 5;
+		}
 	}
 
 	if (bounding_box_type_optional)
