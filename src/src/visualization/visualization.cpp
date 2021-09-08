@@ -264,8 +264,8 @@ void
 Visualization::onSliderMovedTo(int frame_number)
 {
 	Timer timer;
-	auto folder_reader = depth_clustering_->getFolderReader();
-	const auto &frame_paths_names = folder_reader->GetAllFilePaths();
+	auto folder_reader_first_return_range = depth_clustering_->getFolderReaderFirstReturnRange();
+	const auto &frame_paths_names = folder_reader_first_return_range->GetAllFilePaths();
 
 	if (frame_paths_names.empty())
 	{
@@ -469,9 +469,9 @@ Visualization::openDataset(const std::string& dataset_path)
 
 	depth_clustering_->initializeForDataset(dataset_path_);
 
-	auto folder_reader = depth_clustering_->getFolderReader();
+	auto folder_reader_first_return_range = depth_clustering_->getFolderReaderFirstReturnRange();
 	const auto &parameter = depth_clustering_->getParameter();
-	const auto &frame_paths_names = folder_reader->GetAllFilePaths();
+	const auto &frame_paths_names = folder_reader_first_return_range->GetAllFilePaths();
 
 	if (frame_paths_names.empty())
 	{
