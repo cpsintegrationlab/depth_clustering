@@ -301,10 +301,8 @@ Visualization::onSliderMovedTo(int frame_number)
 		return;
 	}
 
-	const auto &frame_path_name_range = frame_paths_names_range[frame_number];
-
 	std::cout << std::endl;
-	depth_clustering_->processOneRangeFrameForDataset(frame_path_name_range);
+	depth_clustering_->processOneRangeFrameForDataset(frame_paths_names_range[frame_number]);
 
 	if (viewer_image_layer_index_top_ == 3 || viewer_image_layer_index_middle_ == 3
 			|| viewer_image_layer_index_bottom_ == 3)
@@ -316,12 +314,12 @@ Visualization::onSliderMovedTo(int frame_number)
 		{
 			std::cout << "[WARN]: Intensity images missing in \"" << dataset_path_ << "\"."
 					<< std::endl;
-			return;
 		}
-
-		const auto &frame_path_name_intensity = frame_paths_names_intensity[frame_number];
-
-		depth_clustering_->processOneIntensityFrameForDataset(frame_path_name_intensity);
+		else
+		{
+			depth_clustering_->processOneIntensityFrameForDataset(
+					frame_paths_names_intensity[frame_number]);
+		}
 	}
 
 	if (viewer_image_layer_index_top_ == 4 || viewer_image_layer_index_middle_ == 4
@@ -334,12 +332,12 @@ Visualization::onSliderMovedTo(int frame_number)
 		{
 			std::cout << "[WARN]: Elongation images missing in \"" << dataset_path_ << "\"."
 					<< std::endl;
-			return;
 		}
-
-		const auto &frame_path_name_elongation = frame_paths_names_elongation[frame_number];
-
-		depth_clustering_->processOneElongationFrameForDataset(frame_path_name_elongation);
+		else
+		{
+			depth_clustering_->processOneElongationFrameForDataset(
+					frame_paths_names_elongation[frame_number]);
+		}
 	}
 
 	timer.start();
