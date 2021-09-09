@@ -92,6 +92,8 @@ Visualization::Visualization(QWidget* parent) :
 	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->button_page_next, SIGNAL(released()), this, SLOT(onNextPage()));
+	connect(ui->button_page_last, SIGNAL(released()), this, SLOT(onLastPage()));
 
 	scene_difference_.reset(new QGraphicsScene);
 	scene_difference_->addPixmap(QPixmap::fromImage(QImage()));
@@ -447,6 +449,18 @@ Visualization::onDifferenceTypeUpdated()
 	this->onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Updated difference type." << std::endl;
+}
+
+void
+Visualization::onNextPage()
+{
+	ui->stacked_settings->setCurrentIndex(1);
+}
+
+void
+Visualization::onLastPage()
+{
+	ui->stacked_settings->setCurrentIndex(0);
 }
 
 void

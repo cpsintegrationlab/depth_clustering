@@ -88,6 +88,12 @@ private slots:
 	void
 	onDifferenceTypeUpdated();
 
+	void
+	onNextPage();
+
+	void
+	onLastPage();
+
 private:
 
 	void
