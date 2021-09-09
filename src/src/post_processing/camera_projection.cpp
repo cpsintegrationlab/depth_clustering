@@ -399,5 +399,5 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 void
 CameraProjection::projectFromBoundingBoxFramePolygon()
 {
-	std::cout << "[ERROR]: Not implemented." << std::endl;
+	std::cerr << "[ERROR]: Polygon bounding box projection is not implemented." << std::endl;
 }

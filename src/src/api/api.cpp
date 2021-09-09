@@ -18,6 +18,8 @@
 using boost::property_tree::json_parser::read_json;
 using depth_clustering::DiffFactory;
 using depth_clustering::MatFromPNGRange;
+using depth_clustering::MatFromTIFFElongation;
+using depth_clustering::MatFromTIFFIntensity;
 using depth_clustering::MatFromTIFFRange;
 using depth_clustering::Radians;
 using depth_clustering::RichPoint;
@@ -214,6 +216,18 @@ DepthClustering::getImageRange() const
 	return image_range_;
 }
 
+const cv::Mat&
+DepthClustering::getImageIntensity() const
+{
+	return image_intensity_;
+}
+
+const cv::Mat&
+DepthClustering::getImageElongation() const
+{
+	return image_elongation_;
+}
+
 Cloud::ConstPtr
 DepthClustering::getCloud() const
 {
@@ -247,6 +261,18 @@ std::shared_ptr<FolderReader>
 DepthClustering::getFolderReaderRange() const
 {
 	return folder_reader_range_;
+}
+
+std::shared_ptr<FolderReader>
+DepthClustering::getFolderReaderIntensity() const
+{
+	return folder_reader_intensity_;
+}
+
+std::shared_ptr<FolderReader>
+DepthClustering::getFolderReaderElongation() const
+{
+	return folder_reader_elongation_;
 }
 
 std::shared_ptr<ProjectionParams>
@@ -371,11 +397,80 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 
 	cloud_ = Cloud::FromImage(image_range_, *projection_parameter_);
 
-	std::cout << std::endl << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
 	bounding_box_->clearFrames();
 	depth_ground_remover_->OnNewObjectReceived(*cloud_, 0);
 	bounding_box_->produceFrameFlat();
+
+	return frame_name;
+}
+
+const std::string
+DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_path_name)
+{
+	std::string frame_name = "";
+	std::stringstream ss(frame_path_name);
+
+	while (std::getline(ss, frame_name, '/'))
+	{
+	}
+
+	if (parameter_.dataset_file_type == ".png")
+	{
+		std::cerr << "[ERROR]: The processing of \".png\" type intensity images is not implemented."
+				<< std::endl;
+		return "";
+	}
+	else if (parameter_.dataset_file_type == ".tiff")
+	{
+		image_intensity_ = MatFromTIFFIntensity(frame_path_name);
+	}
+	else
+	{
+		std::cout << "[INFO]: Unknown data type. Skip." << std::endl;
+		return "";
+	}
+
+	// TODO adapt below
+//	cloud_ = Cloud::FromImage(image_range_, *projection_parameter_);
+
+	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+
+	return frame_name;
+}
+
+const std::string
+DepthClustering::processOneElongationFrameForDataset(const std::string& frame_path_name)
+{
+	std::string frame_name = "";
+	std::stringstream ss(frame_path_name);
+
+	while (std::getline(ss, frame_name, '/'))
+	{
+	}
+
+	if (parameter_.dataset_file_type == ".png")
+	{
+		std::cerr
+				<< "[ERROR]: The processing of \".png\" type elongation images is not implemented."
+				<< std::endl;
+		return "";
+	}
+	else if (parameter_.dataset_file_type == ".tiff")
+	{
+		image_elongation_ = MatFromTIFFElongation(frame_path_name);
+	}
+	else
+	{
+		std::cout << "[INFO]: Unknown data type. Skip." << std::endl;
+		return "";
+	}
+
+	// TODO adapt below
+	//	cloud_ = Cloud::FromImage(image_range_, *projection_parameter_);
+
+	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
 	return frame_name;
 }
@@ -393,6 +488,7 @@ DepthClustering::processNextRangeFrameForDataset()
 
 	while (frame_name == "" && frame_counter_ < static_cast<int>(frame_paths_names.size()))
 	{
+		std::cout << std::endl;
 		frame_name = processOneRangeFrameForDataset(frame_paths_names[frame_counter_++]);
 	}
 
@@ -412,6 +508,7 @@ DepthClustering::processLastRangeFrameForDataset()
 
 	while (frame_name == "" && frame_counter_ >= 0)
 	{
+		std::cout << std::endl;
 		frame_name = processOneRangeFrameForDataset(frame_paths_names[frame_counter_--]);
 	}
 
@@ -423,6 +520,7 @@ DepthClustering::processAllRangeFramesForDataset()
 {
 	for (const auto &frame_path_name : folder_reader_range_->GetAllFilePaths())
 	{
+		std::cout << std::endl;
 		const auto &frame_name = processOneRangeFrameForDataset(frame_path_name);
 
 		if (frame_name != "")

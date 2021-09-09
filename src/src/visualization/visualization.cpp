@@ -115,6 +115,10 @@ Visualization::Visualization(QWidget* parent) :
 	scene_segmentation_->addPixmap(QPixmap::fromImage(QImage()));
 	scene_range_.reset(new QGraphicsScene);
 	scene_range_->addPixmap(QPixmap::fromImage(QImage()));
+	scene_intensity_.reset(new QGraphicsScene);
+	scene_intensity_->addPixmap(QPixmap::fromImage(QImage()));
+	scene_elongation_.reset(new QGraphicsScene);
+	scene_elongation_->addPixmap(QPixmap::fromImage(QImage()));
 
 	depth_clustering_ = std::unique_ptr<DepthClustering>(new DepthClustering());
 
@@ -289,20 +293,54 @@ Visualization::onSliderMovedTo(int frame_number)
 {
 	Timer timer;
 	auto folder_reader_range = depth_clustering_->getFolderReaderRange();
-	const auto &frame_paths_names = folder_reader_range->GetAllFilePaths();
+	const auto &frame_paths_names_range = folder_reader_range->GetAllFilePaths();
 
-	if (frame_paths_names.empty())
+	if (frame_paths_names_range.empty())
 	{
-		std::cerr << "[ERROR]: Invalid dataset path \"" << dataset_path_ << "\"." << std::endl;
+		std::cerr << "[ERROR]: Range images missing in \"" << dataset_path_ << "\"." << std::endl;
 		return;
 	}
 
-	std::cout << std::endl << "[INFO]: Visualizing frame \"" << frame_paths_names[frame_number]
-			<< "\"." << std::endl;
+	const auto &frame_path_name_range = frame_paths_names_range[frame_number];
 
-	const auto &frame_path_name = frame_paths_names[frame_number];
+	std::cout << std::endl;
+	depth_clustering_->processOneRangeFrameForDataset(frame_path_name_range);
 
-	depth_clustering_->processOneRangeFrameForDataset(frame_path_name);
+	if (viewer_image_layer_index_top_ == 3 || viewer_image_layer_index_middle_ == 3
+			|| viewer_image_layer_index_bottom_ == 3)
+	{
+		auto folder_reader_intensity = depth_clustering_->getFolderReaderIntensity();
+		const auto &frame_paths_names_intensity = folder_reader_intensity->GetAllFilePaths();
+
+		if (frame_paths_names_intensity.empty())
+		{
+			std::cout << "[WARN]: Intensity images missing in \"" << dataset_path_ << "\"."
+					<< std::endl;
+			return;
+		}
+
+		const auto &frame_path_name_intensity = frame_paths_names_intensity[frame_number];
+
+		depth_clustering_->processOneIntensityFrameForDataset(frame_path_name_intensity);
+	}
+
+	if (viewer_image_layer_index_top_ == 4 || viewer_image_layer_index_middle_ == 4
+			|| viewer_image_layer_index_bottom_ == 4)
+	{
+		auto folder_reader_elongation = depth_clustering_->getFolderReaderElongation();
+		const auto &frame_paths_names_elongation = folder_reader_elongation->GetAllFilePaths();
+
+		if (frame_paths_names_elongation.empty())
+		{
+			std::cout << "[WARN]: Elongation images missing in \"" << dataset_path_ << "\"."
+					<< std::endl;
+			return;
+		}
+
+		const auto &frame_path_name_elongation = frame_paths_names_elongation[frame_number];
+
+		depth_clustering_->processOneElongationFrameForDataset(frame_path_name_elongation);
+	}
 
 	timer.start();
 
@@ -529,19 +567,20 @@ Visualization::openDataset(const std::string& dataset_path)
 
 	auto folder_reader_range = depth_clustering_->getFolderReaderRange();
 	const auto &parameter = depth_clustering_->getParameter();
-	const auto &frame_paths_names = folder_reader_range->GetAllFilePaths();
+	const auto &frame_paths_names_range = folder_reader_range->GetAllFilePaths();
 
-	if (frame_paths_names.empty())
+	if (frame_paths_names_range.empty())
 	{
-		std::cerr << "[ERROR]: Invalid dataset path \"" << dataset_path_ << "\"." << std::endl;
+		std::cerr << "[ERROR]: Intensity images missing in \"" << dataset_path_ << "\"."
+				<< std::endl;
 		return;
 	}
 
 	depth_clustering_->getDepthGroundRemover()->AddClient(this);
 	depth_clustering_->getClusterer()->SetLabelImageClient(this);
 
-	ui->slider_frame->setMaximum(frame_paths_names.size() - 1);
-	ui->spin_frame->setMaximum(frame_paths_names.size() - 1);
+	ui->slider_frame->setMaximum(frame_paths_names_range.size() - 1);
+	ui->spin_frame->setMaximum(frame_paths_names_range.size() - 1);
 	ui->slider_frame->setValue(ui->slider_frame->minimum());
 
 	ui->button_play->setEnabled(true);
@@ -767,6 +806,30 @@ Visualization::updateViewerImageScene()
 
 		updateViewerImage();
 	}
+
+	if (viewer_image_layer_index_top_ == 3 || viewer_image_layer_index_middle_ == 3
+			|| viewer_image_layer_index_bottom_ == 3)
+	{
+		auto image_intensity = depth_clustering_->getImageIntensity();
+		QImage qimage_intensity = MatToQImage(image_intensity);
+
+		scene_intensity_.reset(new QGraphicsScene);
+		scene_intensity_->addPixmap(QPixmap::fromImage(qimage_intensity));
+
+		updateViewerImage();
+	}
+
+	if (viewer_image_layer_index_top_ == 4 || viewer_image_layer_index_middle_ == 4
+			|| viewer_image_layer_index_bottom_ == 4)
+	{
+		auto image_elongation = depth_clustering_->getImageElongation();
+		QImage qimage_elongation = MatToQImage(image_elongation);
+
+		scene_elongation_.reset(new QGraphicsScene);
+		scene_elongation_->addPixmap(QPixmap::fromImage(qimage_elongation));
+
+		updateViewerImage();
+	}
 }
 
 void
@@ -794,12 +857,14 @@ Visualization::updateViewerImage()
 	}
 	case 3:
 	{
-		// TODO implement this
+		ui->viewer_image_top->setScene(scene_intensity_.get());
+		ui->viewer_image_top->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
 	case 4:
 	{
-		// TODO implement this
+		ui->viewer_image_top->setScene(scene_elongation_.get());
+		ui->viewer_image_top->fitInView(scene_elongation_->itemsBoundingRect());
 		break;
 	}
 	default:
@@ -832,12 +897,14 @@ Visualization::updateViewerImage()
 	}
 	case 3:
 	{
-		// TODO implement this
+		ui->viewer_image_middle->setScene(scene_intensity_.get());
+		ui->viewer_image_middle->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
 	case 4:
 	{
-		// TODO implement this
+		ui->viewer_image_middle->setScene(scene_elongation_.get());
+		ui->viewer_image_middle->fitInView(scene_elongation_->itemsBoundingRect());
 		break;
 	}
 	default:
@@ -870,12 +937,14 @@ Visualization::updateViewerImage()
 	}
 	case 3:
 	{
-		// TODO implement this
+		ui->viewer_image_bottom->setScene(scene_intensity_.get());
+		ui->viewer_image_bottom->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
 	case 4:
 	{
-		// TODO implement this
+		ui->viewer_image_bottom->setScene(scene_elongation_.get());
+		ui->viewer_image_bottom->fitInView(scene_elongation_->itemsBoundingRect());
 		break;
 	}
 	default:

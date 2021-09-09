@@ -53,6 +53,12 @@ public:
 	const cv::Mat&
 	getImageRange() const;
 
+	const cv::Mat&
+	getImageIntensity() const;
+
+	const cv::Mat&
+	getImageElongation() const;
+
 	Cloud::ConstPtr
 	getCloud() const;
 
@@ -67,6 +73,12 @@ public:
 
 	std::shared_ptr<FolderReader>
 	getFolderReaderRange() const;
+
+	std::shared_ptr<FolderReader>
+	getFolderReaderIntensity() const;
+
+	std::shared_ptr<FolderReader>
+	getFolderReaderElongation() const;
 
 	std::shared_ptr<ProjectionParams>
 	getProjectionParameter() const;
@@ -83,6 +95,12 @@ public:
 
 	const std::string
 	processOneRangeFrameForDataset(const std::string& frame_path_name);
+
+	const std::string
+	processOneIntensityFrameForDataset(const std::string& frame_path_name);
+
+	const std::string
+	processOneElongationFrameForDataset(const std::string& frame_path_name);
 
 	const std::string
 	processNextRangeFrameForDataset();
@@ -115,10 +133,13 @@ private:
 	std::shared_ptr<Logger> logger_;
 
 	DepthClusteringParameter parameter_;
-	Cloud::Ptr cloud_;
-	cv::Mat image_range_;
 	std::string dataset_path_;
 	int frame_counter_;
+
+	Cloud::Ptr cloud_;
+	cv::Mat image_range_;
+	cv::Mat image_intensity_;
+	cv::Mat image_elongation_;
 };
 
 #endif /* SRC_API_DEPTH_CLUSTERING_H_ */

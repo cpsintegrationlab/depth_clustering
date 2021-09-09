@@ -122,6 +122,8 @@ private:
 	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_segmentation_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_range_ = nullptr;
+	std::unique_ptr<QGraphicsScene> scene_intensity_ = nullptr;
+	std::unique_ptr<QGraphicsScene> scene_elongation_ = nullptr;
 	std::unique_ptr<DepthClustering> depth_clustering_ = nullptr;
 
 	std::string dataset_path_;
