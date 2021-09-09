@@ -86,6 +86,9 @@ private slots:
 	onParameterUpdated();
 
 	void
+	onLayerPointCloudUpdated();
+
+	void
 	onLayerImageUpdated();
 
 	void

@@ -37,8 +37,9 @@ using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
-		QWidget(parent), ui(new Ui::Visualization), play_(false), show_bounding_box_(true), viewer_image_layer_index_top_(
-				0), viewer_image_layer_index_middle_(1), viewer_image_layer_index_bottom_(2)
+		QWidget(parent), ui(new Ui::Visualization), play_(false), show_bounding_box_(true), viewer_point_cloud_layer_index_(
+				0), viewer_image_layer_index_top_(0), viewer_image_layer_index_middle_(1), viewer_image_layer_index_bottom_(
+				2)
 {
 	ui->setupUi(this);
 
@@ -61,14 +62,14 @@ Visualization::Visualization(QWidget* parent) :
 	ui->spin_size_cluster_max->setEnabled(false);
 	ui->combo_bounding_box_type->setEnabled(false);
 
+	ui->combo_layer_point_cloud->setCurrentIndex(viewer_point_cloud_layer_index_);
 	ui->combo_layer_image_top->setCurrentIndex(viewer_image_layer_index_top_);
 	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
 	ui->combo_layer_image_bottom->setCurrentIndex(viewer_image_layer_index_bottom_);
 
 	ui->viewer_image_top->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_top->setCacheMode(QGraphicsView::CacheBackground);
-	ui->viewer_image_top->setRenderHints(
-			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+	ui->viewer_image_top->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	ui->viewer_image_middle->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_middle->setCacheMode(QGraphicsView::CacheBackground);
 	ui->viewer_image_middle->setRenderHints(
@@ -96,6 +97,7 @@ Visualization::Visualization(QWidget* parent) :
 			SLOT(onDifferenceTypeUpdated()));
 	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this, SLOT(onLayerPointCloudUpdated()));
 	connect(ui->combo_layer_image_top, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
 	connect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
@@ -404,6 +406,14 @@ Visualization::onParameterUpdated()
 }
 
 void
+Visualization::onLayerPointCloudUpdated()
+{
+	viewer_point_cloud_layer_index_ = ui->combo_layer_point_cloud->currentIndex();
+
+	updateViewerPointCloud();
+}
+
+void
 Visualization::onLayerImageUpdated()
 {
 	viewer_image_layer_index_top_ = ui->combo_layer_image_top->currentIndex();
@@ -502,6 +512,7 @@ Visualization::openDataset(const std::string& dataset_path)
 
 	dataset_path_ = dataset_path;
 	play_ = false;
+	viewer_point_cloud_layer_index_ = 0;
 	viewer_image_layer_index_top_ = 0;
 	viewer_image_layer_index_middle_ = 1;
 	viewer_image_layer_index_bottom_ = 2;
@@ -549,6 +560,7 @@ Visualization::openDataset(const std::string& dataset_path)
 	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
 	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
 
+	ui->combo_layer_point_cloud->setCurrentIndex(viewer_point_cloud_layer_index_);
 	ui->combo_layer_image_top->setCurrentIndex(viewer_image_layer_index_top_);
 	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
 	ui->combo_layer_image_bottom->setCurrentIndex(viewer_image_layer_index_bottom_);
@@ -639,22 +651,31 @@ Visualization::extractGroundPointCloud()
 void
 Visualization::updateViewerPointCloud()
 {
-	auto current_cloud = depth_clustering_->getCurrentCloud();
-	auto bounding_box = depth_clustering_->getBoundingBox();
-	const auto &parameter = depth_clustering_->getParameter();
-
-	const auto cloud_separated = extractGroundPointCloud();
-	const auto cloud_ground = cloud_separated.first;
-	const auto cloud_no_ground = cloud_separated.second;
-
 	ui->viewer_point_cloud->Clear();
-	ui->viewer_point_cloud->AddDrawable(
-			DrawableCloud::FromCloud(cloud_ground, Eigen::Vector3f(255, 0, 0)));
-	ui->viewer_point_cloud->AddDrawable(
-			DrawableCloud::FromCloud(cloud_no_ground, Eigen::Vector3f(255, 255, 255)));
+
+	if (viewer_point_cloud_layer_index_ == 0)
+	{
+		const auto cloud_separated = extractGroundPointCloud();
+		const auto cloud_ground = cloud_separated.first;
+		const auto cloud_no_ground = cloud_separated.second;
+
+		ui->viewer_point_cloud->AddDrawable(
+				DrawableCloud::FromCloud(cloud_ground, Eigen::Vector3f(255, 0, 0)));
+		ui->viewer_point_cloud->AddDrawable(
+				DrawableCloud::FromCloud(cloud_no_ground, Eigen::Vector3f(255, 255, 255)));
+	}
+	else
+	{
+		auto current_cloud = depth_clustering_->getCurrentCloud();
+
+		ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(current_cloud));
+	}
 
 	if (show_bounding_box_)
 	{
+		auto bounding_box = depth_clustering_->getBoundingBox();
+		const auto &parameter = depth_clustering_->getParameter();
+
 		switch (parameter.bounding_box_type)
 		{
 		case BoundingBox::Type::Cube:
