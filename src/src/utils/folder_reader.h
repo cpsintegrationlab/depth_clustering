@@ -26,37 +26,51 @@
 #include <vector>
 #include <algorithm>
 
-namespace depth_clustering {
+namespace depth_clustering
+{
 
-int num_from_string(const std::string& query_str);
+int
+num_from_string(const std::string& query_str);
 
-bool numeric_string_compare(const std::string& s1, const std::string& s2);
+bool
+numeric_string_compare(const std::string& s1, const std::string& s2);
 
 /**
  * @brief      Reads a folder and can sort the inputs. Not too efficient.
  */
-class FolderReader {
- public:
-  enum class Order { SORTED, UNDEFINED };
+class FolderReader
+{
+public:
+	enum class Order
+	{
+		SORTED, UNDEFINED
+	};
 
-  explicit FolderReader(const std::string& folder_path,
-                        const std::string& ending_with,
-                        const Order order = Order::UNDEFINED);
+	explicit
+	FolderReader(const std::string& folder_path, const std::string& ending_with, const Order order =
+			Order::UNDEFINED);
 
-  explicit FolderReader(const std::string& folder_path,
-                        const std::string& starting_with,
-                        const std::string& ending_with,
-                        const Order order = Order::UNDEFINED);
+	explicit
+	FolderReader(const std::string& folder_path, const std::string& starting_with,
+			const std::string& ending_with, const Order order = Order::UNDEFINED);
 
-  std::string GetNextFilePath();
+	std::string
+	GetNextFilePath();
 
-  const std::vector<std::string>& GetAllFilePaths() const { return _all_paths; }
+	const std::vector<std::string>&
+	GetAllFilePaths() const
+	{
+		return _all_paths;
+	}
 
-  virtual ~FolderReader() {}
+	virtual
+	~FolderReader()
+	{
+	}
 
- protected:
-  std::vector<std::string> _all_paths;
-  size_t _path_counter;
+protected:
+	std::vector<std::string> _all_paths;
+	size_t _path_counter;
 };
 
 }  // namespace depth_clustering
