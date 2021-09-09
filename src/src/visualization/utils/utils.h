@@ -5,22 +5,23 @@
 #ifndef SRC_QT_UTILS_UTILS_H_
 #define SRC_QT_UTILS_UTILS_H_
 
+#include <opencv2/opencv.hpp>
 #include <QDir>
 #include <QImage>
 #include <QString>
-
 #include <string>
 
-#include <opencv2/opencv.hpp>
-#include <utils/cloud.h>
+#include "utils/cloud.h"
 
 namespace dc = depth_clustering;
 
-QString appendPaths(const QString &path1, const QString &path2);
+QString
+appendPaths(const QString& path1, const QString& path2);
 
-QImage MatToQImage(const cv::Mat &image);
+QImage
+MatToQImage(const cv::Mat& image);
 
-dc::Cloud::Ptr CloudFromFile(const std::string &file_name,
-                             const dc::ProjectionParams &proj_params);
+dc::Cloud::Ptr
+CloudFromFile(const std::string& file_name, const dc::ProjectionParams& proj_params);
 
 #endif  // SRC_QT_UTILS_UTILS_H_
