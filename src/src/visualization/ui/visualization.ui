@@ -728,7 +728,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QGraphicsView" name="viewer_image_difference">
+     <widget class="QGraphicsView" name="viewer_image_top">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
@@ -754,7 +754,7 @@
        <enum>QGraphicsView::SmartViewportUpdate</enum>
       </property>
      </widget>
-     <widget class="QGraphicsView" name="viewer_image_segmentation">
+     <widget class="QGraphicsView" name="viewer_image_middle">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
@@ -780,7 +780,7 @@
        <enum>QGraphicsView::SmartViewportUpdate</enum>
       </property>
      </widget>
-     <widget class="QGraphicsView" name="viewer_image_depth">
+     <widget class="QGraphicsView" name="viewer_image_bottom">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>

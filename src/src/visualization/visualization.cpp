@@ -44,9 +44,9 @@ Visualization::Visualization(QWidget* parent) :
 
 	ui->frame_controls->setFixedHeight(ui->frame_controls->minimumHeight());
 	ui->frame_settings->setFixedHeight(ui->frame_settings->minimumHeight());
-	ui->viewer_image_difference->setFixedHeight(ui->viewer_image_difference->minimumHeight());
-	ui->viewer_image_segmentation->setFixedHeight(ui->viewer_image_segmentation->minimumHeight());
-	ui->viewer_image_depth->setFixedHeight(ui->viewer_image_depth->minimumHeight());
+	ui->viewer_image_top->setFixedHeight(ui->viewer_image_top->minimumHeight());
+	ui->viewer_image_middle->setFixedHeight(ui->viewer_image_middle->minimumHeight());
+	ui->viewer_image_bottom->setFixedHeight(ui->viewer_image_bottom->minimumHeight());
 
 	ui->button_play->setEnabled(false);
 	ui->button_pause->setEnabled(false);
@@ -65,17 +65,17 @@ Visualization::Visualization(QWidget* parent) :
 	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
 	ui->combo_layer_image_bottom->setCurrentIndex(viewer_image_layer_index_bottom_);
 
-	ui->viewer_image_difference->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	ui->viewer_image_difference->setCacheMode(QGraphicsView::CacheBackground);
-	ui->viewer_image_difference->setRenderHints(
+	ui->viewer_image_top->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_top->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_top->setRenderHints(
 			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-	ui->viewer_image_segmentation->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	ui->viewer_image_segmentation->setCacheMode(QGraphicsView::CacheBackground);
-	ui->viewer_image_segmentation->setRenderHints(
+	ui->viewer_image_middle->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_middle->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_middle->setRenderHints(
 			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-	ui->viewer_image_depth->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	ui->viewer_image_depth->setCacheMode(QGraphicsView::CacheBackground);
-	ui->viewer_image_depth->setRenderHints(
+	ui->viewer_image_bottom->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_bottom->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_bottom->setRenderHints(
 			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	ui->viewer_point_cloud->installEventFilter(this);
 	ui->viewer_point_cloud->setAutoFillBackground(true);
@@ -756,20 +756,20 @@ Visualization::updateViewerImage()
 	{
 	case 0:
 	{
-		ui->viewer_image_difference->setScene(scene_difference_.get());
-		ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_top->setScene(scene_difference_.get());
+		ui->viewer_image_top->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
 	case 1:
 	{
-		ui->viewer_image_difference->setScene(scene_segmentation_.get());
-		ui->viewer_image_difference->fitInView(scene_segmentation_->itemsBoundingRect());
+		ui->viewer_image_top->setScene(scene_segmentation_.get());
+		ui->viewer_image_top->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
 	case 2:
 	{
-		ui->viewer_image_difference->setScene(scene_depth_.get());
-		ui->viewer_image_difference->fitInView(scene_depth_->itemsBoundingRect());
+		ui->viewer_image_top->setScene(scene_depth_.get());
+		ui->viewer_image_top->fitInView(scene_depth_->itemsBoundingRect());
 		break;
 	}
 	case 3:
@@ -784,8 +784,8 @@ Visualization::updateViewerImage()
 	}
 	default:
 	{
-		ui->viewer_image_difference->setScene(scene_difference_.get());
-		ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_top->setScene(scene_difference_.get());
+		ui->viewer_image_top->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
 	}
@@ -794,20 +794,20 @@ Visualization::updateViewerImage()
 	{
 	case 0:
 	{
-		ui->viewer_image_segmentation->setScene(scene_difference_.get());
-		ui->viewer_image_segmentation->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_middle->setScene(scene_difference_.get());
+		ui->viewer_image_middle->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
 	case 1:
 	{
-		ui->viewer_image_segmentation->setScene(scene_segmentation_.get());
-		ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
+		ui->viewer_image_middle->setScene(scene_segmentation_.get());
+		ui->viewer_image_middle->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
 	case 2:
 	{
-		ui->viewer_image_segmentation->setScene(scene_depth_.get());
-		ui->viewer_image_segmentation->fitInView(scene_depth_->itemsBoundingRect());
+		ui->viewer_image_middle->setScene(scene_depth_.get());
+		ui->viewer_image_middle->fitInView(scene_depth_->itemsBoundingRect());
 		break;
 	}
 	case 3:
@@ -822,8 +822,8 @@ Visualization::updateViewerImage()
 	}
 	default:
 	{
-		ui->viewer_image_segmentation->setScene(scene_difference_.get());
-		ui->viewer_image_segmentation->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_middle->setScene(scene_difference_.get());
+		ui->viewer_image_middle->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
 	}
@@ -832,20 +832,20 @@ Visualization::updateViewerImage()
 	{
 	case 0:
 	{
-		ui->viewer_image_depth->setScene(scene_difference_.get());
-		ui->viewer_image_depth->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_bottom->setScene(scene_difference_.get());
+		ui->viewer_image_bottom->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
 	case 1:
 	{
-		ui->viewer_image_depth->setScene(scene_segmentation_.get());
-		ui->viewer_image_depth->fitInView(scene_segmentation_->itemsBoundingRect());
+		ui->viewer_image_bottom->setScene(scene_segmentation_.get());
+		ui->viewer_image_bottom->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
 	case 2:
 	{
-		ui->viewer_image_depth->setScene(scene_depth_.get());
-		ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
+		ui->viewer_image_bottom->setScene(scene_depth_.get());
+		ui->viewer_image_bottom->fitInView(scene_depth_->itemsBoundingRect());
 		break;
 	}
 	case 3:
@@ -860,8 +860,8 @@ Visualization::updateViewerImage()
 	}
 	default:
 	{
-		ui->viewer_image_depth->setScene(scene_difference_.get());
-		ui->viewer_image_depth->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_bottom->setScene(scene_difference_.get());
+		ui->viewer_image_bottom->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
 	}
