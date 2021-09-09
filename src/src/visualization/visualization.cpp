@@ -97,8 +97,10 @@ Visualization::Visualization(QWidget* parent) :
 	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_layer_image_top, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
-	connect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
-	connect(ui->combo_layer_image_bottom, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
+	connect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,
+			SLOT(onLayerImageUpdated()));
+	connect(ui->combo_layer_image_bottom, SIGNAL(activated(int)), this,
+			SLOT(onLayerImageUpdated()));
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->button_page_next, SIGNAL(released()), this, SLOT(onNextPage()));
 	connect(ui->button_page_last, SIGNAL(released()), this, SLOT(onLastPage()));
@@ -123,13 +125,17 @@ Visualization::Visualization(QWidget* parent) :
 void
 Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client_id)
 {
-	QImage qimage_segmentation = MatToQImage(
-			AbstractImageLabeler::LabelsToColor(image_segmentation));
+	if (viewer_image_layer_index_top_ == 1 || viewer_image_layer_index_middle_ == 1
+			|| viewer_image_layer_index_bottom_ == 1)
+	{
+		QImage qimage_segmentation = MatToQImage(
+				AbstractImageLabeler::LabelsToColor(image_segmentation));
 
-	scene_segmentation_.reset(new QGraphicsScene);
-	scene_segmentation_->addPixmap(QPixmap::fromImage(qimage_segmentation));
+		scene_segmentation_.reset(new QGraphicsScene);
+		scene_segmentation_->addPixmap(QPixmap::fromImage(qimage_segmentation));
 
-	updateViewerImage();
+		updateViewerImage();
+	}
 }
 
 void
@@ -593,7 +599,7 @@ Visualization::openDataset(const std::string& dataset_path)
 }
 
 std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
-Visualization::separatePointCloud()
+Visualization::extractGroundPointCloud()
 {
 	cv::Mat current_depth_image;
 	cv::Mat current_depth_image_no_ground;
@@ -637,7 +643,7 @@ Visualization::updateViewerPointCloud()
 	auto bounding_box = depth_clustering_->getBoundingBox();
 	const auto &parameter = depth_clustering_->getParameter();
 
-	const auto cloud_separated = separatePointCloud();
+	const auto cloud_separated = extractGroundPointCloud();
 	const auto cloud_ground = cloud_separated.first;
 	const auto cloud_no_ground = cloud_separated.second;
 
@@ -714,20 +720,33 @@ Visualization::updateViewerPointCloud()
 void
 Visualization::updateViewerImageScene()
 {
-	auto image_depth = depth_clustering_->getCurrentDepthImage();
-	auto difference_type = depth_clustering_->getParameter().difference_type;
-	auto projection_parameter = depth_clustering_->getProjectionParameter();
-	auto difference_helper = DiffFactory::Build(difference_type, &image_depth,
-			projection_parameter.get());
-	QImage qimage_difference = MatToQImage(difference_helper->Visualize());
-	QImage qimage_depth = MatToQImage(image_depth);
+	if (viewer_image_layer_index_top_ == 0 || viewer_image_layer_index_middle_ == 0
+			|| viewer_image_layer_index_bottom_ == 0)
+	{
+		auto image_depth = depth_clustering_->getCurrentDepthImage();
+		auto difference_type = depth_clustering_->getParameter().difference_type;
+		auto projection_parameter = depth_clustering_->getProjectionParameter();
+		auto difference_helper = DiffFactory::Build(difference_type, &image_depth,
+				projection_parameter.get());
+		QImage qimage_difference = MatToQImage(difference_helper->Visualize());
 
-	scene_difference_.reset(new QGraphicsScene);
-	scene_difference_->addPixmap(QPixmap::fromImage(qimage_difference));
-	scene_depth_.reset(new QGraphicsScene);
-	scene_depth_->addPixmap(QPixmap::fromImage(qimage_depth));
+		scene_difference_.reset(new QGraphicsScene);
+		scene_difference_->addPixmap(QPixmap::fromImage(qimage_difference));
 
-	updateViewerImage();
+		updateViewerImage();
+	}
+
+	if (viewer_image_layer_index_top_ == 2 || viewer_image_layer_index_middle_ == 2
+			|| viewer_image_layer_index_bottom_ == 2)
+	{
+		auto image_depth = depth_clustering_->getCurrentDepthImage();
+		QImage qimage_depth = MatToQImage(image_depth);
+
+		scene_depth_.reset(new QGraphicsScene);
+		scene_depth_->addPixmap(QPixmap::fromImage(qimage_depth));
+
+		updateViewerImage();
+	}
 }
 
 void
