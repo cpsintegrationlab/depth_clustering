@@ -17,8 +17,8 @@
 
 using boost::property_tree::json_parser::read_json;
 using depth_clustering::DiffFactory;
-using depth_clustering::MatFromDepthPng;
-using depth_clustering::MatFromDepthTiff;
+using depth_clustering::MatFromPNGRange;
+using depth_clustering::MatFromTIFFRange;
 using depth_clustering::Radians;
 using depth_clustering::RichPoint;
 
@@ -342,11 +342,11 @@ DepthClustering::processOneFrameForDataset(const std::string& frame_path_name)
 
 	if (parameter_.dataset_file_type == ".png")
 	{
-		image_range_ = MatFromDepthPng(frame_path_name);
+		image_range_ = MatFromPNGRange(frame_path_name);
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_range_ = MatFromDepthTiff(frame_path_name);
+		image_range_ = MatFromTIFFRange(frame_path_name);
 	}
 	else
 	{

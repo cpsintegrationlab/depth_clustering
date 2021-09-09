@@ -31,7 +31,6 @@ using depth_clustering::DiffFactory;
 using depth_clustering::DrawableCube;
 using depth_clustering::DrawablePolygon3d;
 using depth_clustering::FolderReader;
-using depth_clustering::MatFromDepthPng;
 using depth_clustering::ReadKittiCloud;
 using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;

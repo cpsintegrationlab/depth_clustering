@@ -54,10 +54,10 @@ Cloud::Ptr
 ReadKittiCloudTxt(const std::string& path);
 
 cv::Mat
-MatFromDepthPng(const std::string& path);
+MatFromPNGRange(const std::string& path);
 
 cv::Mat
-MatFromDepthTiff(const std::string& path);
+MatFromTIFFRange(const std::string& path);
 }  // namespace depth_clustering
 
 #endif  // SRC_UTILS_VELODYNE_UTILS_H_

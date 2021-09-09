@@ -122,21 +122,21 @@ FixKITTIDepth(const cv::Mat& original)
 }
 
 cv::Mat
-MatFromDepthPng(const string& path)
+MatFromPNGRange(const string& path)
 {
-	cv::Mat depth_image = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
-	depth_image.convertTo(depth_image, CV_32F);
-	depth_image /= 500.;
-	return FixKITTIDepth(depth_image);
+	cv::Mat image_range = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
+	image_range.convertTo(image_range, CV_32F);
+	image_range /= 500.0;
+	return FixKITTIDepth(image_range);
 }
 
 cv::Mat
-MatFromDepthTiff(const string& path)
+MatFromTIFFRange(const string& path)
 {
-	cv::Mat depth_image = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
-	depth_image.convertTo(depth_image, CV_32F);
-	depth_image /= 65535.;
-	depth_image *= 75.;
-	return depth_image;
+	cv::Mat image_range = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
+	image_range.convertTo(image_range, CV_32F);
+	image_range /= 65535.0;
+	image_range *= 75.0;
+	return image_range;
 }
 }  // namespace depth_clustering
