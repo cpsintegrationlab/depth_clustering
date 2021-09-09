@@ -86,6 +86,9 @@ private slots:
 	onParameterUpdated();
 
 	void
+	onLayerImageUpdated();
+
+	void
 	onDifferenceTypeUpdated();
 
 	void
@@ -106,10 +109,10 @@ private:
 	updateViewerPointCloud();
 
 	void
-	updateViewerImage();
+	updateViewerImageScene();
 
 	void
-	refreshViewer();
+	updateViewerImage();
 
 	std::unique_ptr<Ui::Visualization> ui;
 	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
@@ -121,8 +124,13 @@ private:
 	cv::Mat current_depth_image_;
 	cv::Mat current_depth_image_no_ground_;
 	mutable std::mutex current_depth_image_mutex_;
+
 	volatile bool play_;
 	bool show_bounding_box_;
+	int viewer_point_cloud_layer_index_;
+	int viewer_image_layer_index_top_;
+	int viewer_image_layer_index_middle_;
+	int viewer_image_layer_index_bottom_;
 };
 
 #endif  // SRC_VISUALIZATION_VISUALIZATION_H_

@@ -37,7 +37,8 @@ using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
-		QWidget(parent), ui(new Ui::Visualization), play_(false), show_bounding_box_(true)
+		QWidget(parent), ui(new Ui::Visualization), play_(false), show_bounding_box_(true), viewer_image_layer_index_top_(
+				0), viewer_image_layer_index_middle_(1), viewer_image_layer_index_bottom_(2)
 {
 	ui->setupUi(this);
 
@@ -59,6 +60,10 @@ Visualization::Visualization(QWidget* parent) :
 	ui->spin_size_cluster_min->setEnabled(false);
 	ui->spin_size_cluster_max->setEnabled(false);
 	ui->combo_bounding_box_type->setEnabled(false);
+
+	ui->combo_layer_image_top->setCurrentIndex(viewer_image_layer_index_top_);
+	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
+	ui->combo_layer_image_bottom->setCurrentIndex(viewer_image_layer_index_bottom_);
 
 	ui->viewer_image_difference->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_difference->setCacheMode(QGraphicsView::CacheBackground);
@@ -91,6 +96,9 @@ Visualization::Visualization(QWidget* parent) :
 			SLOT(onDifferenceTypeUpdated()));
 	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_layer_image_top, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
+	connect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
+	connect(ui->combo_layer_image_bottom, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->button_page_next, SIGNAL(released()), this, SLOT(onNextPage()));
 	connect(ui->button_page_last, SIGNAL(released()), this, SLOT(onLastPage()));
@@ -120,8 +128,8 @@ Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client
 
 	scene_segmentation_.reset(new QGraphicsScene);
 	scene_segmentation_->addPixmap(QPixmap::fromImage(qimage_segmentation));
-	ui->viewer_image_segmentation->setScene(scene_segmentation_.get());
-	ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
+
+	updateViewerImage();
 }
 
 void
@@ -183,7 +191,9 @@ Visualization::showEvent(QShowEvent* event)
 {
 	QWidget::showEvent(event);
 
-	refreshViewer();
+	ui->viewer_point_cloud->update();
+
+	updateViewerImage();
 }
 
 void
@@ -191,7 +201,9 @@ Visualization::resizeEvent(QResizeEvent* event)
 {
 	QWidget::resizeEvent(event);
 
-	refreshViewer();
+	ui->viewer_point_cloud->update();
+
+	updateViewerImage();
 }
 
 void
@@ -284,7 +296,7 @@ Visualization::onSliderMovedTo(int frame_number)
 
 	timer.start();
 
-	updateViewerImage();
+	updateViewerImageScene();
 
 	std::cout << "[INFO]: Updated difference and depth image viewers in "
 			<< timer.measure(Timer::Units::Micro) << " us." << std::endl;
@@ -386,6 +398,16 @@ Visualization::onParameterUpdated()
 }
 
 void
+Visualization::onLayerImageUpdated()
+{
+	viewer_image_layer_index_top_ = ui->combo_layer_image_top->currentIndex();
+	viewer_image_layer_index_middle_ = ui->combo_layer_image_middle->currentIndex();
+	viewer_image_layer_index_bottom_ = ui->combo_layer_image_bottom->currentIndex();
+
+	updateViewerImage();
+}
+
+void
 Visualization::onDifferenceTypeUpdated()
 {
 	DepthClusteringParameter parameter = depth_clustering_->getParameter();
@@ -474,6 +496,9 @@ Visualization::openDataset(const std::string& dataset_path)
 
 	dataset_path_ = dataset_path;
 	play_ = false;
+	viewer_image_layer_index_top_ = 0;
+	viewer_image_layer_index_middle_ = 1;
+	viewer_image_layer_index_bottom_ = 2;
 
 	if (!depth_clustering_)
 	{
@@ -517,6 +542,10 @@ Visualization::openDataset(const std::string& dataset_path)
 	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
 	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
 	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
+
+	ui->combo_layer_image_top->setCurrentIndex(viewer_image_layer_index_top_);
+	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
+	ui->combo_layer_image_bottom->setCurrentIndex(viewer_image_layer_index_bottom_);
 
 	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
 
@@ -683,7 +712,7 @@ Visualization::updateViewerPointCloud()
 }
 
 void
-Visualization::updateViewerImage()
+Visualization::updateViewerImageScene()
 {
 	auto image_depth = depth_clustering_->getCurrentDepthImage();
 	auto difference_type = depth_clustering_->getParameter().difference_type;
@@ -695,23 +724,126 @@ Visualization::updateViewerImage()
 
 	scene_difference_.reset(new QGraphicsScene);
 	scene_difference_->addPixmap(QPixmap::fromImage(qimage_difference));
-	ui->viewer_image_difference->setScene(scene_difference_.get());
-	ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
-
 	scene_depth_.reset(new QGraphicsScene);
 	scene_depth_->addPixmap(QPixmap::fromImage(qimage_depth));
-	ui->viewer_image_depth->setScene(scene_depth_.get());
-	ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
+
+	updateViewerImage();
 }
 
 void
-Visualization::refreshViewer()
+Visualization::updateViewerImage()
 {
-	ui->viewer_point_cloud->update();
-	ui->viewer_image_difference->setScene(scene_difference_.get());
-	ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
-	ui->viewer_image_segmentation->setScene(scene_segmentation_.get());
-	ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
-	ui->viewer_image_depth->setScene(scene_depth_.get());
-	ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
+	switch (viewer_image_layer_index_top_)
+	{
+	case 0:
+	{
+		ui->viewer_image_difference->setScene(scene_difference_.get());
+		ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
+		break;
+	}
+	case 1:
+	{
+		ui->viewer_image_difference->setScene(scene_segmentation_.get());
+		ui->viewer_image_difference->fitInView(scene_segmentation_->itemsBoundingRect());
+		break;
+	}
+	case 2:
+	{
+		ui->viewer_image_difference->setScene(scene_depth_.get());
+		ui->viewer_image_difference->fitInView(scene_depth_->itemsBoundingRect());
+		break;
+	}
+	case 3:
+	{
+		// TODO implement this
+		break;
+	}
+	case 4:
+	{
+		// TODO implement this
+		break;
+	}
+	default:
+	{
+		ui->viewer_image_difference->setScene(scene_difference_.get());
+		ui->viewer_image_difference->fitInView(scene_difference_->itemsBoundingRect());
+		break;
+	}
+	}
+
+	switch (viewer_image_layer_index_middle_)
+	{
+	case 0:
+	{
+		ui->viewer_image_segmentation->setScene(scene_difference_.get());
+		ui->viewer_image_segmentation->fitInView(scene_difference_->itemsBoundingRect());
+		break;
+	}
+	case 1:
+	{
+		ui->viewer_image_segmentation->setScene(scene_segmentation_.get());
+		ui->viewer_image_segmentation->fitInView(scene_segmentation_->itemsBoundingRect());
+		break;
+	}
+	case 2:
+	{
+		ui->viewer_image_segmentation->setScene(scene_depth_.get());
+		ui->viewer_image_segmentation->fitInView(scene_depth_->itemsBoundingRect());
+		break;
+	}
+	case 3:
+	{
+		// TODO implement this
+		break;
+	}
+	case 4:
+	{
+		// TODO implement this
+		break;
+	}
+	default:
+	{
+		ui->viewer_image_segmentation->setScene(scene_difference_.get());
+		ui->viewer_image_segmentation->fitInView(scene_difference_->itemsBoundingRect());
+		break;
+	}
+	}
+
+	switch (viewer_image_layer_index_bottom_)
+	{
+	case 0:
+	{
+		ui->viewer_image_depth->setScene(scene_difference_.get());
+		ui->viewer_image_depth->fitInView(scene_difference_->itemsBoundingRect());
+		break;
+	}
+	case 1:
+	{
+		ui->viewer_image_depth->setScene(scene_segmentation_.get());
+		ui->viewer_image_depth->fitInView(scene_segmentation_->itemsBoundingRect());
+		break;
+	}
+	case 2:
+	{
+		ui->viewer_image_depth->setScene(scene_depth_.get());
+		ui->viewer_image_depth->fitInView(scene_depth_->itemsBoundingRect());
+		break;
+	}
+	case 3:
+	{
+		// TODO implement this
+		break;
+	}
+	case 4:
+	{
+		// TODO implement this
+		break;
+	}
+	default:
+	{
+		ui->viewer_image_depth->setScene(scene_difference_.get());
+		ui->viewer_image_depth->fitInView(scene_difference_->itemsBoundingRect());
+		break;
+	}
+	}
 }
