@@ -20,7 +20,15 @@ ParameterFactory::ParameterFactory(std::string& path) :
 		path += "/";
 	}
 
-	boost::property_tree::read_json(path + configuration_file_name_, top_tree_);
+	try
+	{
+		boost::property_tree::read_json(path + configuration_file_name_, top_tree_);
+	} catch (boost::exception const &e)
+	{
+		std::cout << "[ERROR]: Failed to load depth clustering configuration file from \"" << path
+				<< "\"." << std::endl;
+		return;
+	}
 
 	depth_clustering_tree_ = top_tree_.get_child_optional("depth_clustering");
 	lidar_projection_tree_ = top_tree_.get_child_optional("lidar_projection");

@@ -294,7 +294,7 @@ Visualization::onSliderMovedTo(int frame_number)
 
 	if (frame_paths_names.empty())
 	{
-		std::cerr << "[ERROR]: Empty folder at \"" << dataset_path_ << "\"." << std::endl;
+		std::cerr << "[ERROR]: Invalid dataset path \"" << dataset_path_ << "\"." << std::endl;
 		return;
 	}
 
@@ -317,7 +317,6 @@ Visualization::onSliderMovedTo(int frame_number)
 	std::cout << "[INFO]: Updated point cloud viewer: " << timer.measure(Timer::Units::Micro)
 			<< " us." << std::endl;
 }
-
 
 void
 Visualization::onParameterUpdated()
@@ -409,7 +408,6 @@ Visualization::onParameterUpdated()
 	std::cout << "[INFO]: Updated parameters." << std::endl;
 }
 
-
 void
 Visualization::onLayerPointCloudUpdated()
 {
@@ -417,7 +415,6 @@ Visualization::onLayerPointCloudUpdated()
 
 	updateViewerPointCloud();
 }
-
 
 void
 Visualization::onLayerImageUpdated()
@@ -428,7 +425,6 @@ Visualization::onLayerImageUpdated()
 
 	updateViewerImage();
 }
-
 
 void
 Visualization::onDifferenceTypeUpdated()
@@ -496,20 +492,17 @@ Visualization::onDifferenceTypeUpdated()
 	std::cout << "[INFO]: Updated difference type." << std::endl;
 }
 
-
 void
 Visualization::onNextPage()
 {
 	ui->stacked_settings->setCurrentIndex(1);
 }
 
-
 void
 Visualization::onLastPage()
 {
 	ui->stacked_settings->setCurrentIndex(0);
 }
-
 
 void
 Visualization::openDataset(const std::string& dataset_path)
@@ -541,7 +534,7 @@ Visualization::openDataset(const std::string& dataset_path)
 
 	if (frame_paths_names.empty())
 	{
-		std::cerr << "[ERROR]: Empty folder at \"" << dataset_path_ << "\"." << std::endl;
+		std::cerr << "[ERROR]: Invalid dataset path \"" << dataset_path_ << "\"." << std::endl;
 		return;
 	}
 
@@ -620,7 +613,6 @@ Visualization::openDataset(const std::string& dataset_path)
 	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
 }
 
-
 std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
 Visualization::extractGroundPointCloud()
 {
@@ -658,7 +650,6 @@ Visualization::extractGroundPointCloud()
 
 	return std::make_pair(cloud_ground, cloud_no_ground);
 }
-
 
 void
 Visualization::updateViewerPointCloud()
