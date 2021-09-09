@@ -295,7 +295,8 @@ Visualization::onSliderMovedTo(int frame_number)
 	auto folder_reader_range = depth_clustering_->getFolderReaderRange();
 	const auto &frame_paths_names_range = folder_reader_range->GetAllFilePaths();
 
-	if (frame_paths_names_range.empty())
+	if (frame_paths_names_range.empty()
+			|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 	{
 		std::cerr << "[ERROR]: Range images missing in \"" << dataset_path_ << "\"." << std::endl;
 		return;
@@ -310,7 +311,8 @@ Visualization::onSliderMovedTo(int frame_number)
 		auto folder_reader_intensity = depth_clustering_->getFolderReaderIntensity();
 		const auto &frame_paths_names_intensity = folder_reader_intensity->GetAllFilePaths();
 
-		if (frame_paths_names_intensity.empty())
+		if (frame_paths_names_intensity.empty()
+				|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 		{
 			std::cout << "[WARN]: Intensity images missing in \"" << dataset_path_ << "\"."
 					<< std::endl;
@@ -328,7 +330,8 @@ Visualization::onSliderMovedTo(int frame_number)
 		auto folder_reader_elongation = depth_clustering_->getFolderReaderElongation();
 		const auto &frame_paths_names_elongation = folder_reader_elongation->GetAllFilePaths();
 
-		if (frame_paths_names_elongation.empty())
+		if (frame_paths_names_elongation.empty()
+				|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 		{
 			std::cout << "[WARN]: Elongation images missing in \"" << dataset_path_ << "\"."
 					<< std::endl;
@@ -438,7 +441,7 @@ Visualization::onParameterUpdated()
 	depth_clustering_->getDepthGroundRemover()->AddClient(this);
 	depth_clustering_->getClusterer()->SetLabelImageClient(this);
 
-	this->onSliderMovedTo(ui->slider_frame->value());
+	onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Updated parameters." << std::endl;
 }
@@ -458,6 +461,7 @@ Visualization::onLayerImageUpdated()
 	viewer_image_layer_index_middle_ = ui->combo_layer_image_middle->currentIndex();
 	viewer_image_layer_index_bottom_ = ui->combo_layer_image_bottom->currentIndex();
 
+	onSliderMovedTo(ui->slider_frame->value());
 	updateViewerImage();
 }
 
@@ -522,7 +526,7 @@ Visualization::onDifferenceTypeUpdated()
 	depth_clustering_->getClusterer()->SetDiffType(difference_type);
 	depth_clustering_->getClusterer()->SetLabelImageClient(this);
 
-	this->onSliderMovedTo(ui->slider_frame->value());
+	onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Updated difference type." << std::endl;
 }

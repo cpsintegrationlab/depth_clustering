@@ -77,7 +77,7 @@ FolderReader::FolderReader(const string& folder_path, const string& starting_wit
 	fs::path folder(folder_path);
 	if (!fs::exists(folder))
 	{
-		std::cerr << "[ERROR]: Invalid folder path \"" << folder_path.c_str() << "\"." << std::endl;
+		std::cout << "[WARN]: Invalid folder path \"" << folder_path.c_str() << "\"." << std::endl;
 		return;
 	}
 	if (fs::is_directory(folder))
