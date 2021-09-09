@@ -51,10 +51,10 @@ public:
 	getDatasetPath() const;
 
 	const cv::Mat&
-	getCurrentDepthImage() const;
+	getImageRange() const;
 
 	Cloud::ConstPtr
-	getCurrentCloud() const;
+	getCloud() const;
 
 	std::shared_ptr<BoundingBox>
 	getBoundingBox() const;
@@ -113,8 +113,8 @@ private:
 	std::shared_ptr<Logger> logger_;
 
 	DepthClusteringParameter parameter_;
-	cv::Mat current_depth_image_;
-	Cloud::Ptr current_cloud_;
+	Cloud::Ptr cloud_;
+	cv::Mat image_range_;
 	std::string dataset_path_;
 	int frame_counter_;
 };

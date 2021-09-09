@@ -121,13 +121,13 @@ private:
 	std::unique_ptr<QGraphicsScene> scene_empty_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_segmentation_ = nullptr;
-	std::unique_ptr<QGraphicsScene> scene_depth_ = nullptr;
+	std::unique_ptr<QGraphicsScene> scene_range_ = nullptr;
 	std::unique_ptr<DepthClustering> depth_clustering_ = nullptr;
 
 	std::string dataset_path_;
-	cv::Mat current_depth_image_;
-	cv::Mat current_depth_image_no_ground_;
-	mutable std::mutex current_depth_image_mutex_;
+	cv::Mat image_range_;
+	cv::Mat image_range_no_ground_;
+	mutable std::mutex image_range_mutex_;
 
 	volatile bool play_;
 	bool show_bounding_box_;

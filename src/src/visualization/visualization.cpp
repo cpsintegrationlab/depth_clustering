@@ -114,8 +114,8 @@ Visualization::Visualization(QWidget* parent) :
 	scene_difference_->addPixmap(QPixmap::fromImage(QImage()));
 	scene_segmentation_.reset(new QGraphicsScene);
 	scene_segmentation_->addPixmap(QPixmap::fromImage(QImage()));
-	scene_depth_.reset(new QGraphicsScene);
-	scene_depth_->addPixmap(QPixmap::fromImage(QImage()));
+	scene_range_.reset(new QGraphicsScene);
+	scene_range_->addPixmap(QPixmap::fromImage(QImage()));
 
 	depth_clustering_ = std::unique_ptr<DepthClustering>(new DepthClustering());
 
@@ -146,9 +146,9 @@ Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client
 void
 Visualization::OnNewObjectReceived(const Cloud& cloud_no_ground, int client_id)
 {
-	std::lock_guard<std::mutex> lock_guard(current_depth_image_mutex_);
-	current_depth_image_ = depth_clustering_->getCurrentDepthImage();
-	current_depth_image_no_ground_ = cloud_no_ground.projection_ptr()->depth_image();
+	std::lock_guard<std::mutex> lock_guard(image_range_mutex_);
+	image_range_ = depth_clustering_->getImageRange();
+	image_range_no_ground_ = cloud_no_ground.projection_ptr()->depth_image();
 }
 
 Visualization::~Visualization()
@@ -309,8 +309,8 @@ Visualization::onSliderMovedTo(int frame_number)
 
 	updateViewerImageScene();
 
-	std::cout << "[INFO]: Updated difference and depth image viewers: "
-			<< timer.measure(Timer::Units::Micro) << " us." << std::endl;
+	std::cout << "[INFO]: Updated image viewers: " << timer.measure(Timer::Units::Micro) << " us."
+			<< std::endl;
 
 	updateViewerPointCloud();
 
@@ -616,37 +616,35 @@ Visualization::openDataset(const std::string& dataset_path)
 std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
 Visualization::extractGroundPointCloud()
 {
-	cv::Mat current_depth_image;
-	cv::Mat current_depth_image_no_ground;
+	cv::Mat image_range;
+	cv::Mat image_range_no_ground;
 	const ProjectionParams projection_parameter = *depth_clustering_->getProjectionParameter();
 
 	{
-		std::lock_guard<std::mutex> lock_guard(current_depth_image_mutex_);
-		current_depth_image = current_depth_image_;
-		current_depth_image_no_ground = current_depth_image_no_ground_;
+		std::lock_guard<std::mutex> lock_guard(image_range_mutex_);
+		image_range = image_range_;
+		image_range_no_ground = image_range_no_ground_;
 	}
 
-	auto current_depth_image_ground = current_depth_image;
+	auto image_range_ground = image_range;
 
-	for (int row = 0; row < current_depth_image.rows; row++)
+	for (int row = 0; row < image_range.rows; row++)
 	{
-		for (int col = 0; col < current_depth_image.cols; col++)
+		for (int col = 0; col < image_range.cols; col++)
 		{
-			if (current_depth_image.at<float>(row, col)
-					!= current_depth_image_no_ground.at<float>(row, col))
+			if (image_range.at<float>(row, col) != image_range_no_ground.at<float>(row, col))
 			{
-				current_depth_image_ground.at<float>(row, col) = current_depth_image.at<float>(row,
-						col);
+				image_range_ground.at<float>(row, col) = image_range.at<float>(row, col);
 			}
 			else
 			{
-				current_depth_image_ground.at<float>(row, col) = 0.0;
+				image_range_ground.at<float>(row, col) = 0.0;
 			}
 		}
 	}
 
-	auto cloud_ground = Cloud::FromImage(current_depth_image_ground, projection_parameter);
-	auto cloud_no_ground = Cloud::FromImage(current_depth_image_no_ground, projection_parameter);
+	auto cloud_ground = Cloud::FromImage(image_range_ground, projection_parameter);
+	auto cloud_no_ground = Cloud::FromImage(image_range_no_ground, projection_parameter);
 
 	return std::make_pair(cloud_ground, cloud_no_ground);
 }
@@ -669,9 +667,8 @@ Visualization::updateViewerPointCloud()
 	}
 	else
 	{
-		auto current_cloud = depth_clustering_->getCurrentCloud();
-
-		ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(current_cloud));
+		ui->viewer_point_cloud->AddDrawable(
+				DrawableCloud::FromCloud(depth_clustering_->getCloud()));
 	}
 
 	if (show_bounding_box_)
@@ -747,10 +744,10 @@ Visualization::updateViewerImageScene()
 	if (viewer_image_layer_index_top_ == 0 || viewer_image_layer_index_middle_ == 0
 			|| viewer_image_layer_index_bottom_ == 0)
 	{
-		auto image_depth = depth_clustering_->getCurrentDepthImage();
+		auto image_range = depth_clustering_->getImageRange();
 		auto difference_type = depth_clustering_->getParameter().difference_type;
 		auto projection_parameter = depth_clustering_->getProjectionParameter();
-		auto difference_helper = DiffFactory::Build(difference_type, &image_depth,
+		auto difference_helper = DiffFactory::Build(difference_type, &image_range,
 				projection_parameter.get());
 		QImage qimage_difference = MatToQImage(difference_helper->Visualize());
 
@@ -763,11 +760,11 @@ Visualization::updateViewerImageScene()
 	if (viewer_image_layer_index_top_ == 2 || viewer_image_layer_index_middle_ == 2
 			|| viewer_image_layer_index_bottom_ == 2)
 	{
-		auto image_depth = depth_clustering_->getCurrentDepthImage();
-		QImage qimage_depth = MatToQImage(image_depth);
+		auto image_range = depth_clustering_->getImageRange();
+		QImage qimage_range = MatToQImage(image_range);
 
-		scene_depth_.reset(new QGraphicsScene);
-		scene_depth_->addPixmap(QPixmap::fromImage(qimage_depth));
+		scene_range_.reset(new QGraphicsScene);
+		scene_range_->addPixmap(QPixmap::fromImage(qimage_range));
 
 		updateViewerImage();
 	}
@@ -792,8 +789,8 @@ Visualization::updateViewerImage()
 	}
 	case 2:
 	{
-		ui->viewer_image_top->setScene(scene_depth_.get());
-		ui->viewer_image_top->fitInView(scene_depth_->itemsBoundingRect());
+		ui->viewer_image_top->setScene(scene_range_.get());
+		ui->viewer_image_top->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
 	case 3:
@@ -830,8 +827,8 @@ Visualization::updateViewerImage()
 	}
 	case 2:
 	{
-		ui->viewer_image_middle->setScene(scene_depth_.get());
-		ui->viewer_image_middle->fitInView(scene_depth_->itemsBoundingRect());
+		ui->viewer_image_middle->setScene(scene_range_.get());
+		ui->viewer_image_middle->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
 	case 3:
@@ -868,8 +865,8 @@ Visualization::updateViewerImage()
 	}
 	case 2:
 	{
-		ui->viewer_image_bottom->setScene(scene_depth_.get());
-		ui->viewer_image_bottom->fitInView(scene_depth_->itemsBoundingRect());
+		ui->viewer_image_bottom->setScene(scene_range_.get());
+		ui->viewer_image_bottom->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
 	case 3:

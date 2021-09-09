@@ -194,15 +194,15 @@ DepthClustering::getDatasetPath() const
 }
 
 const cv::Mat&
-DepthClustering::getCurrentDepthImage() const
+DepthClustering::getImageRange() const
 {
-	return current_depth_image_;
+	return image_range_;
 }
 
 Cloud::ConstPtr
-DepthClustering::getCurrentCloud() const
+DepthClustering::getCloud() const
 {
-	return current_cloud_;
+	return cloud_;
 }
 
 std::shared_ptr<BoundingBox>
@@ -309,7 +309,7 @@ void
 DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)
 {
-	current_cloud_ = Cloud::Ptr(new Cloud);
+	cloud_ = Cloud::Ptr(new Cloud);
 
 	for (const auto &point_eigen : point_cloud)
 	{
@@ -319,13 +319,13 @@ DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 		point_rich.y() = point_eigen.y();
 		point_rich.z() = point_eigen.z();
 
-		current_cloud_->push_back(point_rich);
+		cloud_->push_back(point_rich);
 	}
 
-	current_cloud_->InitProjection(*projection_parameter_);
+	cloud_->InitProjection(*projection_parameter_);
 
 	bounding_box_->clearFrames();
-	depth_ground_remover_->OnNewObjectReceived(*current_cloud_, 0);
+	depth_ground_remover_->OnNewObjectReceived(*cloud_, 0);
 
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 }
@@ -342,11 +342,11 @@ DepthClustering::processOneFrameForDataset(const std::string& frame_path_name)
 
 	if (parameter_.dataset_file_type == ".png")
 	{
-		current_depth_image_ = MatFromDepthPng(frame_path_name);
+		image_range_ = MatFromDepthPng(frame_path_name);
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		current_depth_image_ = MatFromDepthTiff(frame_path_name);
+		image_range_ = MatFromDepthTiff(frame_path_name);
 	}
 	else
 	{
@@ -354,12 +354,12 @@ DepthClustering::processOneFrameForDataset(const std::string& frame_path_name)
 		return "";
 	}
 
-	current_cloud_ = Cloud::FromImage(current_depth_image_, *projection_parameter_);
+	cloud_ = Cloud::FromImage(image_range_, *projection_parameter_);
 
 	std::cout << std::endl << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
 	bounding_box_->clearFrames();
-	depth_ground_remover_->OnNewObjectReceived(*current_cloud_, 0);
+	depth_ground_remover_->OnNewObjectReceived(*cloud_, 0);
 	bounding_box_->produceFrameFlat();
 
 	return frame_name;
