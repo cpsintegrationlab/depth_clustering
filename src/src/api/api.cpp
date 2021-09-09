@@ -130,8 +130,16 @@ DepthClustering::initializeForDataset(const std::string& dataset_path, const boo
 
 	std::string dataset_path_range = dataset_path_ + "frames_lidar/" + dataset_path_lidar_return
 			+ "/range/";
+	std::string dataset_path_intensity = dataset_path_ + "frames_lidar/" + dataset_path_lidar_return
+			+ "/intensity/";
+	std::string dataset_path_elongation = dataset_path_ + "frames_lidar/"
+			+ dataset_path_lidar_return + "/elongation/";
 
 	folder_reader_range_ = std::make_shared<FolderReader>(dataset_path_range,
+			parameter_.dataset_file_type, FolderReader::Order::SORTED);
+	folder_reader_intensity_ = std::make_shared<FolderReader>(dataset_path_intensity,
+			parameter_.dataset_file_type, FolderReader::Order::SORTED);
+	folder_reader_elongation_ = std::make_shared<FolderReader>(dataset_path_elongation,
 			parameter_.dataset_file_type, FolderReader::Order::SORTED);
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
@@ -236,7 +244,7 @@ DepthClustering::getClusterer() const
 }
 
 std::shared_ptr<FolderReader>
-DepthClustering::getFolderReaderFirstReturnRange() const
+DepthClustering::getFolderReaderRange() const
 {
 	return folder_reader_range_;
 }

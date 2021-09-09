@@ -66,7 +66,7 @@ public:
 	getClusterer() const;
 
 	std::shared_ptr<FolderReader>
-	getFolderReaderFirstReturnRange() const;
+	getFolderReaderRange() const;
 
 	std::shared_ptr<ProjectionParams>
 	getProjectionParameter() const;
@@ -107,6 +107,8 @@ private:
 	std::shared_ptr<ParameterFactory> parameter_factory_;
 	std::shared_ptr<ProjectionParams> projection_parameter_;
 	std::shared_ptr<FolderReader> folder_reader_range_;
+	std::shared_ptr<FolderReader> folder_reader_intensity_;
+	std::shared_ptr<FolderReader> folder_reader_elongation_;
 	std::shared_ptr<DepthGroundRemover> depth_ground_remover_;
 	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>> clusterer_;
 	std::shared_ptr<BoundingBox> bounding_box_;
