@@ -97,7 +97,8 @@ Visualization::Visualization(QWidget* parent) :
 			SLOT(onDifferenceTypeUpdated()));
 	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
-	connect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this, SLOT(onLayerPointCloudUpdated()));
+	connect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
+			SLOT(onLayerPointCloudUpdated()));
 	connect(ui->combo_layer_image_top, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
 	connect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
@@ -107,6 +108,8 @@ Visualization::Visualization(QWidget* parent) :
 	connect(ui->button_page_next, SIGNAL(released()), this, SLOT(onNextPage()));
 	connect(ui->button_page_last, SIGNAL(released()), this, SLOT(onLastPage()));
 
+	scene_empty_.reset(new QGraphicsScene);
+	scene_empty_->addPixmap(QPixmap::fromImage(QImage()));
 	scene_difference_.reset(new QGraphicsScene);
 	scene_difference_->addPixmap(QPixmap::fromImage(QImage()));
 	scene_segmentation_.reset(new QGraphicsScene);
@@ -245,7 +248,7 @@ Visualization::onPlay()
 	{
 		if (!play_)
 		{
-			std::cout << "[INFO]: Visualization stopped." << std::endl;
+			std::cout << std::endl << "[INFO]: Visualization stopped." << std::endl;
 			return;
 		}
 
@@ -256,7 +259,7 @@ Visualization::onPlay()
 
 	onPause();
 
-	std::cout << "[INFO]: Visualization completed." << std::endl;
+	std::cout << std::endl << "[INFO]: Visualization completed." << std::endl;
 }
 
 void
@@ -295,8 +298,8 @@ Visualization::onSliderMovedTo(int frame_number)
 		return;
 	}
 
-	std::cout << "[INFO]: Visualizing frame \"" << frame_paths_names[frame_number] << "\"."
-			<< std::endl;
+	std::cout << std::endl << "[INFO]: Visualizing frame \"" << frame_paths_names[frame_number]
+			<< "\"." << std::endl;
 
 	const auto &frame_path_name = frame_paths_names[frame_number];
 
@@ -805,8 +808,8 @@ Visualization::updateViewerImage()
 	}
 	default:
 	{
-		ui->viewer_image_top->setScene(scene_difference_.get());
-		ui->viewer_image_top->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_top->setScene(scene_empty_.get());
+		ui->viewer_image_top->fitInView(scene_empty_->itemsBoundingRect());
 		break;
 	}
 	}
@@ -843,8 +846,8 @@ Visualization::updateViewerImage()
 	}
 	default:
 	{
-		ui->viewer_image_middle->setScene(scene_difference_.get());
-		ui->viewer_image_middle->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_middle->setScene(scene_empty_.get());
+		ui->viewer_image_middle->fitInView(scene_empty_->itemsBoundingRect());
 		break;
 	}
 	}
@@ -881,8 +884,8 @@ Visualization::updateViewerImage()
 	}
 	default:
 	{
-		ui->viewer_image_bottom->setScene(scene_difference_.get());
-		ui->viewer_image_bottom->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_bottom->setScene(scene_empty_.get());
+		ui->viewer_image_bottom->fitInView(scene_empty_->itemsBoundingRect());
 		break;
 	}
 	}

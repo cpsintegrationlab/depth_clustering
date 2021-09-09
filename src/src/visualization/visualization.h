@@ -118,6 +118,7 @@ private:
 	updateViewerImage();
 
 	std::unique_ptr<Ui::Visualization> ui;
+	std::unique_ptr<QGraphicsScene> scene_empty_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_segmentation_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_depth_ = nullptr;
