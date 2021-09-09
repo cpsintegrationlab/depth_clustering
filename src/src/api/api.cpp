@@ -463,7 +463,7 @@ DepthClustering::processOneElongationFrameForDataset(const std::string& frame_pa
 	}
 	else
 	{
-		std::cout << "[INFO]: Unknown data type. Skip." << std::endl;
+		std::cout << "[WARN]: Unknown dataset file type." << std::endl;
 		return "";
 	}
 

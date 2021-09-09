@@ -19,7 +19,19 @@ QString
 appendPaths(const QString& path1, const QString& path2);
 
 QImage
-MatToQImage(const cv::Mat& image);
+MatToQImage(const cv::Mat& image, const int& rgb_factor = 10);
+
+QImage
+MatPNGRangeToQImage(const cv::Mat& image);
+
+QImage
+MatTIFFRangeToQImage(const cv::Mat& image);
+
+QImage
+MatTIFFIntensityToQImage(const cv::Mat& image);
+
+QImage
+MatTIFFElongationToQImage(const cv::Mat& image);
 
 dc::Cloud::Ptr
 CloudFromFile(const std::string& file_name, const dc::ProjectionParams& proj_params);

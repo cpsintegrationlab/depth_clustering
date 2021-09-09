@@ -26,7 +26,7 @@ appendPaths(const QString& path1, const QString& path2)
 }
 
 QImage
-MatToQImage(const cv::Mat& image)
+MatToQImage(const cv::Mat& image, const int& rgb_factor)
 {
 	auto qimage = QImage(image.cols, image.rows, QImage::Format_RGB888);
 	if (image.type() == CV_32F)
@@ -41,7 +41,7 @@ MatToQImage(const cv::Mat& image)
 					qimage.setPixel(c, r, color);
 					continue;
 				}
-				const float &val = image.at<float>(r, c) * 10;
+				const float &val = image.at<float>(r, c) * rgb_factor;
 				auto color = qRgb(val, val, val);
 				qimage.setPixel(c, r, color);
 			}
@@ -60,6 +60,30 @@ MatToQImage(const cv::Mat& image)
 		}
 	}
 	return qimage;
+}
+
+QImage
+MatPNGRangeToQImage(const cv::Mat& image)
+{
+	return MatToQImage(image, 255 / 131);
+}
+
+QImage
+MatTIFFRangeToQImage(const cv::Mat& image)
+{
+	return MatToQImage(image, 255 / 75);
+}
+
+QImage
+MatTIFFIntensityToQImage(const cv::Mat& image)
+{
+	return MatToQImage(image, 255 / 2);
+}
+
+QImage
+MatTIFFElongationToQImage(const cv::Mat& image)
+{
+	return MatToQImage(image, 255 / 1.5);
 }
 
 Cloud::Ptr

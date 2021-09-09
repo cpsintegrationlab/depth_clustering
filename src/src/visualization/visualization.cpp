@@ -37,8 +37,8 @@ using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
 		QWidget(parent), ui(new Ui::Visualization), play_(false), show_bounding_box_(true), viewer_point_cloud_layer_index_(
-				0), viewer_image_layer_index_top_(0), viewer_image_layer_index_middle_(1), viewer_image_layer_index_bottom_(
-				2)
+				5), viewer_image_layer_index_top_(2), viewer_image_layer_index_middle_(3), viewer_image_layer_index_bottom_(
+				4)
 {
 	ui->setupUi(this);
 
@@ -554,10 +554,10 @@ Visualization::openDataset(const std::string& dataset_path)
 
 	dataset_path_ = dataset_path;
 	play_ = false;
-	viewer_point_cloud_layer_index_ = 0;
-	viewer_image_layer_index_top_ = 0;
-	viewer_image_layer_index_middle_ = 1;
-	viewer_image_layer_index_bottom_ = 2;
+	viewer_point_cloud_layer_index_ = 5;
+	viewer_image_layer_index_top_ = 2;
+	viewer_image_layer_index_middle_ = 3;
+	viewer_image_layer_index_bottom_ = 4;
 
 	if (!depth_clustering_)
 	{
@@ -800,8 +800,22 @@ Visualization::updateViewerImageScene()
 	if (viewer_image_layer_index_top_ == 2 || viewer_image_layer_index_middle_ == 2
 			|| viewer_image_layer_index_bottom_ == 2)
 	{
+		auto parameter = depth_clustering_->getParameter();
 		auto image_range = depth_clustering_->getImageRange();
-		QImage qimage_range = MatToQImage(image_range);
+		QImage qimage_range;
+
+		if (parameter.dataset_file_type == ".png")
+		{
+			qimage_range = MatPNGRangeToQImage(image_range);
+		}
+		else if (parameter.dataset_file_type == ".tiff")
+		{
+			qimage_range = MatTIFFRangeToQImage(image_range);
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown dataset file type." << std::endl;
+		}
 
 		scene_range_.reset(new QGraphicsScene);
 		scene_range_->addPixmap(QPixmap::fromImage(qimage_range));
@@ -812,8 +826,24 @@ Visualization::updateViewerImageScene()
 	if (viewer_image_layer_index_top_ == 3 || viewer_image_layer_index_middle_ == 3
 			|| viewer_image_layer_index_bottom_ == 3)
 	{
+		auto parameter = depth_clustering_->getParameter();
 		auto image_intensity = depth_clustering_->getImageIntensity();
-		QImage qimage_intensity = MatToQImage(image_intensity);
+		QImage qimage_intensity;
+
+		if (parameter.dataset_file_type == ".png")
+		{
+			std::cerr
+					<< "[ERROR]: The processing of \".png\" type intensity images is not implemented."
+					<< std::endl;
+		}
+		else if (parameter.dataset_file_type == ".tiff")
+		{
+			qimage_intensity = MatTIFFIntensityToQImage(image_intensity);
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown dataset file type." << std::endl;
+		}
 
 		scene_intensity_.reset(new QGraphicsScene);
 		scene_intensity_->addPixmap(QPixmap::fromImage(qimage_intensity));
@@ -824,8 +854,24 @@ Visualization::updateViewerImageScene()
 	if (viewer_image_layer_index_top_ == 4 || viewer_image_layer_index_middle_ == 4
 			|| viewer_image_layer_index_bottom_ == 4)
 	{
+		auto parameter = depth_clustering_->getParameter();
 		auto image_elongation = depth_clustering_->getImageElongation();
-		QImage qimage_elongation = MatToQImage(image_elongation);
+		QImage qimage_elongation;
+
+		if (parameter.dataset_file_type == ".png")
+		{
+			std::cerr
+					<< "[ERROR]: The processing of \".png\" type elongation images is not implemented."
+					<< std::endl;
+		}
+		else if (parameter.dataset_file_type == ".tiff")
+		{
+			qimage_elongation = MatTIFFElongationToQImage(image_elongation);
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown dataset file type." << std::endl;
+		}
 
 		scene_elongation_.reset(new QGraphicsScene);
 		scene_elongation_->addPixmap(QPixmap::fromImage(qimage_elongation));
