@@ -309,14 +309,15 @@ Visualization::onSliderMovedTo(int frame_number)
 
 	updateViewerImageScene();
 
-	std::cout << "[INFO]: Updated difference and depth image viewers in "
+	std::cout << "[INFO]: Updated difference and depth image viewers: "
 			<< timer.measure(Timer::Units::Micro) << " us." << std::endl;
 
 	updateViewerPointCloud();
 
-	std::cout << "[INFO]: Updated point cloud viewer in " << timer.measure(Timer::Units::Micro)
+	std::cout << "[INFO]: Updated point cloud viewer: " << timer.measure(Timer::Units::Micro)
 			<< " us." << std::endl;
 }
+
 
 void
 Visualization::onParameterUpdated()
@@ -408,6 +409,7 @@ Visualization::onParameterUpdated()
 	std::cout << "[INFO]: Updated parameters." << std::endl;
 }
 
+
 void
 Visualization::onLayerPointCloudUpdated()
 {
@@ -415,6 +417,7 @@ Visualization::onLayerPointCloudUpdated()
 
 	updateViewerPointCloud();
 }
+
 
 void
 Visualization::onLayerImageUpdated()
@@ -425,6 +428,7 @@ Visualization::onLayerImageUpdated()
 
 	updateViewerImage();
 }
+
 
 void
 Visualization::onDifferenceTypeUpdated()
@@ -492,17 +496,20 @@ Visualization::onDifferenceTypeUpdated()
 	std::cout << "[INFO]: Updated difference type." << std::endl;
 }
 
+
 void
 Visualization::onNextPage()
 {
 	ui->stacked_settings->setCurrentIndex(1);
 }
 
+
 void
 Visualization::onLastPage()
 {
 	ui->stacked_settings->setCurrentIndex(0);
 }
+
 
 void
 Visualization::openDataset(const std::string& dataset_path)
@@ -613,6 +620,7 @@ Visualization::openDataset(const std::string& dataset_path)
 	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
 }
 
+
 std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
 Visualization::extractGroundPointCloud()
 {
@@ -650,6 +658,7 @@ Visualization::extractGroundPointCloud()
 
 	return std::make_pair(cloud_ground, cloud_no_ground);
 }
+
 
 void
 Visualization::updateViewerPointCloud()
