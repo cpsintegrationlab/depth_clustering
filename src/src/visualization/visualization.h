@@ -125,16 +125,16 @@ private:
 	std::unique_ptr<DepthClustering> depth_clustering_ = nullptr;
 
 	std::string dataset_path_;
-	cv::Mat image_range_;
-	cv::Mat image_range_no_ground_;
-	mutable std::mutex image_range_mutex_;
-
 	volatile bool play_;
 	bool show_bounding_box_;
 	int viewer_point_cloud_layer_index_;
 	int viewer_image_layer_index_top_;
 	int viewer_image_layer_index_middle_;
 	int viewer_image_layer_index_bottom_;
+
+	cv::Mat image_range_;
+	cv::Mat image_range_no_ground_;
+	mutable std::mutex image_range_mutex_;
 };
 
 #endif  // SRC_VISUALIZATION_VISUALIZATION_H_
