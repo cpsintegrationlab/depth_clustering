@@ -78,20 +78,20 @@ public:
 	setParameter(const DepthClusteringParameter& parameter);
 
 	void
-	processOneFrameForApollo(const std::string& frame_name,
+	processOneRangeFrameForApollo(const std::string& frame_name,
 			const std::vector<Eigen::Vector3f>& point_cloud);
 
 	const std::string
-	processOneFrameForDataset(const std::string& frame_path_name);
+	processOneRangeFrameForDataset(const std::string& frame_path_name);
 
 	const std::string
-	processNextFrameForDataset();
+	processNextRangeFrameForDataset();
 
 	const std::string
-	processLastFrameForDataset();
+	processLastRangeFrameForDataset();
 
 	void
-	processAllFramesForDataset();
+	processAllRangeFramesForDataset();
 
 	void
 	processGroundTruthForDataset();

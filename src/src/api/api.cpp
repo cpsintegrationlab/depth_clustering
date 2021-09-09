@@ -321,7 +321,7 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 }
 
 void
-DepthClustering::processOneFrameForApollo(const std::string& frame_name,
+DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)
 {
 	cloud_ = Cloud::Ptr(new Cloud);
@@ -346,7 +346,7 @@ DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 }
 
 const std::string
-DepthClustering::processOneFrameForDataset(const std::string& frame_path_name)
+DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_name)
 {
 	std::string frame_name = "";
 	std::stringstream ss(frame_path_name);
@@ -381,7 +381,7 @@ DepthClustering::processOneFrameForDataset(const std::string& frame_path_name)
 }
 
 const std::string
-DepthClustering::processNextFrameForDataset()
+DepthClustering::processNextRangeFrameForDataset()
 {
 	std::string frame_name = "";
 	const auto &frame_paths_names = folder_reader_range_->GetAllFilePaths();
@@ -393,14 +393,14 @@ DepthClustering::processNextFrameForDataset()
 
 	while (frame_name == "" && frame_counter_ < static_cast<int>(frame_paths_names.size()))
 	{
-		frame_name = processOneFrameForDataset(frame_paths_names[frame_counter_++]);
+		frame_name = processOneRangeFrameForDataset(frame_paths_names[frame_counter_++]);
 	}
 
 	return frame_name;
 }
 
 const std::string
-DepthClustering::processLastFrameForDataset()
+DepthClustering::processLastRangeFrameForDataset()
 {
 	std::string frame_name = "";
 	const auto &frame_paths_names = folder_reader_range_->GetAllFilePaths();
@@ -412,18 +412,18 @@ DepthClustering::processLastFrameForDataset()
 
 	while (frame_name == "" && frame_counter_ >= 0)
 	{
-		frame_name = processOneFrameForDataset(frame_paths_names[frame_counter_--]);
+		frame_name = processOneRangeFrameForDataset(frame_paths_names[frame_counter_--]);
 	}
 
 	return frame_name;
 }
 
 void
-DepthClustering::processAllFramesForDataset()
+DepthClustering::processAllRangeFramesForDataset()
 {
 	for (const auto &frame_path_name : folder_reader_range_->GetAllFilePaths())
 	{
-		const auto &frame_name = processOneFrameForDataset(frame_path_name);
+		const auto &frame_name = processOneRangeFrameForDataset(frame_path_name);
 
 		if (frame_name != "")
 		{

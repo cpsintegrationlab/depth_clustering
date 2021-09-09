@@ -302,7 +302,7 @@ Visualization::onSliderMovedTo(int frame_number)
 
 	const auto &frame_path_name = frame_paths_names[frame_number];
 
-	depth_clustering_->processOneFrameForDataset(frame_path_name);
+	depth_clustering_->processOneRangeFrameForDataset(frame_path_name);
 
 	timer.start();
 
