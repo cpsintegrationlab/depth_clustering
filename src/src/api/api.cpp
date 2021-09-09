@@ -90,13 +90,20 @@ DepthClustering::initializeForApollo()
 }
 
 bool
-DepthClustering::initializeForDataset(std::string dataset_path)
+DepthClustering::initializeForDataset(const std::string& dataset_path, const bool& second_return)
 {
 	dataset_path_ = dataset_path;
 
 	if (dataset_path_[dataset_path_.size() - 1] != '/')
 	{
 		dataset_path_ += "/";
+	}
+
+	std::string dataset_path_lidar_return = "first_return";
+
+	if (second_return)
+	{
+		dataset_path_lidar_return = "second_return";
 	}
 
 	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path_);
@@ -121,11 +128,11 @@ DepthClustering::initializeForDataset(std::string dataset_path)
 
 	logger_parameter.log_path = dataset_path_;
 
-	std::string dataset_path_first_return_range = dataset_path_ + "frames_lidar/first_return/range/";
+	std::string dataset_path_range = dataset_path_ + "frames_lidar/" + dataset_path_lidar_return
+			+ "/range/";
 
-	folder_reader_first_return_range_ = std::make_shared<FolderReader>(
-			dataset_path_first_return_range, parameter_.dataset_file_type,
-			FolderReader::Order::SORTED);
+	folder_reader_range_ = std::make_shared<FolderReader>(dataset_path_range,
+			parameter_.dataset_file_type, FolderReader::Order::SORTED);
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
@@ -231,7 +238,7 @@ DepthClustering::getClusterer() const
 std::shared_ptr<FolderReader>
 DepthClustering::getFolderReaderFirstReturnRange() const
 {
-	return folder_reader_first_return_range_;
+	return folder_reader_range_;
 }
 
 std::shared_ptr<ProjectionParams>
@@ -369,7 +376,7 @@ const std::string
 DepthClustering::processNextFrameForDataset()
 {
 	std::string frame_name = "";
-	const auto &frame_paths_names = folder_reader_first_return_range_->GetAllFilePaths();
+	const auto &frame_paths_names = folder_reader_range_->GetAllFilePaths();
 
 	if (frame_counter_ >= static_cast<int>(frame_paths_names.size()))
 	{
@@ -388,7 +395,7 @@ const std::string
 DepthClustering::processLastFrameForDataset()
 {
 	std::string frame_name = "";
-	const auto &frame_paths_names = folder_reader_first_return_range_->GetAllFilePaths();
+	const auto &frame_paths_names = folder_reader_range_->GetAllFilePaths();
 
 	if (frame_counter_ < 0)
 	{
@@ -406,7 +413,7 @@ DepthClustering::processLastFrameForDataset()
 void
 DepthClustering::processAllFramesForDataset()
 {
-	for (const auto &frame_path_name : folder_reader_first_return_range_->GetAllFilePaths())
+	for (const auto &frame_path_name : folder_reader_range_->GetAllFilePaths())
 	{
 		const auto &frame_name = processOneFrameForDataset(frame_path_name);
 

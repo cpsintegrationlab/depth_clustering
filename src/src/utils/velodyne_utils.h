@@ -58,6 +58,12 @@ MatFromPNGRange(const std::string& path);
 
 cv::Mat
 MatFromTIFFRange(const std::string& path);
+
+cv::Mat
+MatFromTIFFIntensity(const std::string& path);
+
+cv::Mat
+MatFromTIFFElongation(const std::string& path);
 }  // namespace depth_clustering
 
 #endif  // SRC_UTILS_VELODYNE_UTILS_H_

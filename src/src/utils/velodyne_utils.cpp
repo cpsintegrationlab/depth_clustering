@@ -139,4 +139,25 @@ MatFromTIFFRange(const string& path)
 	image_range *= 75.0;
 	return image_range;
 }
+
+cv::Mat
+MatFromTIFFIntensity(const string& path)
+{
+	cv::Mat image_intensity = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
+	image_intensity.convertTo(image_intensity, CV_32F);
+	image_intensity /= 65535.0;
+	image_intensity *= 2.0;
+	return image_intensity;
+}
+
+cv::Mat
+MatFromTIFFElongation(const string& path)
+{
+	cv::Mat image_elongation = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
+	image_elongation.convertTo(image_elongation, CV_32F);
+	image_elongation /= 65535.0;
+	image_elongation *= 1.5;
+	return image_elongation;
+}
+
 }  // namespace depth_clustering
