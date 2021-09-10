@@ -46,6 +46,24 @@ DepthClustering::getDatasetPath() const
 	return dataset_path_;
 }
 
+Cloud::ConstPtr
+DepthClustering::getCloudRange() const
+{
+	return cloud_range_;
+}
+
+Cloud::ConstPtr
+DepthClustering::getCloudIntensity() const
+{
+	return cloud_intensity_;
+}
+
+Cloud::ConstPtr
+DepthClustering::getCloudElongation() const
+{
+	return cloud_elongation_;
+}
+
 const cv::Mat&
 DepthClustering::getImageRange() const
 {
@@ -62,12 +80,6 @@ const cv::Mat&
 DepthClustering::getImageElongation() const
 {
 	return image_elongation_;
-}
-
-Cloud::ConstPtr
-DepthClustering::getCloud() const
-{
-	return cloud_;
 }
 
 std::shared_ptr<BoundingBox>
@@ -350,7 +362,7 @@ void
 DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)
 {
-	cloud_ = Cloud::Ptr(new Cloud);
+	cloud_range_ = Cloud::Ptr(new Cloud);
 
 	for (const auto &point_eigen : point_cloud)
 	{
@@ -360,13 +372,13 @@ DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 		point_rich.y() = point_eigen.y();
 		point_rich.z() = point_eigen.z();
 
-		cloud_->push_back(point_rich);
+		cloud_range_->push_back(point_rich);
 	}
 
-	cloud_->InitProjection(*projection_parameter_);
+	cloud_range_->InitProjection(*projection_parameter_);
 
 	bounding_box_->clearFrames();
-	depth_ground_remover_->OnNewObjectReceived(*cloud_, 0);
+	depth_ground_remover_->OnNewObjectReceived(*cloud_range_, 0);
 
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 }
@@ -407,12 +419,12 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 		return "";
 	}
 
-	cloud_ = Cloud::FromImage(image_range_, *projection_parameter_);
-
 	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
+	cloud_range_ = Cloud::FromImage(image_range_, *projection_parameter_);
+
 	bounding_box_->clearFrames();
-	depth_ground_remover_->OnNewObjectReceived(*cloud_, 0);
+	depth_ground_remover_->OnNewObjectReceived(*cloud_range_, 0);
 	bounding_box_->produceFrameFlat();
 
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
@@ -459,10 +471,10 @@ DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_pat
 		return "";
 	}
 
-	// TODO adapt below
-//	cloud_ = Cloud::FromImage(image_range_, *projection_parameter_);
-
 	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+
+	cloud_intensity_ = Cloud::FromImageIntensity(image_range_, image_intensity_,
+			*projection_parameter_);
 
 	return frame_name;
 }
@@ -506,10 +518,10 @@ DepthClustering::processOneElongationFrameForDataset(const std::string& frame_pa
 		return "";
 	}
 
-	// TODO adapt below
-	//	cloud_ = Cloud::FromImage(image_range_, *projection_parameter_);
-
 	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+
+	cloud_elongation_ = Cloud::FromImageElongation(image_range_, image_elongation_,
+			*projection_parameter_);
 
 	return frame_name;
 }

@@ -191,6 +191,14 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	static Cloud::Ptr
 	FromImage(const cv::Mat& image, const ProjectionParams& params);
 
+	static Cloud::Ptr
+	FromImageIntensity(const cv::Mat& image, const cv::Mat& image_intensity,
+			const ProjectionParams& params);
+
+	static Cloud::Ptr
+	FromImageElongation(const cv::Mat& image, const cv::Mat& image_elongation,
+			const ProjectionParams& params);
+
 // PCL specific part
 #if PCL_FOUND
 

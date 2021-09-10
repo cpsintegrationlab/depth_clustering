@@ -682,10 +682,10 @@ Visualization::extractGroundPointCloud()
 		}
 	}
 
-	auto cloud_ground = Cloud::FromImage(image_range_ground, projection_parameter);
-	auto cloud_no_ground = Cloud::FromImage(image_range_no_ground, projection_parameter);
+	auto cloud_range_ground = Cloud::FromImage(image_range_ground, projection_parameter);
+	auto cloud_range_no_ground = Cloud::FromImage(image_range_no_ground, projection_parameter);
 
-	return std::make_pair(cloud_ground, cloud_no_ground);
+	return std::make_pair(cloud_range_ground, cloud_range_no_ground);
 }
 
 void
@@ -695,19 +695,19 @@ Visualization::updateViewerPointCloud()
 
 	if (viewer_point_cloud_layer_index_ == 0)
 	{
-		const auto cloud_separated = extractGroundPointCloud();
-		const auto cloud_ground = cloud_separated.first;
-		const auto cloud_no_ground = cloud_separated.second;
+		const auto cloud_range_separated = extractGroundPointCloud();
+		const auto cloud_range_ground = cloud_range_separated.first;
+		const auto cloud_range_no_ground = cloud_range_separated.second;
 
 		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloud(cloud_ground, Eigen::Vector3f(255, 0, 0)));
+				DrawableCloud::FromCloud(cloud_range_ground, Eigen::Vector3f(255, 0, 0)));
 		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloud(cloud_no_ground, Eigen::Vector3f(255, 255, 255)));
+				DrawableCloud::FromCloud(cloud_range_no_ground, Eigen::Vector3f(255, 255, 255)));
 	}
 	else
 	{
 		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloud(depth_clustering_->getCloud()));
+				DrawableCloud::FromCloud(depth_clustering_->getCloudRange()));
 	}
 
 	if (show_bounding_box_)

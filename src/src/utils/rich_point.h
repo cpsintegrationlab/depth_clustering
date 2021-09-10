@@ -49,7 +49,7 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	}
 
 	explicit
-	RichPoint(float x, float y, float z, uint16_t ring, int intensity, int elongation) :
+	RichPoint(float x, float y, float z, uint16_t ring, float intensity, float elongation) :
 			_point
 			{ x, y, z }, _ring(ring), intensity_(intensity), elongation_(elongation)
 	{
@@ -89,13 +89,13 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		return _ring;
 	}
 
-	inline int
+	inline float
 	intensity() const
 	{
 		return intensity_;
 	}
 
-	inline int
+	inline float
 	elongation() const
 	{
 		return elongation_;
@@ -125,13 +125,13 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		return _ring;
 	}
 
-	inline int&
+	inline float&
 	intensity()
 	{
 		return intensity_;
 	}
 
-	inline int&
+	inline float&
 	elongation()
 	{
 		return elongation_;
@@ -162,13 +162,13 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	}
 
 	inline void
-	setIntensity(const int& intensity)
+	setIntensity(const float& intensity)
 	{
 		intensity_ = intensity;
 	}
 
 	inline void
-	setElongation(const int& elongation)
+	setElongation(const float& elongation)
 	{
 		elongation_ = elongation;
 	}
@@ -186,8 +186,8 @@ private:
 
 	Eigen::Vector3f _point = Eigen::Vector3f::Zero();
 	uint16_t _ring = 0;
-	int intensity_ = 0;
-	int elongation_ = 0;
+	float intensity_ = 0;
+	float elongation_ = 0;
 };
 }  // namespace depth_clustering
 

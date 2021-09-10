@@ -44,6 +44,15 @@ public:
 	const std::string&
 	getDatasetPath() const;
 
+	Cloud::ConstPtr
+	getCloudRange() const;
+
+	Cloud::ConstPtr
+	getCloudIntensity() const;
+
+	Cloud::ConstPtr
+	getCloudElongation() const;
+
 	const cv::Mat&
 	getImageRange() const;
 
@@ -52,9 +61,6 @@ public:
 
 	const cv::Mat&
 	getImageElongation() const;
-
-	Cloud::ConstPtr
-	getCloud() const;
 
 	std::shared_ptr<BoundingBox>
 	getBoundingBox() const;
@@ -127,7 +133,9 @@ private:
 	std::string dataset_path_;
 	int frame_counter_;
 
-	Cloud::Ptr cloud_;
+	Cloud::Ptr cloud_range_;
+	Cloud::Ptr cloud_intensity_;
+	Cloud::Ptr cloud_elongation_;
 	cv::Mat image_range_;
 	cv::Mat image_intensity_;
 	cv::Mat image_elongation_;
