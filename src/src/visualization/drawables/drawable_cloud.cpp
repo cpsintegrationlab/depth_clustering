@@ -29,6 +29,10 @@ DrawableCloud::Draw() const
 		{
 			setRGBColorWithValue(point.elongation(), 1.5);
 		}
+		else if (color_from_confidence_)
+		{
+			setRGBColorWithValue(point.confidence());
+		}
 		else
 		{
 			glColor3f(_color[0], _color[1], _color[2]);
@@ -52,14 +56,21 @@ DrawableCloud::Ptr
 DrawableCloud::FromCloudIntensity(const Cloud::ConstPtr& cloud)
 {
 	return std::make_shared<DrawableCloud>(
-			DrawableCloud(cloud, Eigen::Vector3f::Ones(), true, false));
+			DrawableCloud(cloud, Eigen::Vector3f::Ones(), true, false, false));
 }
 
 DrawableCloud::Ptr
 DrawableCloud::FromCloudElongation(const Cloud::ConstPtr& cloud)
 {
 	return std::make_shared<DrawableCloud>(
-			DrawableCloud(cloud, Eigen::Vector3f::Ones(), false, true));
+			DrawableCloud(cloud, Eigen::Vector3f::Ones(), false, true, false));
+}
+
+DrawableCloud::Ptr
+DrawableCloud::FromCloudConfidence(const Cloud::ConstPtr& cloud)
+{
+	return std::make_shared<DrawableCloud>(
+			DrawableCloud(cloud, Eigen::Vector3f::Ones(), false, false, true));
 }
 
 void
@@ -82,11 +93,11 @@ DrawableCloud::setRGBColorWithValue(const float& value, const float& value_max) 
 			+ (colormap_turbo[value_int_high][0] - colormap_turbo[value_int_low][0])
 					* value_fraction;
 	float green = colormap_turbo[value_int_low][1]
-				+ (colormap_turbo[value_int_high][1] - colormap_turbo[value_int_low][1])
-						* value_fraction;
+			+ (colormap_turbo[value_int_high][1] - colormap_turbo[value_int_low][1])
+					* value_fraction;
 	float blue = colormap_turbo[value_int_low][2]
-				+ (colormap_turbo[value_int_high][2] - colormap_turbo[value_int_low][2])
-						* value_fraction;
+			+ (colormap_turbo[value_int_high][2] - colormap_turbo[value_int_low][2])
+					* value_fraction;
 
 	glColor3f(red, green, blue);
 }

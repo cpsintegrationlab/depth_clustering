@@ -64,6 +64,13 @@ DepthClustering::getCloudElongation() const
 	return cloud_elongation_;
 }
 
+Cloud::ConstPtr
+DepthClustering::getCloudConfidence() const
+{
+	return Cloud::FromImageConfidence(image_range_, image_intensity_, image_elongation_,
+			*projection_parameter_);
+}
+
 const cv::Mat&
 DepthClustering::getImageRange() const
 {

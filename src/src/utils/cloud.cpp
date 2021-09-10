@@ -167,6 +167,35 @@ Cloud::FromImageElongation(const cv::Mat& image, const cv::Mat& image_elongation
 	return boost::make_shared<Cloud>(cloud);
 }
 
+Cloud::Ptr
+Cloud::FromImageConfidence(const cv::Mat& image, const cv::Mat& image_intensity,
+		const cv::Mat& image_elongation, const ProjectionParams& params)
+{
+	CloudProjection::Ptr proj = CloudProjection::Ptr(new RingProjection(params));
+	proj->CheckImageAndStorage(image);
+	proj->CloneDepthImage(image);
+	Cloud cloud;
+	for (int r = 0; r < image.rows; ++r)
+	{
+		for (int c = 0; c < image.cols; ++c)
+		{
+			if (image.at<float>(r, c) < 0.0001f)
+			{
+				continue;
+			}
+			RichPoint point = proj->UnprojectPoint(image, r, c);
+			point.setIntensity(image_intensity.at<float>(r, c));
+			point.setElongation(image_elongation.at<float>(r, c));
+			point.calculateConfidence();
+			cloud.push_back(point);
+			proj->at(r, c).points().push_back(cloud.points().size() - 1);
+		}
+	}
+	cloud.SetProjectionPtr(proj);
+	// we cannot share ownership of this cloud with others, so create a new one
+	return boost::make_shared<Cloud>(cloud);
+}
+
 // this code will be only there if we use pcl
 #ifdef PCL_FOUND
 

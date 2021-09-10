@@ -305,7 +305,8 @@ Visualization::onSliderMovedTo(int frame_number)
 	std::cout << std::endl;
 	depth_clustering_->processOneRangeFrameForDataset(frame_paths_names_range[frame_number]);
 
-	if (viewer_image_layer_index_top_ == 3 || viewer_image_layer_index_middle_ == 3
+	if (viewer_point_cloud_layer_index_ == 1 || viewer_point_cloud_layer_index_ == 3
+			|| viewer_image_layer_index_top_ == 3 || viewer_image_layer_index_middle_ == 3
 			|| viewer_image_layer_index_bottom_ == 3)
 	{
 		auto folder_reader_intensity = depth_clustering_->getFolderReaderIntensity();
@@ -324,7 +325,8 @@ Visualization::onSliderMovedTo(int frame_number)
 		}
 	}
 
-	if (viewer_image_layer_index_top_ == 4 || viewer_image_layer_index_middle_ == 4
+	if (viewer_point_cloud_layer_index_ == 2 || viewer_point_cloud_layer_index_ == 3
+			|| viewer_image_layer_index_top_ == 4 || viewer_image_layer_index_middle_ == 4
 			|| viewer_image_layer_index_bottom_ == 4)
 	{
 		auto folder_reader_elongation = depth_clustering_->getFolderReaderElongation();
@@ -712,6 +714,11 @@ Visualization::updateViewerPointCloud()
 	{
 		ui->viewer_point_cloud->AddDrawable(
 				DrawableCloud::FromCloudElongation(depth_clustering_->getCloudElongation()));
+	}
+	else if (viewer_point_cloud_layer_index_ == 3)
+	{
+		ui->viewer_point_cloud->AddDrawable(
+				DrawableCloud::FromCloudConfidence(depth_clustering_->getCloudConfidence()));
 	}
 	else
 	{

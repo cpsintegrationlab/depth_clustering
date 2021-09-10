@@ -53,6 +53,9 @@ public:
 	Cloud::ConstPtr
 	getCloudElongation() const;
 
+	Cloud::ConstPtr
+	getCloudConfidence() const;
+
 	const cv::Mat&
 	getImageRange() const;
 

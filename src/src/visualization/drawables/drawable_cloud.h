@@ -17,11 +17,11 @@ public:
 	explicit
 	DrawableCloud(const Cloud::ConstPtr& cloud, const Eigen::Vector3f& color =
 			Eigen::Vector3f::Ones(), const bool& color_from_intensity = false,
-			const bool& color_from_elongation = false) :
+			const bool& color_from_elongation = false, const bool& color_from_confidence = false) :
 			_cloud_ptr
 			{ cloud }, _color
 			{ color }, color_from_intensity_(color_from_intensity), color_from_elongation_(
-					color_from_elongation)
+					color_from_elongation), color_from_confidence_(color_from_confidence)
 	{
 	}
 
@@ -42,15 +42,19 @@ public:
 	static DrawableCloud::Ptr
 	FromCloudElongation(const Cloud::ConstPtr& cloud);
 
+	static DrawableCloud::Ptr
+	FromCloudConfidence(const Cloud::ConstPtr& cloud);
+
 private:
 
 	void
-	setRGBColorWithValue(const float& value, const float& value_max) const;
+	setRGBColorWithValue(const float& value, const float& value_max = 1) const;
 
 	Cloud::ConstPtr _cloud_ptr = nullptr;
 	Eigen::Vector3f _color = Eigen::Vector3f::Ones();
 	bool color_from_intensity_ = false;
 	bool color_from_elongation_ = false;
+	bool color_from_confidence_ = false;
 
 	// https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
 	const float colormap_turbo[256][3] =

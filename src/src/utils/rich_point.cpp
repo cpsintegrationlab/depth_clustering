@@ -17,7 +17,6 @@
 
 namespace depth_clustering
 {
-
 RichPoint&
 RichPoint::operator=(const RichPoint& other)
 {
@@ -27,6 +26,7 @@ RichPoint::operator=(const RichPoint& other)
 		_ring = other.ring();
 		intensity_ = other.intensity();
 		elongation_ = other.elongation();
+		confidence_ = other.confidence();
 	}
 
 	return *this;
@@ -44,7 +44,16 @@ RichPoint::operator==(const RichPoint& other) const
 {
 	return this->x() == other.x() && this->y() == other.y() && this->z() == other.z()
 			&& this->ring() == other.ring() && this->intensity() == other.intensity()
-			&& this->elongation() == other.elongation();
+			&& this->elongation() == other.elongation() && this->confidence() == other.confidence();
 }
 
+void
+RichPoint::calculateConfidence()
+{
+	float intensity_normalized = intensity_ / 2.0; // 0 - 1
+	float elongation_normalized = elongation_ / 1.5 + 1; // 1 - 2
+
+	confidence_ = intensity_normalized / elongation_normalized; // 0.5 - 1
+	confidence_ = fabs((confidence_ - 0.5) * 2); // 0 - 1
+}
 }  // namespace depth_clustering
