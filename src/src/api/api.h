@@ -137,8 +137,6 @@ private:
 	int frame_counter_;
 
 	Cloud::Ptr cloud_range_;
-	Cloud::Ptr cloud_intensity_;
-	Cloud::Ptr cloud_elongation_;
 	cv::Mat image_range_;
 	cv::Mat image_intensity_;
 	cv::Mat image_elongation_;

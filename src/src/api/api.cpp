@@ -55,13 +55,13 @@ DepthClustering::getCloudRange() const
 Cloud::ConstPtr
 DepthClustering::getCloudIntensity() const
 {
-	return cloud_intensity_;
+	return Cloud::FromImageIntensity(image_range_, image_intensity_, *projection_parameter_);
 }
 
 Cloud::ConstPtr
 DepthClustering::getCloudElongation() const
 {
-	return cloud_elongation_;
+	return Cloud::FromImageElongation(image_range_, image_elongation_, *projection_parameter_);
 }
 
 Cloud::ConstPtr
@@ -462,6 +462,8 @@ DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_pat
 		return "";
 	}
 
+	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+
 	if (parameter_.dataset_file_type == ".png")
 	{
 		std::cerr << "[ERROR]: The processing of \".png\" type intensity images is not implemented."
@@ -477,11 +479,6 @@ DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_pat
 		std::cout << "[WARN]: Unknown dataset file type." << std::endl;
 		return "";
 	}
-
-	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
-
-	cloud_intensity_ = Cloud::FromImageIntensity(image_range_, image_intensity_,
-			*projection_parameter_);
 
 	return frame_name;
 }
@@ -508,6 +505,8 @@ DepthClustering::processOneElongationFrameForDataset(const std::string& frame_pa
 		return "";
 	}
 
+	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+
 	if (parameter_.dataset_file_type == ".png")
 	{
 		std::cerr
@@ -524,11 +523,6 @@ DepthClustering::processOneElongationFrameForDataset(const std::string& frame_pa
 		std::cout << "[WARN]: Unknown dataset file type." << std::endl;
 		return "";
 	}
-
-	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
-
-	cloud_elongation_ = Cloud::FromImageElongation(image_range_, image_elongation_,
-			*projection_parameter_);
 
 	return frame_name;
 }
