@@ -15,24 +15,36 @@
 
 #include "utils/rich_point.h"
 
-namespace depth_clustering {
+namespace depth_clustering
+{
 
-RichPoint& RichPoint::operator=(const RichPoint& other) {
-  if (this != &other) {  // self-assignment check expected
-    _point = other.AsEigenVector();
-    _ring = other.ring();
-  }
-  return *this;
+RichPoint&
+RichPoint::operator=(const RichPoint& other)
+{
+	if (this != &other)
+	{  // self-assignment check expected
+		_point = other.AsEigenVector();
+		_ring = other.ring();
+		intensity_ = other.intensity();
+		elongation_ = other.elongation();
+	}
+
+	return *this;
 }
 
-RichPoint& RichPoint::operator=(const Eigen::Vector3f& other) {
-  this->_point = other;
-  return *this;
+RichPoint&
+RichPoint::operator=(const Eigen::Vector3f& other)
+{
+	this->_point = other;
+	return *this;
 }
 
-bool RichPoint::operator==(const RichPoint& other) const {
-  return this->x() == other.x() && this->y() == other.y() &&
-         this->z() == other.z() && this->ring() == other.ring();
+bool
+RichPoint::operator==(const RichPoint& other) const
+{
+	return this->x() == other.x() && this->y() == other.y() && this->z() == other.z()
+			&& this->ring() == other.ring() && this->intensity() == other.intensity()
+			&& this->elongation() == other.elongation();
 }
 
 }  // namespace depth_clustering

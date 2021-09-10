@@ -19,56 +19,176 @@
 #include <Eigen/Core>
 #include <vector>
 
-namespace depth_clustering {
-
+namespace depth_clustering
+{
 /**
  * @brief      A point class that holds additional ring information
  */
-class RichPoint {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+class RichPoint
+{
+public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  using AlignedVector =
-      std::vector<RichPoint, Eigen::aligned_allocator<RichPoint>>;
+	using AlignedVector =
+	std::vector<RichPoint, Eigen::aligned_allocator<RichPoint>>;
 
-  RichPoint() {}
-  explicit RichPoint(float x, float y, float z) : _point(x, y, z) {}
-  explicit RichPoint(float x, float y, float z, uint16_t ring)
-      : _point{x, y, z}, _ring{ring} {}
-  explicit RichPoint(Eigen::Vector3f& eigen_vec) : _point(eigen_vec) {}
-  ~RichPoint() {}
+	RichPoint()
+	{
+	}
 
-  inline int ring() const { return _ring; }
-  inline float x() const { return _point.x(); }
-  inline float y() const { return _point.y(); }
-  inline float z() const { return _point.z(); }
+	explicit
+	RichPoint(float x, float y, float z) :
+			_point(x, y, z)
+	{
+	}
 
-  inline uint16_t& ring() { return _ring; }
-  inline float& x() { return _point.x(); }
-  inline float& y() { return _point.y(); }
-  inline float& z() { return _point.z(); }
+	explicit
+	RichPoint(float x, float y, float z, uint16_t ring) :
+			_point
+			{ x, y, z }, _ring(ring)
+	{
+	}
 
-  inline const Eigen::Vector3f& AsEigenVector() const { return _point; }
-  inline Eigen::Vector3f& AsEigenVector() { return _point; }
+	explicit
+	RichPoint(float x, float y, float z, uint16_t ring, int intensity, int elongation) :
+			_point
+			{ x, y, z }, _ring(ring), intensity_(intensity), elongation_(elongation)
+	{
+	}
 
-  inline float DistToSensor2D() const {
-    return sqrt(_point.x() * _point.x() + _point.y() * _point.y());
-  }
+	explicit
+	RichPoint(Eigen::Vector3f& eigen_vec) :
+			_point(eigen_vec)
+	{
+	}
 
-  inline float DistToSensor3D() const {
-    return sqrt(_point.x() * _point.x() + _point.y() * _point.y() +
-                _point.z() * _point.z());
-  }
+	~RichPoint()
+	{
+	}
 
-  RichPoint& operator=(const RichPoint& other);
-  RichPoint& operator=(const Eigen::Vector3f& other);
-  bool operator==(const RichPoint& other) const;
+	inline float
+	x() const
+	{
+		return _point.x();
+	}
 
- private:
-  Eigen::Vector3f _point = Eigen::Vector3f::Zero();
-  uint16_t _ring = 0;
+	inline float
+	y() const
+	{
+		return _point.y();
+	}
+
+	inline float
+	z() const
+	{
+		return _point.z();
+	}
+
+	inline uint16_t
+	ring() const
+	{
+		return _ring;
+	}
+
+	inline int
+	intensity() const
+	{
+		return intensity_;
+	}
+
+	inline int
+	elongation() const
+	{
+		return elongation_;
+	}
+
+	inline float&
+	x()
+	{
+		return _point.x();
+	}
+
+	inline float&
+	y()
+	{
+		return _point.y();
+	}
+
+	inline float&
+	z()
+	{
+		return _point.z();
+	}
+
+	inline uint16_t&
+	ring()
+	{
+		return _ring;
+	}
+
+	inline int&
+	intensity()
+	{
+		return intensity_;
+	}
+
+	inline int&
+	elongation()
+	{
+		return elongation_;
+	}
+
+	inline const Eigen::Vector3f&
+	AsEigenVector() const
+	{
+		return _point;
+	}
+
+	inline Eigen::Vector3f&
+	AsEigenVector()
+	{
+		return _point;
+	}
+
+	inline float
+	DistToSensor2D() const
+	{
+		return sqrt(_point.x() * _point.x() + _point.y() * _point.y());
+	}
+
+	inline float
+	DistToSensor3D() const
+	{
+		return sqrt(_point.x() * _point.x() + _point.y() * _point.y() + _point.z() * _point.z());
+	}
+
+	inline void
+	setIntensity(const int& intensity)
+	{
+		intensity_ = intensity;
+	}
+
+	inline void
+	setElongation(const int& elongation)
+	{
+		elongation_ = elongation;
+	}
+
+	RichPoint&
+	operator=(const RichPoint& other);
+
+	RichPoint&
+	operator=(const Eigen::Vector3f& other);
+
+	bool
+	operator==(const RichPoint& other) const;
+
+private:
+
+	Eigen::Vector3f _point = Eigen::Vector3f::Zero();
+	uint16_t _ring = 0;
+	int intensity_ = 0;
+	int elongation_ = 0;
 };
-
 }  // namespace depth_clustering
 
 #endif  // SRC_UTILS_RICH_POINT_H_
