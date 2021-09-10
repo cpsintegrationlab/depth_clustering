@@ -16,18 +16,17 @@
 #ifndef SRC_UTILS_CLOUD_H_
 #define SRC_UTILS_CLOUD_H_
 
+#include <algorithm>
 #include <Eigen/Core>
 #include <Eigen/StdVector>
+#include <list>
+#include <memory>
+#include <vector>
 
 #if PCL_FOUND
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #endif  // PCL_FOUND
-
-#include <algorithm>
-#include <list>
-#include <memory>
-#include <vector>
 
 #include "projections/cloud_projection.h"
 #include "projections/ring_projection.h"
@@ -35,90 +34,193 @@
 #include "utils/pose.h"
 #include "utils/useful_typedefs.h"
 
-namespace depth_clustering {
-
+namespace depth_clustering
+{
 /**
  * @brief      A class that stores a vector of RichPoints
  * @details    A utility class  for storing points. If PCL is available has ways
  *             of converting to and from pcl. Also knows how to generate a
  *             projection from its points and can be generated from an image.
  */
-class Cloud {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  using Ptr = shared_ptr<Cloud>;
-  using ConstPtr = shared_ptr<const Cloud>;
+class Cloud
+{
+public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  Cloud() : _points{}, _pose{}, _sensor_pose{} {}
-  explicit Cloud(const Cloud& cloud);
-  explicit Cloud(const Pose& pose) : _pose(pose), _sensor_pose() {}
+	using Ptr = shared_ptr<Cloud>;
+	using ConstPtr = shared_ptr<const Cloud>;
 
-  virtual ~Cloud() {}
+	Cloud() :
+			_points
+			{ }, _pose
+			{ }, _sensor_pose
+			{ }
+	{
+	}
 
-  inline const RichPoint::AlignedVector& points() const { return _points; }
+	explicit
+	Cloud(const Cloud& cloud);
 
-  inline Pose& pose() { return _pose; }
-  inline const Pose& pose() const { return _pose; }
+	explicit
+	Cloud(const Pose& pose) :
+			_pose(pose), _sensor_pose()
+	{
+	}
 
-  inline Pose& sensor_pose() { return _sensor_pose; }
-  inline const Pose& sensor_pose() const { return _sensor_pose; }
+	virtual
+	~Cloud()
+	{
+	}
 
-  inline void push_back(const RichPoint& point) { _points.push_back(point); }
-  inline size_t size() const { return _points.size(); }
-  inline bool empty() const { return _points.empty(); }
-  inline void reserve(size_t size) { _points.reserve(size); }
+	inline const RichPoint::AlignedVector&
+	points() const
+	{
+		return _points;
+	}
 
-  inline RichPoint& operator[](int idx) { return _points[idx]; }
-  inline const RichPoint& operator[](int idx) const { return _points[idx]; }
+	inline Pose&
+	pose()
+	{
+		return _pose;
+	}
 
-  inline RichPoint& at(int idx) { return _points[idx]; }
-  inline const RichPoint& at(int idx) const { return _points[idx]; }
+	inline const Pose&
+	pose() const
+	{
+		return _pose;
+	}
 
-  inline void Resize(size_t new_size) { _points.resize(new_size); }
-  inline void SetPose(const Pose& pose) { _pose = pose; }
+	inline Pose&
+	sensor_pose()
+	{
+		return _sensor_pose;
+	}
 
-  inline const typename CloudProjection::ConstPtr projection_ptr() const {
-    return _projection;
-  }
+	inline const Pose&
+	sensor_pose() const
+	{
+		return _sensor_pose;
+	}
 
-  inline typename CloudProjection::Ptr projection_ptr() { return _projection; }
+	inline void
+	push_back(const RichPoint& point)
+	{
+		_points.push_back(point);
+	}
 
-  std::list<const RichPoint*> PointsProjectedToPixel(int row, int col) const;
+	inline size_t
+	size() const
+	{
+		return _points.size();
+	}
 
-  void TransformInPlace(const Pose& pose);
-  Cloud::Ptr Transform(const Pose& pose) const;
+	inline bool
+	empty() const
+	{
+		return _points.empty();
+	}
 
-  void SetProjectionPtr(typename CloudProjection::Ptr proj_ptr);
+	inline void
+	reserve(size_t size)
+	{
+		_points.reserve(size);
+	}
 
-  void InitProjection(const ProjectionParams& params);
+	inline RichPoint&
+	operator[](int idx)
+	{
+		return _points[idx];
+	}
 
-  static Cloud::Ptr FromImage(const cv::Mat& image,
-                              const ProjectionParams& params);
+	inline const RichPoint&
+	operator[](int idx) const
+	{
+		return _points[idx];
+	}
+
+	inline RichPoint&
+	at(int idx)
+	{
+		return _points[idx];
+	}
+
+	inline const RichPoint&
+	at(int idx) const
+	{
+		return _points[idx];
+	}
+
+	inline void
+	Resize(size_t new_size)
+	{
+		_points.resize(new_size);
+	}
+
+	inline void
+	SetPose(const Pose& pose)
+	{
+		_pose = pose;
+	}
+
+	inline const typename CloudProjection::ConstPtr
+	projection_ptr() const
+	{
+		return _projection;
+	}
+
+	inline typename CloudProjection::Ptr
+	projection_ptr()
+	{
+		return _projection;
+	}
+
+	std::list<const RichPoint*>
+	PointsProjectedToPixel(int row, int col) const;
+
+	void
+	TransformInPlace(const Pose& pose);
+
+	Cloud::Ptr
+	Transform(const Pose& pose) const;
+
+	void
+	SetProjectionPtr(typename CloudProjection::Ptr proj_ptr);
+
+	void
+	InitProjection(const ProjectionParams& params);
+
+	static Cloud::Ptr
+	FromImage(const cv::Mat& image, const ProjectionParams& params);
 
 // PCL specific part
 #if PCL_FOUND
-  typename pcl::PointCloud<pcl::PointXYZL>::Ptr ToPcl() const;
 
-  template <class PointT>
-  static Cloud::Ptr FromPcl(const pcl::PointCloud<PointT>& pcl_cloud) {
-    Cloud cloud;
-    for (const auto& pcl_point : pcl_cloud) {
-      RichPoint point(pcl_point.x, pcl_point.y, pcl_point.z);
-      cloud.push_back(point);
-    }
-    return make_shared<Cloud>(cloud);
-  }
+	typename pcl::PointCloud<pcl::PointXYZL>::Ptr
+	ToPcl() const;
+
+	template<class PointT>
+	static Cloud::Ptr
+	FromPcl(const pcl::PointCloud<PointT>& pcl_cloud)
+	{
+		Cloud cloud;
+		for (const auto &pcl_point : pcl_cloud)
+		{
+			RichPoint point(pcl_point.x, pcl_point.y, pcl_point.z);
+			cloud.push_back(point);
+		}
+		return make_shared<Cloud>(cloud);
+	}
+
 #endif  // PCL_FOUND
 
- protected:
-  RichPoint::AlignedVector _points;
+protected:
 
-  Pose _pose;
-  Pose _sensor_pose;
+	RichPoint::AlignedVector _points;
 
-  CloudProjection::Ptr _projection = nullptr;
+	Pose _pose;
+	Pose _sensor_pose;
+
+	CloudProjection::Ptr _projection = nullptr;
 };
-
 }  // namespace depth_clustering
 
 #endif  // SRC_UTILS_CLOUD_H_
