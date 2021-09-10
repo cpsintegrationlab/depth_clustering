@@ -37,7 +37,7 @@ using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
 		QWidget(parent), ui(new Ui::Visualization), play_(false), show_bounding_box_(true), viewer_point_cloud_layer_index_(
-				5), viewer_image_layer_index_top_(2), viewer_image_layer_index_middle_(3), viewer_image_layer_index_bottom_(
+				4), viewer_image_layer_index_top_(2), viewer_image_layer_index_middle_(3), viewer_image_layer_index_bottom_(
 				4)
 {
 	ui->setupUi(this);
@@ -553,7 +553,7 @@ Visualization::openDataset(const std::string& dataset_path)
 
 	dataset_path_ = dataset_path;
 	play_ = false;
-	viewer_point_cloud_layer_index_ = 5;
+	viewer_point_cloud_layer_index_ = 4;
 	viewer_image_layer_index_top_ = 2;
 	viewer_image_layer_index_middle_ = 3;
 	viewer_image_layer_index_bottom_ = 4;
