@@ -38,12 +38,6 @@ public:
 
 	DepthClustering(const DepthClusteringParameter& parameter);
 
-	bool
-	initializeForApollo();
-
-	bool
-	initializeForDataset(const std::string& dataset_path, const bool& second_return = false);
-
 	const DepthClusteringParameter&
 	getParameter() const;
 
@@ -89,6 +83,12 @@ public:
 	void
 	setParameter(const DepthClusteringParameter& parameter);
 
+	bool
+	initializeForApollo();
+
+	bool
+	initializeForDataset(const std::string& dataset_path, const bool& second_return = false);
+
 	void
 	processOneRangeFrameForApollo(const std::string& frame_name,
 			const std::vector<Eigen::Vector3f>& point_cloud);
@@ -102,23 +102,14 @@ public:
 	const std::string
 	processOneElongationFrameForDataset(const std::string& frame_path_name);
 
-	const std::string
-	processNextRangeFrameForDataset();
-
-	const std::string
-	processLastRangeFrameForDataset();
+	void
+	processAllGroundTruthsForDataset();
 
 	void
-	processAllRangeFramesForDataset();
+	writeLogForApollo();
 
 	void
-	processGroundTruthForDataset();
-
-	void
-	logForApollo();
-
-	void
-	logForDataset();
+	writeLogForDataset();
 
 private:
 

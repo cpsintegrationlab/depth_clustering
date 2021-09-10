@@ -43,8 +43,13 @@ main(int argc, char* argv[])
 		return -1;
 	}
 
-	depth_clustering.processAllFramesForDataset();
-	depth_clustering.logForDataset();
+	for (const auto &frame_path_name : depth_clustering.getFolderReaderRange()->GetAllFilePaths())
+	{
+		std::cout << std::endl;
+		depth_clustering.processOneRangeFrameForDataset(frame_path_name);
+	}
+
+	depth_clustering.writeLogForDataset();
 
 	return 0;
 }

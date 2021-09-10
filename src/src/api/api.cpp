@@ -34,6 +34,154 @@ DepthClustering::DepthClustering(const DepthClusteringParameter& parameter) :
 {
 }
 
+const DepthClusteringParameter&
+DepthClustering::getParameter() const
+{
+	return parameter_;
+}
+
+const std::string&
+DepthClustering::getDatasetPath() const
+{
+	return dataset_path_;
+}
+
+const cv::Mat&
+DepthClustering::getImageRange() const
+{
+	return image_range_;
+}
+
+const cv::Mat&
+DepthClustering::getImageIntensity() const
+{
+	return image_intensity_;
+}
+
+const cv::Mat&
+DepthClustering::getImageElongation() const
+{
+	return image_elongation_;
+}
+
+Cloud::ConstPtr
+DepthClustering::getCloud() const
+{
+	return cloud_;
+}
+
+std::shared_ptr<BoundingBox>
+DepthClustering::getBoundingBox() const
+{
+	return bounding_box_;
+}
+
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
+DepthClustering::getBoundingBoxFrameFlat() const
+{
+	if (!bounding_box_)
+	{
+		return nullptr;
+	}
+
+	return bounding_box_->getFrameFlat();
+}
+
+std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>>
+DepthClustering::getClusterer() const
+{
+	return clusterer_;
+}
+
+std::shared_ptr<FolderReader>
+DepthClustering::getFolderReaderRange() const
+{
+	return folder_reader_range_;
+}
+
+std::shared_ptr<FolderReader>
+DepthClustering::getFolderReaderIntensity() const
+{
+	return folder_reader_intensity_;
+}
+
+std::shared_ptr<FolderReader>
+DepthClustering::getFolderReaderElongation() const
+{
+	return folder_reader_elongation_;
+}
+
+std::shared_ptr<ProjectionParams>
+DepthClustering::getProjectionParameter() const
+{
+	return projection_parameter_;
+}
+
+std::shared_ptr<DepthGroundRemover>
+DepthClustering::getDepthGroundRemover() const
+{
+	return depth_ground_remover_;
+}
+
+void
+DepthClustering::setParameter(const DepthClusteringParameter& parameter)
+{
+	parameter_ = parameter;
+
+	auto camera_projection_parameter = parameter_factory_->getCameraProjectionParameter();
+	auto logger_parameter = parameter_factory_->getLoggerParameter();
+
+	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
+			parameter_.angle_ground_removal, parameter_.size_smooth_window);
+	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
+			camera_projection_parameter);
+
+	Radians clustering_threshold;
+
+	switch (parameter_.difference_type)
+	{
+	case DiffFactory::DiffType::ANGLES:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	case DiffFactory::DiffType::ANGLES_PRECOMPUTED:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::LINE_DIST_PRECOMPUTED:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	case DiffFactory::DiffType::SIMPLE:
+	{
+		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
+		break;
+	}
+	default:
+	{
+		clustering_threshold = parameter_.angle_clustering;
+		break;
+	}
+	}
+
+	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(clustering_threshold,
+			parameter_.size_cluster_min, parameter_.size_cluster_max);
+
+	clusterer_->SetDiffType(parameter_.difference_type);
+	logger_->setBoundingBox(bounding_box_);
+
+	depth_ground_remover_->AddClient(clusterer_.get());
+	clusterer_->AddClient(bounding_box_.get());
+}
+
 bool
 DepthClustering::initializeForApollo()
 {
@@ -198,154 +346,6 @@ DepthClustering::initializeForDataset(const std::string& dataset_path, const boo
 	return true;
 }
 
-const DepthClusteringParameter&
-DepthClustering::getParameter() const
-{
-	return parameter_;
-}
-
-const std::string&
-DepthClustering::getDatasetPath() const
-{
-	return dataset_path_;
-}
-
-const cv::Mat&
-DepthClustering::getImageRange() const
-{
-	return image_range_;
-}
-
-const cv::Mat&
-DepthClustering::getImageIntensity() const
-{
-	return image_intensity_;
-}
-
-const cv::Mat&
-DepthClustering::getImageElongation() const
-{
-	return image_elongation_;
-}
-
-Cloud::ConstPtr
-DepthClustering::getCloud() const
-{
-	return cloud_;
-}
-
-std::shared_ptr<BoundingBox>
-DepthClustering::getBoundingBox() const
-{
-	return bounding_box_;
-}
-
-std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
-DepthClustering::getBoundingBoxFrameFlat() const
-{
-	if (!bounding_box_)
-	{
-		return nullptr;
-	}
-
-	return bounding_box_->getFrameFlat();
-}
-
-std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>>
-DepthClustering::getClusterer() const
-{
-	return clusterer_;
-}
-
-std::shared_ptr<FolderReader>
-DepthClustering::getFolderReaderRange() const
-{
-	return folder_reader_range_;
-}
-
-std::shared_ptr<FolderReader>
-DepthClustering::getFolderReaderIntensity() const
-{
-	return folder_reader_intensity_;
-}
-
-std::shared_ptr<FolderReader>
-DepthClustering::getFolderReaderElongation() const
-{
-	return folder_reader_elongation_;
-}
-
-std::shared_ptr<ProjectionParams>
-DepthClustering::getProjectionParameter() const
-{
-	return projection_parameter_;
-}
-
-std::shared_ptr<DepthGroundRemover>
-DepthClustering::getDepthGroundRemover() const
-{
-	return depth_ground_remover_;
-}
-
-void
-DepthClustering::setParameter(const DepthClusteringParameter& parameter)
-{
-	parameter_ = parameter;
-
-	auto camera_projection_parameter = parameter_factory_->getCameraProjectionParameter();
-	auto logger_parameter = parameter_factory_->getLoggerParameter();
-
-	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
-			parameter_.angle_ground_removal, parameter_.size_smooth_window);
-	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
-			camera_projection_parameter);
-
-	Radians clustering_threshold;
-
-	switch (parameter_.difference_type)
-	{
-	case DiffFactory::DiffType::ANGLES:
-	{
-		clustering_threshold = parameter_.angle_clustering;
-		break;
-	}
-	case DiffFactory::DiffType::ANGLES_PRECOMPUTED:
-	{
-		clustering_threshold = parameter_.angle_clustering;
-		break;
-	}
-	case DiffFactory::DiffType::LINE_DIST:
-	{
-		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
-		break;
-	}
-	case DiffFactory::DiffType::LINE_DIST_PRECOMPUTED:
-	{
-		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
-		break;
-	}
-	case DiffFactory::DiffType::SIMPLE:
-	{
-		clustering_threshold = Radians::FromRadians(parameter_.distance_clustering);
-		break;
-	}
-	default:
-	{
-		clustering_threshold = parameter_.angle_clustering;
-		break;
-	}
-	}
-
-	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(clustering_threshold,
-			parameter_.size_cluster_min, parameter_.size_cluster_max);
-
-	clusterer_->SetDiffType(parameter_.difference_type);
-	logger_->setBoundingBox(bounding_box_);
-
-	depth_ground_remover_->AddClient(clusterer_.get());
-	clusterer_->AddClient(bounding_box_.get());
-}
-
 void
 DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)
@@ -374,11 +374,23 @@ DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 const std::string
 DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_name)
 {
+	if (frame_path_name == "")
+	{
+		std::cout << "[WARN]: Invalid frame path and name." << std::endl;
+		return "";
+	}
+
 	std::string frame_name = "";
 	std::stringstream ss(frame_path_name);
 
 	while (std::getline(ss, frame_name, '/'))
 	{
+	}
+
+	if (frame_name == "")
+	{
+		std::cout << "[WARN]: Invalid frame name." << std::endl;
+		return "";
 	}
 
 	if (parameter_.dataset_file_type == ".png")
@@ -391,7 +403,7 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 	}
 	else
 	{
-		std::cout << "[INFO]: Unknown data type. Skip." << std::endl;
+		std::cout << "[WARN]: Unknown dataset file type." << std::endl;
 		return "";
 	}
 
@@ -403,17 +415,32 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 	depth_ground_remover_->OnNewObjectReceived(*cloud_, 0);
 	bounding_box_->produceFrameFlat();
 
+	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
+	logger_->logBoundingBoxFrameFlat(frame_name);
+
 	return frame_name;
 }
 
 const std::string
 DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_path_name)
 {
+	if (frame_path_name == "")
+	{
+		std::cout << "[WARN]: Invalid frame path and name." << std::endl;
+		return "";
+	}
+
 	std::string frame_name = "";
 	std::stringstream ss(frame_path_name);
 
 	while (std::getline(ss, frame_name, '/'))
 	{
+	}
+
+	if (frame_name == "")
+	{
+		std::cout << "[WARN]: Invalid frame name." << std::endl;
+		return "";
 	}
 
 	if (parameter_.dataset_file_type == ".png")
@@ -428,7 +455,7 @@ DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_pat
 	}
 	else
 	{
-		std::cout << "[INFO]: Unknown data type. Skip." << std::endl;
+		std::cout << "[WARN]: Unknown dataset file type." << std::endl;
 		return "";
 	}
 
@@ -443,11 +470,23 @@ DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_pat
 const std::string
 DepthClustering::processOneElongationFrameForDataset(const std::string& frame_path_name)
 {
+	if (frame_path_name == "")
+	{
+		std::cout << "[WARN]: Invalid frame path and name." << std::endl;
+		return "";
+	}
+
 	std::string frame_name = "";
 	std::stringstream ss(frame_path_name);
 
 	while (std::getline(ss, frame_name, '/'))
 	{
+	}
+
+	if (frame_name == "")
+	{
+		std::cout << "[WARN]: Invalid frame name." << std::endl;
+		return "";
 	}
 
 	if (parameter_.dataset_file_type == ".png")
@@ -475,64 +514,8 @@ DepthClustering::processOneElongationFrameForDataset(const std::string& frame_pa
 	return frame_name;
 }
 
-const std::string
-DepthClustering::processNextRangeFrameForDataset()
-{
-	std::string frame_name = "";
-	const auto &frame_paths_names = folder_reader_range_->GetAllFilePaths();
-
-	if (frame_counter_ >= static_cast<int>(frame_paths_names.size()))
-	{
-		return frame_name;
-	}
-
-	while (frame_name == "" && frame_counter_ < static_cast<int>(frame_paths_names.size()))
-	{
-		std::cout << std::endl;
-		frame_name = processOneRangeFrameForDataset(frame_paths_names[frame_counter_++]);
-	}
-
-	return frame_name;
-}
-
-const std::string
-DepthClustering::processLastRangeFrameForDataset()
-{
-	std::string frame_name = "";
-	const auto &frame_paths_names = folder_reader_range_->GetAllFilePaths();
-
-	if (frame_counter_ < 0)
-	{
-		return frame_name;
-	}
-
-	while (frame_name == "" && frame_counter_ >= 0)
-	{
-		std::cout << std::endl;
-		frame_name = processOneRangeFrameForDataset(frame_paths_names[frame_counter_--]);
-	}
-
-	return frame_name;
-}
-
 void
-DepthClustering::processAllRangeFramesForDataset()
-{
-	for (const auto &frame_path_name : folder_reader_range_->GetAllFilePaths())
-	{
-		std::cout << std::endl;
-		const auto &frame_name = processOneRangeFrameForDataset(frame_path_name);
-
-		if (frame_name != "")
-		{
-			logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
-			logger_->logBoundingBoxFrameFlat(frame_name);
-		}
-	}
-}
-
-void
-DepthClustering::processGroundTruthForDataset()
+DepthClustering::processAllGroundTruthsForDataset()
 {
 	boost::property_tree::ptree ground_truth_tree;
 	CameraProjectionParameter parameter_camera_projection;
@@ -594,13 +577,13 @@ DepthClustering::processGroundTruthForDataset()
 }
 
 void
-DepthClustering::logForApollo()
+DepthClustering::writeLogForApollo()
 {
 	logger_->writeBoundingBoxLog(parameter_.bounding_box_type);
 }
 
 void
-DepthClustering::logForDataset()
+DepthClustering::writeLogForDataset()
 {
 	logger_->writeBoundingBoxLog(parameter_.bounding_box_type);
 	logger_->writeBoundingBoxLog(BoundingBox::Type::Flat);

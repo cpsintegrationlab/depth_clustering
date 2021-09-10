@@ -62,6 +62,7 @@ main(int argc, char* argv[])
 {
 	std::string dataset_path;
 	int display_time = 0;
+	int frame_counter = 0;
 
 	if (argc > 1)
 	{
@@ -110,20 +111,34 @@ main(int argc, char* argv[])
 
 	while (1)
 	{
-		const std::string lidar_frame_name = depth_clustering.processNextFrameForDataset();
-		std::string camera_frame_name = lidar_frame_name;
+		std::string lidar_frame_name = "";
+		const auto &frame_paths_names = depth_clustering.getFolderReaderRange()->GetAllFilePaths();
 
-		if (camera_frame_name.empty())
+		while (lidar_frame_name == "" && frame_counter < static_cast<int>(frame_paths_names.size()))
+		{
+			std::cout << std::endl;
+			lidar_frame_name = depth_clustering.processOneRangeFrameForDataset(
+					frame_paths_names[frame_counter++]);
+		}
+
+		if (lidar_frame_name.empty())
 		{
 			break;
 		}
 
-		camera_frame_name.replace(camera_frame_name.find("lidar"), std::string("lidar").size(),
-				"camera");
+		std::string camera_frame_name = "";
+		std::stringstream ss(lidar_frame_name);
+
+		while (std::getline(ss, camera_frame_name, '_'))
+		{
+		}
+
+		camera_frame_name = "frame_camera_" + camera_frame_name;
 		camera_frame_name.replace(camera_frame_name.find(".tiff"), std::string(".tiff").size(),
 				".png");
 
-		cv::Mat camera_frame = cv::imread(dataset_path + camera_frame_name, CV_LOAD_IMAGE_COLOR);
+		cv::Mat camera_frame = cv::imread(dataset_path + "frames_camera/" + camera_frame_name,
+				CV_LOAD_IMAGE_COLOR);
 
 		auto bounding_box_frame_flat = depth_clustering.getBoundingBoxFrameFlat();
 		auto ground_truth_frame_flat = getGroundTruthFrameFlat(ground_truth_tree, lidar_frame_name);

@@ -43,7 +43,7 @@ main(int argc, char* argv[])
 		return -1;
 	}
 
-	depth_clustering.processGroundTruthForDataset();
+	depth_clustering.processAllGroundTruthsForDataset();
 
 	return 0;
 }
