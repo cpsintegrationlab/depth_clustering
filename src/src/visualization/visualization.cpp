@@ -451,7 +451,7 @@ Visualization::onLayerPointCloudUpdated()
 {
 	viewer_point_cloud_layer_index_ = ui->combo_layer_point_cloud->currentIndex();
 
-	updateViewerPointCloud();
+	onSliderMovedTo(ui->slider_frame->value());
 }
 
 void
@@ -462,7 +462,6 @@ Visualization::onLayerImageUpdated()
 	viewer_image_layer_index_bottom_ = ui->combo_layer_image_bottom->currentIndex();
 
 	onSliderMovedTo(ui->slider_frame->value());
-	updateViewerImage();
 }
 
 void
