@@ -700,14 +700,23 @@ Visualization::updateViewerPointCloud()
 		const auto cloud_range_no_ground = cloud_range_separated.second;
 
 		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloud(cloud_range_ground, Eigen::Vector3f(255, 0, 0)));
+				DrawableCloud::FromCloudRange(cloud_range_ground, Eigen::Vector3f(1, 0, 0)));
+		ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range_no_ground));
+	}
+	else if (viewer_point_cloud_layer_index_ == 1)
+	{
 		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloud(cloud_range_no_ground, Eigen::Vector3f(255, 255, 255)));
+				DrawableCloud::FromCloudIntensity(depth_clustering_->getCloudIntensity()));
+	}
+	else if (viewer_point_cloud_layer_index_ == 2)
+	{
+		ui->viewer_point_cloud->AddDrawable(
+				DrawableCloud::FromCloudElongation(depth_clustering_->getCloudElongation()));
 	}
 	else
 	{
 		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloud(depth_clustering_->getCloudRange()));
+				DrawableCloud::FromCloudRange(depth_clustering_->getCloudRange()));
 	}
 
 	if (show_bounding_box_)
