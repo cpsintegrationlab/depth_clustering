@@ -96,6 +96,7 @@ Visualization::Visualization(QWidget* parent) :
 			SLOT(onDifferenceTypeUpdated()));
 	connect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
 	connect(ui->combo_layer_image_top, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
@@ -367,6 +368,7 @@ Visualization::onParameterUpdated()
 	parameter.size_cluster_min = ui->spin_size_cluster_min->value();
 	parameter.size_cluster_max = ui->spin_size_cluster_max->value();
 	parameter.size_smooth_window = ui->combo_size_smooth_window->currentIndex() * 2 + 5;
+	parameter.use_camera_fov = static_cast<bool>(ui->combo_field_of_view->currentIndex());
 
 	BoundingBox::Type bounding_box_type = BoundingBox::Type::Cube;
 
@@ -603,12 +605,11 @@ Visualization::openDataset(const std::string& dataset_path)
 	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
 	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
 	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
-
+	ui->combo_field_of_view->setCurrentIndex(static_cast<int>(parameter.use_camera_fov));
 	ui->combo_layer_point_cloud->setCurrentIndex(viewer_point_cloud_layer_index_);
 	ui->combo_layer_image_top->setCurrentIndex(viewer_image_layer_index_top_);
 	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
 	ui->combo_layer_image_bottom->setCurrentIndex(viewer_image_layer_index_bottom_);
-
 	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
 
 	switch (parameter.difference_type)

@@ -365,7 +365,7 @@
              </layout>
             </widget>
            </item>
-           <item row="0" column="4">
+           <item row="0" column="5">
             <widget class="QGroupBox" name="group_page_1">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -391,6 +391,32 @@
                 <property name="text">
                  <string>Next Page</string>
                 </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QGroupBox" name="group_field_of_view">
+             <property name="title">
+              <string>Field of View</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_19">
+              <item row="0" column="0">
+               <widget class="QComboBox" name="combo_field_of_view">
+                <item>
+                 <property name="text">
+                  <string>Default</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Camera</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>

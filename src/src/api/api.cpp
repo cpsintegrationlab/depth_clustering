@@ -34,6 +34,12 @@ DepthClustering::DepthClustering(const DepthClusteringParameter& parameter) :
 {
 }
 
+const CameraProjectionParameter&
+DepthClustering::getCameraProjectionParameter() const
+{
+	return parameter_projection_camera_;
+}
+
 const DepthClusteringParameter&
 DepthClustering::getParameter() const
 {
@@ -147,13 +153,33 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 {
 	parameter_ = parameter;
 
-	auto camera_projection_parameter = parameter_factory_->getCameraProjectionParameter();
+	if (parameter_.use_camera_fov)
+	{
+		auto projection_parameter_raw = projection_parameter_->getProjectionParamsRaw();
+
+		projection_parameter_raw->updateHorizontalAngles(
+				parameter_projection_camera_.field_of_view_angle_start,
+				parameter_projection_camera_.field_of_view_angle_end);
+
+		projection_parameter_ = ProjectionParams::FromBeamInclinations(
+				projection_parameter_raw->horizontal_steps_current, projection_parameter_raw->beams,
+				projection_parameter_raw->horizontal_angle_start,
+				projection_parameter_raw->horizontal_angle_end,
+				projection_parameter_raw->beam_inclinations);
+
+		projection_parameter_->setProjectionParamsRaw(projection_parameter_raw);
+	}
+	else
+	{
+		projection_parameter_ = parameter_factory_->getLidarProjectionParameter();
+	}
+
 	auto logger_parameter = parameter_factory_->getLoggerParameter();
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
-			camera_projection_parameter);
+			parameter_projection_camera_);
 
 	Radians clustering_threshold;
 
@@ -277,6 +303,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path, const boo
 
 	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path_);
 	parameter_ = parameter_factory_->getDepthClusteringParameter();
+	parameter_projection_camera_ = parameter_factory_->getCameraProjectionParameter();
 	projection_parameter_ = parameter_factory_->getLidarProjectionParameter();
 
 	if (!projection_parameter_)
@@ -284,15 +311,31 @@ DepthClustering::initializeForDataset(const std::string& dataset_path, const boo
 		return false;
 	}
 
-	auto camera_projection_parameter = parameter_factory_->getCameraProjectionParameter();
+	if (parameter_.use_camera_fov)
+	{
+		auto projection_parameter_raw = projection_parameter_->getProjectionParamsRaw();
+
+		projection_parameter_raw->updateHorizontalAngles(
+				parameter_projection_camera_.field_of_view_angle_start,
+				parameter_projection_camera_.field_of_view_angle_end);
+
+		projection_parameter_ = ProjectionParams::FromBeamInclinations(
+				projection_parameter_raw->horizontal_steps_current, projection_parameter_raw->beams,
+				projection_parameter_raw->horizontal_angle_start,
+				projection_parameter_raw->horizontal_angle_end,
+				projection_parameter_raw->beam_inclinations);
+
+		projection_parameter_->setProjectionParamsRaw(projection_parameter_raw);
+	}
+
 	auto logger_parameter = parameter_factory_->getLoggerParameter();
 
 	// Remove extrinsic translation vector since bounding boxes are already in camera frame
-	if (camera_projection_parameter.extrinsic.size() >= 12)
+	if (parameter_projection_camera_.extrinsic.size() >= 12)
 	{
-		camera_projection_parameter.extrinsic[3] = 0;
-		camera_projection_parameter.extrinsic[7] = 0;
-		camera_projection_parameter.extrinsic[11] = 0;
+		parameter_projection_camera_.extrinsic[3] = 0;
+		parameter_projection_camera_.extrinsic[7] = 0;
+		parameter_projection_camera_.extrinsic[11] = 0;
 	}
 
 	logger_parameter.log_path = dataset_path_;
@@ -314,7 +357,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path, const boo
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
-			camera_projection_parameter);
+			parameter_projection_camera_);
 	logger_ = std::make_shared<Logger>(logger_parameter);
 
 	Radians clustering_threshold;
@@ -414,11 +457,11 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 
 	if (parameter_.dataset_file_type == ".png")
 	{
-		image_range_ = MatFromPNGRange(frame_path_name);
+		image_range_ = MatFromPNGRange(frame_path_name, projection_parameter_);
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_range_ = MatFromTIFFRange(frame_path_name);
+		image_range_ = MatFromTIFFRange(frame_path_name, projection_parameter_);
 	}
 	else
 	{
@@ -472,7 +515,7 @@ DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_pat
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_intensity_ = MatFromTIFFIntensity(frame_path_name);
+		image_intensity_ = MatFromTIFFIntensity(frame_path_name, projection_parameter_);
 	}
 	else
 	{
@@ -516,7 +559,7 @@ DepthClustering::processOneElongationFrameForDataset(const std::string& frame_pa
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_elongation_ = MatFromTIFFElongation(frame_path_name);
+		image_elongation_ = MatFromTIFFElongation(frame_path_name, projection_parameter_);
 	}
 	else
 	{
@@ -531,18 +574,14 @@ void
 DepthClustering::processAllGroundTruthsForDataset()
 {
 	boost::property_tree::ptree ground_truth_tree;
-	CameraProjectionParameter parameter_camera_projection;
 	LoggerParameter parameter_logger;
-
-	parameter_camera_projection = parameter_factory_->getCameraProjectionParameter();
-	parameter_camera_projection.threshold_truncation = 0.7;
 
 	parameter_logger.log_path = dataset_path_;
 	parameter_logger.log_file_name_flat = parameter_.ground_truth_flat_file_name;
 	parameter_logger.log = true;
 
 	std::shared_ptr<BoundingBox> bounding_box = std::make_shared<BoundingBox>(
-			BoundingBox::Type::Cube, parameter_camera_projection);
+			BoundingBox::Type::Cube, parameter_projection_camera_);
 	std::shared_ptr<Logger> logger = std::make_shared<Logger>(parameter_logger);
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube =
 			std::make_shared<BoundingBox::Frame<BoundingBox::Cube>>();

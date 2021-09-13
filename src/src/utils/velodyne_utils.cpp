@@ -122,42 +122,55 @@ FixKITTIDepth(const cv::Mat& original)
 }
 
 cv::Mat
-MatFromPNGRange(const string& path)
+MatFromPNGRange(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
 {
 	cv::Mat image_range = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_range.convertTo(image_range, CV_32F);
 	image_range /= 500.0;
-	return FixKITTIDepth(image_range);
+	return LimitHorizontalFieldOfView(FixKITTIDepth(image_range), projection_parameter);
 }
 
 cv::Mat
-MatFromTIFFRange(const string& path)
+MatFromTIFFRange(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
 {
 	cv::Mat image_range = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_range.convertTo(image_range, CV_32F);
 	image_range /= 65535.0;
 	image_range *= 75.0;
-	return image_range;
+	return LimitHorizontalFieldOfView(image_range, projection_parameter);
 }
 
 cv::Mat
-MatFromTIFFIntensity(const string& path)
+MatFromTIFFIntensity(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
 {
 	cv::Mat image_intensity = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_intensity.convertTo(image_intensity, CV_32F);
 	image_intensity /= 65535.0;
 	image_intensity *= 2.0;
-	return image_intensity;
+	return LimitHorizontalFieldOfView(image_intensity, projection_parameter);
 }
 
 cv::Mat
-MatFromTIFFElongation(const string& path)
+MatFromTIFFElongation(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
 {
 	cv::Mat image_elongation = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_elongation.convertTo(image_elongation, CV_32F);
 	image_elongation /= 65535.0;
 	image_elongation *= 1.5;
-	return image_elongation;
+	return LimitHorizontalFieldOfView(image_elongation, projection_parameter);
 }
 
+cv::Mat
+LimitHorizontalFieldOfView(const cv::Mat& image,
+		std::shared_ptr<ProjectionParams> projection_parameter)
+{
+	if (!projection_parameter)
+	{
+		return image;
+	}
+
+	return image(cv::Range(0, image.rows),
+			cv::Range(projection_parameter->getProjectionParamsRaw()->horizontal_step_start,
+					projection_parameter->getProjectionParamsRaw()->horizontal_step_end));
+}
 }  // namespace depth_clustering

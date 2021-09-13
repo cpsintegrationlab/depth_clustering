@@ -6,11 +6,13 @@
  */
 
 #include <boost/property_tree/json_parser.hpp>
-#include <image_labelers/diff_helpers/diff_factory.h>
 
 #include "api/parameter_factory.h"
+#include "image_labelers/diff_helpers/diff_factory.h"
+#include "projections/projection_params.h"
 
 using boost::property_tree::json_parser::read_json;
+using depth_clustering::ProjectionParamsRaw;
 
 ParameterFactory::ParameterFactory(std::string& path) :
 		configuration_file_name_("depth_clustering_config.json")
@@ -55,6 +57,7 @@ ParameterFactory::getDepthClusteringParameter()
 	auto size_cluster_min_optional = tree.get_optional<int>("size_cluster_min");
 	auto size_cluster_max_optional = tree.get_optional<int>("size_cluster_max");
 	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
+	auto use_camera_fov_optional = tree.get_optional<bool>("use_camera_fov");
 	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
 	auto difference_type_optional = tree.get_optional<std::string>("difference_type");
 	auto dataset_file_type_optional = tree.get_optional<std::string>("dataset_file_type");
@@ -102,6 +105,11 @@ ParameterFactory::getDepthClusteringParameter()
 			std::cout << "[WARN]: Invalid ground removal filter window size." << std::endl;
 			parameter.size_smooth_window = 5;
 		}
+	}
+
+	if (use_camera_fov_optional)
+	{
+		parameter.use_camera_fov = *use_camera_fov_optional;
 	}
 
 	if (bounding_box_type_optional)
@@ -171,7 +179,7 @@ ParameterFactory::getDepthClusteringParameter()
 	return parameter;
 }
 
-std::unique_ptr<ProjectionParams>
+std::shared_ptr<ProjectionParams>
 ParameterFactory::getLidarProjectionParameter()
 {
 	if (!lidar_projection_tree_)
@@ -180,11 +188,7 @@ ParameterFactory::getLidarProjectionParameter()
 		return std::unique_ptr<ProjectionParams>(new ProjectionParams());
 	}
 
-	int horizontal_steps;
-	int beams;
-	int horizontal_angle_start;
-	int horizontal_angle_end;
-	std::vector<double> beam_inclinations;
+	auto projection_parameter_raw = std::make_shared<ProjectionParamsRaw>();
 
 	auto tree = *lidar_projection_tree_;
 
@@ -196,34 +200,48 @@ ParameterFactory::getLidarProjectionParameter()
 
 	if (horizontal_steps_optional)
 	{
-		horizontal_steps = *horizontal_steps_optional;
+		projection_parameter_raw->horizontal_steps = *horizontal_steps_optional;
 	}
 
 	if (beams_optional)
 	{
-		beams = *beams_optional;
+		projection_parameter_raw->beams = *beams_optional;
 	}
 
 	if (horizontal_angle_start_optional)
 	{
-		horizontal_angle_start = *horizontal_angle_start_optional;
+		projection_parameter_raw->horizontal_angle_start = *horizontal_angle_start_optional;
 	}
 
 	if (horizontal_angle_end_optional)
 	{
-		horizontal_angle_end = *horizontal_angle_end_optional;
+		projection_parameter_raw->horizontal_angle_end = *horizontal_angle_end_optional;
 	}
 
 	if (beam_inclinations_optional)
 	{
+		projection_parameter_raw->beam_inclinations.clear();
+
 		for (const auto &beam_inclinations_pair : *beam_inclinations_optional)
 		{
-			beam_inclinations.push_back(beam_inclinations_pair.second.get_value<double>());
+			projection_parameter_raw->beam_inclinations.push_back(
+					beam_inclinations_pair.second.get_value<double>());
 		}
 	}
 
-	return ProjectionParams::FromBeamInclinations(horizontal_steps, beams, horizontal_angle_start,
-			horizontal_angle_end, beam_inclinations);
+	projection_parameter_raw->updateHorizontalAngles(
+			projection_parameter_raw->horizontal_angle_start,
+			projection_parameter_raw->horizontal_angle_end);
+
+	auto projection_parameter = ProjectionParams::FromBeamInclinations(
+			projection_parameter_raw->horizontal_steps, projection_parameter_raw->beams,
+			projection_parameter_raw->horizontal_angle_start,
+			projection_parameter_raw->horizontal_angle_end,
+			projection_parameter_raw->beam_inclinations);
+
+	projection_parameter->setProjectionParamsRaw(projection_parameter_raw);
+
+	return projection_parameter;
 }
 
 CameraProjectionParameter
@@ -243,6 +261,8 @@ ParameterFactory::getCameraProjectionParameter()
 	auto extrinsic_optional = tree.get_child_optional("extrinsic");
 	auto width_optional = tree.get_optional<int>("width");
 	auto height_optional = tree.get_optional<int>("height");
+	auto field_of_view_angle_start_optional = tree.get_optional<int>("field_of_view_angle_start");
+	auto field_of_view_angle_end_optional = tree.get_optional<int>("field_of_view_angle_end");
 	auto threshold_truncation_optional = tree.get_optional<double>("threshold_truncation");
 	auto threshold_filter_height_optional = tree.get_optional<double>("threshold_filter_height");
 	auto threshold_filter_tunnel_left_optional = tree.get_optional<double>(
@@ -279,6 +299,16 @@ ParameterFactory::getCameraProjectionParameter()
 	if (height_optional)
 	{
 		parameter.height = *height_optional;
+	}
+
+	if (field_of_view_angle_start_optional)
+	{
+		parameter.field_of_view_angle_start = *field_of_view_angle_start_optional;
+	}
+
+	if (field_of_view_angle_end_optional)
+	{
+		parameter.field_of_view_angle_end = *field_of_view_angle_end_optional;
 	}
 
 	if (threshold_truncation_optional)

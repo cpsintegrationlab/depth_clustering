@@ -125,7 +125,7 @@ CameraProjection::getBoundingBoxCornersCube(const BoundingBox::Cube& bounding_bo
 std::vector<Eigen::Vector3f>
 CameraProjection::getBoundingBoxCornersPolygon(const BoundingBox::Polygon& bounding_box)
 {
-	std::cout << "[ERROR]: Not implemented." << std::endl;
+	std::cerr << "[ERROR]: Polygon bounding box projection is not implemented." << std::endl;
 	return std::vector<Eigen::Vector3f>();
 }
 

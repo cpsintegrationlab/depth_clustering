@@ -16,6 +16,7 @@
 #ifndef SRC_PROJECTIONS_PROJECTION_PARAMS_H_
 #define SRC_PROJECTIONS_PROJECTION_PARAMS_H_
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -25,6 +26,47 @@
 
 namespace depth_clustering
 {
+
+struct ProjectionParamsRaw
+{
+	int horizontal_steps;
+	int beams;
+	int horizontal_angle_start;
+	int horizontal_angle_end;
+	std::vector<double> beam_inclinations;
+
+	int horizontal_steps_current;
+	int horizontal_step_start;
+	int horizontal_step_end;
+
+	ProjectionParamsRaw() :
+			horizontal_steps(2650), beams(64), horizontal_angle_start(180), horizontal_angle_end(
+					-180), beam_inclinations()
+	{
+		updateHorizontalAngles(horizontal_angle_start, horizontal_angle_end);
+	}
+
+	void
+	updateHorizontalAngles(const int& start, const int& end)
+	{
+		if (start > 180 || start < -180 || end > 180 || end < -180 || start < end)
+		{
+			std::cout << "[WARN]: Invalid horizontal angles." << std::endl;
+			return;
+		}
+
+		horizontal_angle_start = start;
+		horizontal_angle_end = end;
+
+		double horizontal_step_per_degree = horizontal_steps / 360.0;
+
+		horizontal_step_start = std::round(
+				0 + (180 - horizontal_angle_start) * horizontal_step_per_degree);
+		horizontal_step_end = std::round(
+				horizontal_steps + (-180 - horizontal_angle_end) * horizontal_step_per_degree);
+		horizontal_steps_current = horizontal_step_end - horizontal_step_start;
+	}
+};
 
 class SpanParams
 {
@@ -116,6 +158,18 @@ public:
 	}
 	~ProjectionParams()
 	{
+	}
+
+	inline std::shared_ptr<ProjectionParamsRaw>
+	getProjectionParamsRaw()
+	{
+		return params_raw_;
+	}
+
+	inline void
+	setProjectionParamsRaw(std::shared_ptr<ProjectionParamsRaw> params_raw)
+	{
+		params_raw_ = params_raw;
 	}
 
 	/**
@@ -327,6 +381,8 @@ private:
 
 	std::vector<float> _row_angles_sines;
 	std::vector<float> _row_angles_cosines;
+
+	std::shared_ptr<ProjectionParamsRaw> params_raw_;
 };
 
 }  // namespace depth_clustering

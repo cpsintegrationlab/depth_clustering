@@ -41,6 +41,9 @@ public:
 	const DepthClusteringParameter&
 	getParameter() const;
 
+	const CameraProjectionParameter&
+	getCameraProjectionParameter() const;
+
 	const std::string&
 	getDatasetPath() const;
 
@@ -133,6 +136,7 @@ private:
 	std::shared_ptr<Logger> logger_;
 
 	DepthClusteringParameter parameter_;
+	CameraProjectionParameter parameter_projection_camera_;
 	std::string dataset_path_;
 	int frame_counter_;
 

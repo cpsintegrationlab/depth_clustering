@@ -54,16 +54,24 @@ Cloud::Ptr
 ReadKittiCloudTxt(const std::string& path);
 
 cv::Mat
-MatFromPNGRange(const std::string& path);
+MatFromPNGRange(const std::string& path, std::shared_ptr<ProjectionParams> projection_parameter =
+		nullptr);
 
 cv::Mat
-MatFromTIFFRange(const std::string& path);
+MatFromTIFFRange(const std::string& path, std::shared_ptr<ProjectionParams> projection_parameter =
+		nullptr);
 
 cv::Mat
-MatFromTIFFIntensity(const std::string& path);
+MatFromTIFFIntensity(const std::string& path,
+		std::shared_ptr<ProjectionParams> projection_parameter = nullptr);
 
 cv::Mat
-MatFromTIFFElongation(const std::string& path);
+MatFromTIFFElongation(const std::string& path,
+		std::shared_ptr<ProjectionParams> projection_parameter = nullptr);
+
+cv::Mat
+LimitHorizontalFieldOfView(const cv::Mat& image,
+		std::shared_ptr<ProjectionParams> projection_parameter = nullptr);
 }  // namespace depth_clustering
 
 #endif  // SRC_UTILS_VELODYNE_UTILS_H_

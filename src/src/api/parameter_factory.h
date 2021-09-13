@@ -25,7 +25,7 @@ public:
 	DepthClusteringParameter
 	getDepthClusteringParameter();
 
-	std::unique_ptr<ProjectionParams>
+	std::shared_ptr<ProjectionParams>
 	getLidarProjectionParameter();
 
 	CameraProjectionParameter
