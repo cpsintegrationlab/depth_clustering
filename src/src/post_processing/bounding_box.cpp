@@ -95,8 +95,6 @@ BoundingBox::produceFrameFlat()
 void
 BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int)
 {
-	Timer timer;
-
 	for (const auto &kv : clouds)
 	{
 		const auto &cluster = kv.second;
@@ -120,9 +118,6 @@ BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clou
 		}
 		}
 	}
-
-	fprintf(stderr, "[INFO]: Bounding boxes created: %lu us.\n",
-			timer.measure(Timer::Units::Micro));
 }
 
 void

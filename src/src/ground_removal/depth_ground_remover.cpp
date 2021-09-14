@@ -55,18 +55,15 @@ DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int sender_id)
 
 	if (_window_size != 5 && _window_size != 7 && _window_size != 9 && _window_size != 11)
 	{
-		fprintf(stderr, "[INFO]: Skipped ground removal filtering.\n");
 		smoothed_image = angle_image;
 	}
 	else
 	{
-		fprintf(stderr, "[INFO]: Ground removal filter window size: %i.\n", _window_size);
 		smoothed_image = ApplySavitskyGolaySmoothing(angle_image, _window_size);
 	}
 
 	auto no_ground_image = ZeroOutGroundBFS(depth_image, smoothed_image, _ground_remove_angle,
 			_window_size);
-	fprintf(stderr, "[INFO]: Ground removed: %lu us.\n", total_timer.measure());
 	cloud_copy.projection_ptr()->depth_image() = no_ground_image;
 	this->ShareDataWithAllClients(cloud_copy);
 	_counter++;

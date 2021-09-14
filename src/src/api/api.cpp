@@ -13,6 +13,7 @@
 #include "utils/cloud.h"
 #include "utils/radians.h"
 #include "utils/rich_point.h"
+#include "utils/timer.h"
 #include "utils/velodyne_utils.h"
 
 using boost::property_tree::json_parser::read_json;
@@ -23,6 +24,7 @@ using depth_clustering::MatFromTIFFIntensity;
 using depth_clustering::MatFromTIFFRange;
 using depth_clustering::Radians;
 using depth_clustering::RichPoint;
+using depth_clustering::time_utils::Timer;
 
 DepthClustering::DepthClustering() :
 		DepthClustering(DepthClusteringParameter())
@@ -436,6 +438,9 @@ void
 DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)
 {
+	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+
+	Timer timer;
 	cloud_range_ = Cloud::Ptr(new Cloud);
 
 	for (const auto &point_eigen : point_cloud)
@@ -450,11 +455,17 @@ DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 	}
 
 	cloud_range_->InitProjection(*parameter_projection_lidar_);
-
 	bounding_box_->clearFrames();
+
+	std::cout << "[INFO]: Preprocessed: " << timer.measure() << " us." << std::endl;
+
 	depth_ground_remover_->OnNewObjectReceived(*cloud_range_, 0);
 
+	std::cout << "[INFO]: Clustered: " << timer.measure() << " us." << std::endl;
+
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
+
+	std::cout << "[INFO]: Logged: " << timer.measure() << " us." << std::endl;
 }
 
 const std::string
@@ -466,6 +477,7 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 		return "";
 	}
 
+	Timer timer;
 	std::string frame_name = "";
 	std::stringstream ss(frame_path_name);
 
@@ -478,6 +490,8 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 		std::cout << "[WARN]: Invalid frame name." << std::endl;
 		return "";
 	}
+
+	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
 	if (parameter_.dataset_file_type == ".png")
 	{
@@ -493,16 +507,23 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 		return "";
 	}
 
-	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
-
 	cloud_range_ = Cloud::FromImage(image_range_, *parameter_projection_lidar_);
-
 	bounding_box_->clearFrames();
+
+	std::cout << "[INFO]: Preprocessed: " << timer.measure() << " us." << std::endl;
+
 	depth_ground_remover_->OnNewObjectReceived(*cloud_range_, 0);
+
+	std::cout << "[INFO]: Clustered: " << timer.measure() << " us." << std::endl;
+
 	bounding_box_->produceFrameFlat();
+
+	std::cout << "[INFO]: Bounding box created: " << timer.measure() << " us." << std::endl;
 
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 	logger_->logBoundingBoxFrameFlat(frame_name);
+
+	std::cout << "[INFO]: Logged: " << timer.measure() << " us." << std::endl;
 
 	return frame_name;
 }
@@ -649,18 +670,21 @@ DepthClustering::processAllGroundTruthsForDataset()
 		bounding_box->clearFrames();
 	}
 
+	std::cout << std::endl;
 	logger->writeBoundingBoxLog(BoundingBox::Type::Flat);
 }
 
 void
 DepthClustering::writeLogForApollo()
 {
+	std::cout << std::endl;
 	logger_->writeBoundingBoxLog(parameter_.bounding_box_type);
 }
 
 void
 DepthClustering::writeLogForDataset()
 {
+	std::cout << std::endl;
 	logger_->writeBoundingBoxLog(parameter_.bounding_box_type);
 	logger_->writeBoundingBoxLog(BoundingBox::Type::Flat);
 }

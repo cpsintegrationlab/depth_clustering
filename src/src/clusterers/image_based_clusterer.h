@@ -114,15 +114,12 @@ public:
 				cloud.projection_ptr()->params(), _angle_tollerance);
 		image_labeler.ComputeLabels(_diff_type);
 		const cv::Mat *labels_ptr = image_labeler.GetLabelImage();
-		fprintf(stderr, "[INFO]: Image labeled: %lu us.\n", timer.measure());
 
 		// send image to whoever wants to get it
 		if (_label_client)
 		{
 			_label_client->OnNewObjectReceived(*labels_ptr, this->id());
 		}
-
-		fprintf(stderr, "[INFO]: Labeled image shared: %lu us.\n", timer.measure());
 
 		// create 3d clusters from image labels
 		std::unordered_map<uint16_t, Cloud> clusters;
@@ -166,11 +163,7 @@ public:
 			clusters.erase(label);
 		}
 
-		fprintf(stderr, "[INFO]: Clusters prepared: %lu us.\n", timer.measure());
-
 		this->ShareDataWithAllClients(clusters);
-
-		fprintf(stderr, "[INFO]: Clusters shared: %lu us.\n", timer.measure());
 	}
 
 private:

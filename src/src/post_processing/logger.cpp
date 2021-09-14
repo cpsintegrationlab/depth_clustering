@@ -323,7 +323,7 @@ Logger::writeBoundingBoxLog(const BoundingBox::Type& bounding_box_type)
 
 		boost::property_tree::write_json(bounding_box_log_file, bounding_box_log_tree_cube_);
 
-		std::cout << std::endl << "[INFO]: Wrote to log file \""
+		std::cout << "[INFO]: Wrote to log file \""
 				<< parameter_.log_path + parameter_.log_file_name_cude << "\"." << std::endl;
 
 		break;
@@ -335,7 +335,7 @@ Logger::writeBoundingBoxLog(const BoundingBox::Type& bounding_box_type)
 
 		boost::property_tree::write_json(bounding_box_log_file, bounding_box_log_tree_polygon_);
 
-		std::cout << std::endl << "[INFO]: Wrote to log file \""
+		std::cout << "[INFO]: Wrote to log file \""
 				<< parameter_.log_path + parameter_.log_file_name_polygon << "\"." << std::endl;
 
 		break;
@@ -347,7 +347,7 @@ Logger::writeBoundingBoxLog(const BoundingBox::Type& bounding_box_type)
 
 		boost::property_tree::write_json(bounding_box_log_file, bounding_box_log_tree_flat_);
 
-		std::cout << std::endl << "[INFO]: Wrote to log file \""
+		std::cout << "[INFO]: Wrote to log file \""
 				<< parameter_.log_path + parameter_.log_file_name_flat << "\"." << std::endl;
 
 		break;
@@ -359,7 +359,7 @@ Logger::writeBoundingBoxLog(const BoundingBox::Type& bounding_box_type)
 
 		boost::property_tree::write_json(bounding_box_log_file, bounding_box_log_tree_cube_);
 
-		std::cout << std::endl << "[INFO]: Wrote to log file \""
+		std::cout << "[INFO]: Wrote to log file \""
 				<< parameter_.log_path + parameter_.log_file_name_cude << "\"." << std::endl;
 
 		break;
