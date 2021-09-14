@@ -40,6 +40,15 @@ private:
 	float
 	getBoundingBoxDepth(const std::vector<Eigen::Vector3f>& bounding_box_corners);
 
+	float
+	getBoundingBoxBoundTop(const std::vector<Eigen::Vector3f>& bounding_box_corners);
+
+	float
+	getBoundingBoxBoundLeft(const std::vector<Eigen::Vector3f>& bounding_box_corners);
+
+	float
+	getBoundingBoxBoundRight(const std::vector<Eigen::Vector3f>& bounding_box_corners);
+
 	std::shared_ptr<BoundingBox::Flat>
 	getBoundingBoxFlat(const std::vector<Eigen::Vector2i>& bounding_box_corners_projected);
 
@@ -47,10 +56,10 @@ private:
 	correctCameraDistortions(Eigen::Vector2f& point);
 
 	bool
-	filterBoundingBoxHeight(const Eigen::Vector3f& center);
+	filterBoundingBoxHeight(const float& bound_top);
 
 	bool
-	filterBoundingBoxTunnel(const Eigen::Vector3f& center, const float& depth);
+	filterBoundingBoxTunnel(const float& depth, const float& bound_left, const float& bound_right);
 
 	void
 	projectFromBoundingBoxFrameCube();

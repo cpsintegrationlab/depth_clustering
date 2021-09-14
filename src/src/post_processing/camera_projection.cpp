@@ -125,8 +125,20 @@ CameraProjection::getBoundingBoxCornersCube(const BoundingBox::Cube& bounding_bo
 std::vector<Eigen::Vector3f>
 CameraProjection::getBoundingBoxCornersPolygon(const BoundingBox::Polygon& bounding_box)
 {
-	std::cerr << "[ERROR]: Polygon bounding box projection is not implemented." << std::endl;
-	return std::vector<Eigen::Vector3f>();
+	std::vector<Eigen::Vector3f> bounding_box_corners;
+	const auto bounding_box_hull = std::get<0>(bounding_box);
+	const auto bounding_box_diff_z = std::get<1>(bounding_box);
+
+	for (const auto &bounding_box_corner_bottom : bounding_box_hull)
+	{
+		auto bounding_box_corner_top = bounding_box_corner_bottom;
+
+		bounding_box_corner_top.z() += bounding_box_diff_z;
+		bounding_box_corners.push_back(bounding_box_corner_bottom);
+		bounding_box_corners.push_back(bounding_box_corner_top);
+	}
+
+	return bounding_box_corners;
 }
 
 float
@@ -145,6 +157,60 @@ CameraProjection::getBoundingBoxDepth(const std::vector<Eigen::Vector3f>& boundi
 	}
 
 	return depth;
+}
+
+float
+CameraProjection::getBoundingBoxBoundTop(const std::vector<Eigen::Vector3f>& bounding_box_corners)
+{
+	float bound_top = bounding_box_corners[0].z();
+
+	for (const auto &bounding_box_corner : bounding_box_corners)
+	{
+		float bound_top_current = bounding_box_corner.z();
+
+		if (bound_top_current > bound_top)
+		{
+			bound_top = bound_top_current;
+		}
+	}
+
+	return bound_top;
+}
+
+float
+CameraProjection::getBoundingBoxBoundLeft(const std::vector<Eigen::Vector3f>& bounding_box_corners)
+{
+	float bound_left = bounding_box_corners[0].y();
+
+	for (const auto &bounding_box_corner : bounding_box_corners)
+	{
+		float bound_left_current = bounding_box_corner.y();
+
+		if (bound_left_current < bound_left)
+		{
+			bound_left = bound_left_current;
+		}
+	}
+
+	return bound_left;
+}
+
+float
+CameraProjection::getBoundingBoxBoundRight(const std::vector<Eigen::Vector3f>& bounding_box_corners)
+{
+	float bound_right = bounding_box_corners[0].y();
+
+	for (const auto &bounding_box_corner : bounding_box_corners)
+	{
+		float bound_right_current = bounding_box_corner.y();
+
+		if (bound_right_current > bound_right)
+		{
+			bound_right = bound_right_current;
+		}
+	}
+
+	return bound_right;
 }
 
 std::shared_ptr<BoundingBox::Flat>
@@ -268,26 +334,27 @@ CameraProjection::correctCameraDistortions(Eigen::Vector2f& point)
 }
 
 bool
-CameraProjection::filterBoundingBoxHeight(const Eigen::Vector3f& center)
+CameraProjection::filterBoundingBoxHeight(const float& bound_top)
 {
 	if (!parameter_.use_filter_height)
 	{
 		return true;
 	}
 
-	return center.z() < parameter_.threshold_filter_height;
+	return bound_top < parameter_.threshold_filter_height;
 }
 
 bool
-CameraProjection::filterBoundingBoxTunnel(const Eigen::Vector3f& center, const float& depth)
+CameraProjection::filterBoundingBoxTunnel(const float& depth, const float& bound_left,
+		const float& bound_right)
 {
 	if (!parameter_.use_filter_tunnel)
 	{
 		return true;
 	}
 
-	return (center.y() <= parameter_.threshold_filter_tunnel_right
-			&& center.y() >= -parameter_.threshold_filter_tunnel_left
+	return (bound_right <= parameter_.threshold_filter_tunnel_right
+			&& bound_left >= -parameter_.threshold_filter_tunnel_left
 			&& depth <= parameter_.threshold_filter_tunnel_front);
 }
 
@@ -330,9 +397,14 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 			continue;
 		}
 
+		const auto bounding_box_bound_top = getBoundingBoxBoundTop(bounding_box_corners_world);
+		const auto bounding_box_bound_left = getBoundingBoxBoundLeft(bounding_box_corners_world);
+		const auto bounding_box_bound_right = getBoundingBoxBoundRight(bounding_box_corners_world);
+
 		// Exclude bounding box according to filters
-		if (!filterBoundingBoxHeight(std::get<0>(bounding_box))
-				|| !filterBoundingBoxTunnel(std::get<0>(bounding_box), bounding_box_depth))
+		if (!filterBoundingBoxHeight(bounding_box_bound_top)
+				|| !filterBoundingBoxTunnel(bounding_box_depth, bounding_box_bound_left,
+						bounding_box_bound_right))
 		{
 			continue;
 		}
@@ -399,5 +471,109 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 void
 CameraProjection::projectFromBoundingBoxFramePolygon()
 {
-	std::cerr << "[ERROR]: Polygon bounding box projection is not implemented." << std::endl;
+	if (!bounding_box_frame_polygon_)
+	{
+		std::cout << "[ERROR]: Polygon bounding box frame missing." << std::endl;
+		return;
+	}
+
+	Eigen::Matrix4f world_to_camera; // Camera extrinsic matrix, [R|t]
+	Eigen::Matrix4f world_to_camera_axes; // Camera extrinsic matrix axes transformation matrix
+
+	// Construct camera extrinsic matrix
+	for (size_t i = 0; i < parameter_.extrinsic.size(); i++)
+	{
+		world_to_camera(i / 4, i % 4) = parameter_.extrinsic[i];
+	}
+
+	// Construct camera extrinsic matrix axes transformation matrix
+	world_to_camera_axes << 0, -1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 1;
+
+	// Inverse given camera-to-world extrinsic and transformation axes into camera frame
+	world_to_camera = world_to_camera_axes * world_to_camera.inverse();
+
+	// Process all bounding boxes in the frame
+	for (const auto &bounding_box : *bounding_box_frame_polygon_)
+	{
+		std::vector<Eigen::Vector3f> bounding_box_corners_world = getBoundingBoxCornersPolygon(
+				bounding_box);
+		std::vector<Eigen::Vector2i> bounding_box_corners_projected;
+		float bounding_box_depth = getBoundingBoxDepth(bounding_box_corners_world);
+		bool bounding_box_invalid = false;
+
+		// Exclude bounding box with invalid depth
+		if (bounding_box_depth < 0)
+		{
+			continue;
+		}
+
+		const auto bounding_box_bound_top = getBoundingBoxBoundTop(bounding_box_corners_world);
+		const auto bounding_box_bound_left = getBoundingBoxBoundLeft(bounding_box_corners_world);
+		const auto bounding_box_bound_right = getBoundingBoxBoundRight(bounding_box_corners_world);
+
+		// Exclude bounding box according to filters
+		if (!filterBoundingBoxHeight(bounding_box_bound_top)
+				|| !filterBoundingBoxTunnel(bounding_box_depth, bounding_box_bound_left,
+						bounding_box_bound_right))
+		{
+			continue;
+		}
+
+		for (const auto &bounding_box_corner_world : bounding_box_corners_world)
+		{
+			// Project from world frame into camera frame
+			Eigen::Vector4f bounding_box_corner_camera = world_to_camera
+					* Eigen::Vector4f(bounding_box_corner_world(0), bounding_box_corner_world(1),
+							bounding_box_corner_world(2), 1);
+
+			// Exclude bounding box outside the camera image plane
+			if (bounding_box_corner_camera.z() < 0)
+			{
+				bounding_box_invalid = true;
+				break;
+			}
+
+			// Project from 3D camera frame into 2D
+			Eigen::Vector2f bounding_box_corner_projected(
+					bounding_box_corner_camera(0) / bounding_box_corner_camera(2),
+					bounding_box_corner_camera(1) / bounding_box_corner_camera(2));
+
+			// Correct camera distortions
+			correctCameraDistortions(bounding_box_corner_projected);
+
+			// Project from 2D camera frame onto image frame by applying camera intrinsic matrix
+			bounding_box_corner_projected.x() = std::round(
+					bounding_box_corner_projected.x() * parameter_.intrinsic[0]
+							+ parameter_.intrinsic[2]);
+			bounding_box_corner_projected.y() = std::round(
+					bounding_box_corner_projected.y() * parameter_.intrinsic[1]
+							+ parameter_.intrinsic[3]);
+
+			// Store projected corner
+			bounding_box_corners_projected.push_back(
+					Eigen::Vector2i(bounding_box_corner_projected(0),
+							bounding_box_corner_projected(1)));
+		}
+
+		// Exclude invalid bounding box
+		if (bounding_box_invalid || bounding_box_corners_projected.empty())
+		{
+			continue;
+		}
+
+		// Obtain 2D flat bounding box
+		auto bounding_box_flat = getBoundingBoxFlat(bounding_box_corners_projected);
+
+		// Exclude invalid bounding box
+		if (!bounding_box_flat)
+		{
+			continue;
+		}
+
+		std::get<2>(*bounding_box_flat) = bounding_box_depth;
+		std::get<3>(*bounding_box_flat) = std::get<2>(bounding_box);
+
+		// Store 2D flat bounding box
+		bounding_box_frame_flat_->push_back(*bounding_box_flat);
+	}
 }

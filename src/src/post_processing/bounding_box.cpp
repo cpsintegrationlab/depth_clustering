@@ -184,10 +184,6 @@ BoundingBox::CreatePolygons(const Cloud& cloud)
 		hull.emplace_back(cv_point.x, cv_point.y, min_z);
 	}
 	const float diff_z = max_z - min_z;
-	if (diff_z < 0.3)
-	{
-		return;
-	}
 
 	frame_polygon_->push_back(std::make_tuple(hull, diff_z, std::to_string(id_++)));
 }
