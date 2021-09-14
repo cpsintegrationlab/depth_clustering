@@ -660,7 +660,8 @@ Visualization::extractGroundPointCloud()
 {
 	cv::Mat image_range;
 	cv::Mat image_range_no_ground;
-	const ProjectionParams projection_parameter = *depth_clustering_->getProjectionParameter();
+	const ProjectionParams parameter_projection_lidar =
+			*depth_clustering_->getLidarProjectionParameter();
 
 	{
 		std::lock_guard<std::mutex> lock_guard(image_range_mutex_);
@@ -685,8 +686,9 @@ Visualization::extractGroundPointCloud()
 		}
 	}
 
-	auto cloud_range_ground = Cloud::FromImage(image_range_ground, projection_parameter);
-	auto cloud_range_no_ground = Cloud::FromImage(image_range_no_ground, projection_parameter);
+	auto cloud_range_ground = Cloud::FromImage(image_range_ground, parameter_projection_lidar);
+	auto cloud_range_no_ground = Cloud::FromImage(image_range_no_ground,
+			parameter_projection_lidar);
 
 	return std::make_pair(cloud_range_ground, cloud_range_no_ground);
 }
@@ -802,9 +804,9 @@ Visualization::updateViewerImageScene()
 	{
 		auto image_range = depth_clustering_->getImageRange();
 		auto difference_type = depth_clustering_->getParameter().difference_type;
-		auto projection_parameter = depth_clustering_->getProjectionParameter();
+		auto parameter_projection_lidar = depth_clustering_->getLidarProjectionParameter();
 		auto difference_helper = DiffFactory::Build(difference_type, &image_range,
-				projection_parameter.get());
+				parameter_projection_lidar.get());
 		QImage qimage_difference = MatToQImage(difference_helper->Visualize());
 
 		scene_difference_.reset(new QGraphicsScene);

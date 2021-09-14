@@ -34,16 +34,22 @@ DepthClustering::DepthClustering(const DepthClusteringParameter& parameter) :
 {
 }
 
+const DepthClusteringParameter&
+DepthClustering::getParameter() const
+{
+	return parameter_;
+}
+
 const CameraProjectionParameter&
 DepthClustering::getCameraProjectionParameter() const
 {
 	return parameter_projection_camera_;
 }
 
-const DepthClusteringParameter&
-DepthClustering::getParameter() const
+std::shared_ptr<ProjectionParams>
+DepthClustering::getLidarProjectionParameter() const
 {
-	return parameter_;
+	return parameter_projection_lidar_;
 }
 
 const std::string&
@@ -61,20 +67,20 @@ DepthClustering::getCloudRange() const
 Cloud::ConstPtr
 DepthClustering::getCloudIntensity() const
 {
-	return Cloud::FromImageIntensity(image_range_, image_intensity_, *projection_parameter_);
+	return Cloud::FromImageIntensity(image_range_, image_intensity_, *parameter_projection_lidar_);
 }
 
 Cloud::ConstPtr
 DepthClustering::getCloudElongation() const
 {
-	return Cloud::FromImageElongation(image_range_, image_elongation_, *projection_parameter_);
+	return Cloud::FromImageElongation(image_range_, image_elongation_, *parameter_projection_lidar_);
 }
 
 Cloud::ConstPtr
 DepthClustering::getCloudConfidence() const
 {
 	return Cloud::FromImageConfidence(image_range_, image_intensity_, image_elongation_,
-			*projection_parameter_);
+			*parameter_projection_lidar_);
 }
 
 const cv::Mat&
@@ -136,12 +142,6 @@ DepthClustering::getFolderReaderElongation() const
 	return folder_reader_elongation_;
 }
 
-std::shared_ptr<ProjectionParams>
-DepthClustering::getProjectionParameter() const
-{
-	return projection_parameter_;
-}
-
 std::shared_ptr<DepthGroundRemover>
 DepthClustering::getDepthGroundRemover() const
 {
@@ -155,28 +155,28 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 
 	if (parameter_.use_camera_fov)
 	{
-		auto projection_parameter_raw = projection_parameter_->getProjectionParamsRaw();
+		auto projection_parameter_raw = parameter_projection_lidar_->getProjectionParamsRaw();
 
 		projection_parameter_raw->updateHorizontalAngles(
 				parameter_projection_camera_.field_of_view_angle_start,
 				parameter_projection_camera_.field_of_view_angle_end);
 
-		projection_parameter_ = ProjectionParams::FromBeamInclinations(
+		parameter_projection_lidar_ = ProjectionParams::FromBeamInclinations(
 				projection_parameter_raw->horizontal_steps_current, projection_parameter_raw->beams,
 				projection_parameter_raw->horizontal_angle_start,
 				projection_parameter_raw->horizontal_angle_end,
 				projection_parameter_raw->beam_inclinations);
 
-		projection_parameter_->setProjectionParamsRaw(projection_parameter_raw);
+		parameter_projection_lidar_->setProjectionParamsRaw(projection_parameter_raw);
 	}
 	else
 	{
-		projection_parameter_ = parameter_factory_->getLidarProjectionParameter();
+		parameter_projection_lidar_ = parameter_factory_->getLidarProjectionParameter();
 	}
 
 	auto logger_parameter = parameter_factory_->getLoggerParameter();
 
-	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
+	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
 			parameter_projection_camera_);
@@ -230,8 +230,8 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 bool
 DepthClustering::initializeForApollo()
 {
-	projection_parameter_ = ProjectionParams::APOLLO();
-	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
+	parameter_projection_lidar_ = ProjectionParams::APOLLO();
+	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type);
 	logger_ = std::make_shared<Logger>();
@@ -304,28 +304,28 @@ DepthClustering::initializeForDataset(const std::string& dataset_path, const boo
 	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path_);
 	parameter_ = parameter_factory_->getDepthClusteringParameter();
 	parameter_projection_camera_ = parameter_factory_->getCameraProjectionParameter();
-	projection_parameter_ = parameter_factory_->getLidarProjectionParameter();
+	parameter_projection_lidar_ = parameter_factory_->getLidarProjectionParameter();
 
-	if (!projection_parameter_)
+	if (!parameter_projection_lidar_)
 	{
 		return false;
 	}
 
 	if (parameter_.use_camera_fov)
 	{
-		auto projection_parameter_raw = projection_parameter_->getProjectionParamsRaw();
+		auto projection_parameter_raw = parameter_projection_lidar_->getProjectionParamsRaw();
 
 		projection_parameter_raw->updateHorizontalAngles(
 				parameter_projection_camera_.field_of_view_angle_start,
 				parameter_projection_camera_.field_of_view_angle_end);
 
-		projection_parameter_ = ProjectionParams::FromBeamInclinations(
+		parameter_projection_lidar_ = ProjectionParams::FromBeamInclinations(
 				projection_parameter_raw->horizontal_steps_current, projection_parameter_raw->beams,
 				projection_parameter_raw->horizontal_angle_start,
 				projection_parameter_raw->horizontal_angle_end,
 				projection_parameter_raw->beam_inclinations);
 
-		projection_parameter_->setProjectionParamsRaw(projection_parameter_raw);
+		parameter_projection_lidar_->setProjectionParamsRaw(projection_parameter_raw);
 	}
 
 	auto logger_parameter = parameter_factory_->getLoggerParameter();
@@ -354,7 +354,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path, const boo
 	folder_reader_elongation_ = std::make_shared<FolderReader>(dataset_path_elongation,
 			parameter_.dataset_file_type, FolderReader::Order::SORTED);
 
-	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*projection_parameter_,
+	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
 			parameter_projection_camera_);
@@ -425,7 +425,7 @@ DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 		cloud_range_->push_back(point_rich);
 	}
 
-	cloud_range_->InitProjection(*projection_parameter_);
+	cloud_range_->InitProjection(*parameter_projection_lidar_);
 
 	bounding_box_->clearFrames();
 	depth_ground_remover_->OnNewObjectReceived(*cloud_range_, 0);
@@ -457,11 +457,11 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 
 	if (parameter_.dataset_file_type == ".png")
 	{
-		image_range_ = MatFromPNGRange(frame_path_name, projection_parameter_);
+		image_range_ = MatFromPNGRange(frame_path_name, parameter_projection_lidar_);
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_range_ = MatFromTIFFRange(frame_path_name, projection_parameter_);
+		image_range_ = MatFromTIFFRange(frame_path_name, parameter_projection_lidar_);
 	}
 	else
 	{
@@ -471,7 +471,7 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 
 	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
-	cloud_range_ = Cloud::FromImage(image_range_, *projection_parameter_);
+	cloud_range_ = Cloud::FromImage(image_range_, *parameter_projection_lidar_);
 
 	bounding_box_->clearFrames();
 	depth_ground_remover_->OnNewObjectReceived(*cloud_range_, 0);
@@ -515,7 +515,7 @@ DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_pat
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_intensity_ = MatFromTIFFIntensity(frame_path_name, projection_parameter_);
+		image_intensity_ = MatFromTIFFIntensity(frame_path_name, parameter_projection_lidar_);
 	}
 	else
 	{
@@ -559,7 +559,7 @@ DepthClustering::processOneElongationFrameForDataset(const std::string& frame_pa
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_elongation_ = MatFromTIFFElongation(frame_path_name, projection_parameter_);
+		image_elongation_ = MatFromTIFFElongation(frame_path_name, parameter_projection_lidar_);
 	}
 	else
 	{

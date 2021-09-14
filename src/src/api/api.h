@@ -44,6 +44,9 @@ public:
 	const CameraProjectionParameter&
 	getCameraProjectionParameter() const;
 
+	std::shared_ptr<ProjectionParams>
+	getLidarProjectionParameter() const;
+
 	const std::string&
 	getDatasetPath() const;
 
@@ -86,9 +89,6 @@ public:
 	std::shared_ptr<FolderReader>
 	getFolderReaderElongation() const;
 
-	std::shared_ptr<ProjectionParams>
-	getProjectionParameter() const;
-
 	std::shared_ptr<DepthGroundRemover>
 	getDepthGroundRemover() const;
 
@@ -126,7 +126,7 @@ public:
 private:
 
 	std::shared_ptr<ParameterFactory> parameter_factory_;
-	std::shared_ptr<ProjectionParams> projection_parameter_;
+	std::shared_ptr<ProjectionParams> parameter_projection_lidar_;
 	std::shared_ptr<FolderReader> folder_reader_range_;
 	std::shared_ptr<FolderReader> folder_reader_intensity_;
 	std::shared_ptr<FolderReader> folder_reader_elongation_;
