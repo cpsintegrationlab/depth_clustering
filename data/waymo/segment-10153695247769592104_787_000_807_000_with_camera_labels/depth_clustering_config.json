@@ -7,7 +7,7 @@
         "size_cluster_max": 20000,
         "size_smooth_window": 5,
         "use_camera_fov": true,
-        "bounding_box_type": "cube",
+        "bounding_box_type": "polygon",
         "difference_type": "angles_precomputed",
         "dataset_file_type": ".tiff",
         "dataset_name": "segment-10153695247769592104_787_000_807_000_with_camera_labels",
