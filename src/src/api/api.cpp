@@ -61,24 +61,48 @@ DepthClustering::getDatasetPath() const
 Cloud::ConstPtr
 DepthClustering::getCloudRange() const
 {
+	if (image_range_.rows == 0 || image_range_.cols == 0)
+	{
+		return nullptr;
+	}
+
 	return cloud_range_;
 }
 
 Cloud::ConstPtr
 DepthClustering::getCloudIntensity() const
 {
+	if (image_range_.rows == 0 || image_range_.cols == 0 || image_intensity_.rows == 0
+			|| image_intensity_.cols == 0)
+	{
+		return nullptr;
+	}
+
 	return Cloud::FromImageIntensity(image_range_, image_intensity_, *parameter_projection_lidar_);
 }
 
 Cloud::ConstPtr
 DepthClustering::getCloudElongation() const
 {
+	if (image_range_.rows == 0 || image_range_.cols == 0 || image_elongation_.rows == 0
+			|| image_elongation_.cols == 0)
+	{
+		return nullptr;
+	}
+
 	return Cloud::FromImageElongation(image_range_, image_elongation_, *parameter_projection_lidar_);
 }
 
 Cloud::ConstPtr
 DepthClustering::getCloudConfidence() const
 {
+	if (image_range_.rows == 0 || image_range_.cols == 0 || image_intensity_.rows == 0
+			|| image_intensity_.cols == 0 || image_elongation_.rows == 0
+			|| image_elongation_.cols == 0)
+	{
+		return nullptr;
+	}
+
 	return Cloud::FromImageConfidence(image_range_, image_intensity_, image_elongation_,
 			*parameter_projection_lidar_);
 }

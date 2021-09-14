@@ -669,6 +669,13 @@ Visualization::extractGroundPointCloud()
 		image_range_no_ground = image_range_no_ground_;
 	}
 
+	if (image_range.rows == 0 || image_range.cols == 0 || image_range_no_ground.rows == 0
+			|| image_range_no_ground.cols == 0)
+	{
+		std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+		return std::make_pair(nullptr, nullptr);
+	}
+
 	auto image_range_ground = image_range;
 
 	for (int row = 0; row < image_range.rows; row++)
@@ -704,29 +711,116 @@ Visualization::updateViewerPointCloud()
 		const auto cloud_range_ground = cloud_range_separated.first;
 		const auto cloud_range_no_ground = cloud_range_separated.second;
 
-		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloudRange(cloud_range_ground, Eigen::Vector3f(1, 0, 0)));
-		ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range_no_ground));
+		if (!cloud_range_ground || !cloud_range_no_ground)
+		{
+			std::cerr << "[ERROR]: Ground cloud missing." << std::endl;
+
+			const auto cloud_range = depth_clustering_->getCloudRange();
+
+			if (!cloud_range)
+			{
+				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+			}
+			else
+			{
+				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
+			}
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(
+					DrawableCloud::FromCloudRange(cloud_range_ground, Eigen::Vector3f(1, 0, 0)));
+			ui->viewer_point_cloud->AddDrawable(
+					DrawableCloud::FromCloudRange(cloud_range_no_ground));
+		}
 	}
 	else if (viewer_point_cloud_layer_index_ == 1)
 	{
-		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloudIntensity(depth_clustering_->getCloudIntensity()));
+		const auto cloud_intensity = depth_clustering_->getCloudIntensity();
+
+		if (!cloud_intensity)
+		{
+			std::cerr << "[ERROR]: Intensity cloud missing." << std::endl;
+
+			const auto cloud_range = depth_clustering_->getCloudRange();
+
+			if (!cloud_range)
+			{
+				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+			}
+			else
+			{
+				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
+			}
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudIntensity(cloud_intensity));
+		}
+
 	}
 	else if (viewer_point_cloud_layer_index_ == 2)
 	{
-		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloudElongation(depth_clustering_->getCloudElongation()));
+		const auto cloud_elongation = depth_clustering_->getCloudElongation();
+
+		if (!cloud_elongation)
+		{
+			std::cerr << "[ERROR]: Elongation cloud missing." << std::endl;
+
+			const auto cloud_range = depth_clustering_->getCloudRange();
+
+			if (!cloud_range)
+			{
+				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+			}
+			else
+			{
+				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
+			}
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(
+					DrawableCloud::FromCloudElongation(cloud_elongation));
+		}
 	}
 	else if (viewer_point_cloud_layer_index_ == 3)
 	{
-		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloudConfidence(depth_clustering_->getCloudConfidence()));
+		const auto cloud_confidence = depth_clustering_->getCloudConfidence();
+
+		if (!cloud_confidence)
+		{
+			std::cerr << "[ERROR]: Confidence cloud missing." << std::endl;
+
+			const auto cloud_range = depth_clustering_->getCloudRange();
+
+			if (!cloud_range)
+			{
+				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+			}
+			else
+			{
+				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
+			}
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(
+					DrawableCloud::FromCloudConfidence(cloud_confidence));
+		}
 	}
 	else
 	{
-		ui->viewer_point_cloud->AddDrawable(
-				DrawableCloud::FromCloudRange(depth_clustering_->getCloudRange()));
+		const auto cloud_range = depth_clustering_->getCloudRange();
+
+		if (!cloud_range)
+		{
+			std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
+		}
 	}
 
 	if (show_bounding_box_)
