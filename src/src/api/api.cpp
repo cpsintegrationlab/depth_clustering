@@ -518,7 +518,7 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 
 	bounding_box_->produceFrameFlat();
 
-	std::cout << "[INFO]: Bounding box created: " << timer.measure() << " us." << std::endl;
+	std::cout << "[INFO]: Bounding box projected: " << timer.measure() << " us." << std::endl;
 
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 	logger_->logBoundingBoxFrameFlat(frame_name);
