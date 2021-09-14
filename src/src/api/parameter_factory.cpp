@@ -368,7 +368,7 @@ ParameterFactory::getLoggerParameter()
 	auto tree = *logger_tree_;
 
 	auto log_path_optional = tree.get_optional<std::string>("log_path");
-	auto log_file_name_cude_optional = tree.get_optional<std::string>("log_file_name_cude");
+	auto log_file_name_cube_optional = tree.get_optional<std::string>("log_file_name_cube");
 	auto log_file_name_polygon_optional = tree.get_optional<std::string>("log_file_name_polygon");
 	auto log_file_name_flat_optional = tree.get_optional<std::string>("log_file_name_flat");
 	auto log_optional = tree.get_optional<bool>("log");
@@ -378,9 +378,9 @@ ParameterFactory::getLoggerParameter()
 		parameter.log_path = *log_path_optional;
 	}
 
-	if (log_file_name_cude_optional)
+	if (log_file_name_cube_optional)
 	{
-		parameter.log_file_name_cude = *log_file_name_cude_optional;
+		parameter.log_file_name_cube = *log_file_name_cube_optional;
 	}
 
 	if (log_file_name_polygon_optional)

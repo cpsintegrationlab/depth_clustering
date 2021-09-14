@@ -318,13 +318,13 @@ Logger::writeBoundingBoxLog(const BoundingBox::Type& bounding_box_type)
 	{
 	case BoundingBox::Type::Cube:
 	{
-		bounding_box_log_file.open(parameter_.log_path + parameter_.log_file_name_cude,
+		bounding_box_log_file.open(parameter_.log_path + parameter_.log_file_name_cube,
 				std::fstream::out | std::fstream::trunc);
 
 		boost::property_tree::write_json(bounding_box_log_file, bounding_box_log_tree_cube_);
 
 		std::cout << "[INFO]: Wrote to log file \""
-				<< parameter_.log_path + parameter_.log_file_name_cude << "\"." << std::endl;
+				<< parameter_.log_path + parameter_.log_file_name_cube << "\"." << std::endl;
 
 		break;
 	}
@@ -354,13 +354,13 @@ Logger::writeBoundingBoxLog(const BoundingBox::Type& bounding_box_type)
 	}
 	default:
 	{
-		bounding_box_log_file.open(parameter_.log_path + parameter_.log_file_name_cude,
+		bounding_box_log_file.open(parameter_.log_path + parameter_.log_file_name_cube,
 				std::fstream::out | std::fstream::trunc);
 
 		boost::property_tree::write_json(bounding_box_log_file, bounding_box_log_tree_cube_);
 
 		std::cout << "[INFO]: Wrote to log file \""
-				<< parameter_.log_path + parameter_.log_file_name_cude << "\"." << std::endl;
+				<< parameter_.log_path + parameter_.log_file_name_cube << "\"." << std::endl;
 
 		break;
 	}

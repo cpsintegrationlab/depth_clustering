@@ -13,13 +13,13 @@
 struct LoggerParameter
 {
 	std::string log_path;
-	std::string log_file_name_cude;
+	std::string log_file_name_cube;
 	std::string log_file_name_polygon;
 	std::string log_file_name_flat;
 	bool log;
 
 	LoggerParameter() :
-			log_path("./"), log_file_name_cude("depth_clustering_detection_cube.json"), log_file_name_polygon(
+			log_path("./"), log_file_name_cube("depth_clustering_detection_cube.json"), log_file_name_polygon(
 					"depth_clustering_detection_polygon.json"), log_file_name_flat(
 					"depth_clustering_detection_flat.json"), log(true)
 	{
