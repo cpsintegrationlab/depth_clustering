@@ -26,7 +26,6 @@
 
 namespace depth_clustering
 {
-
 struct ProjectionParamsRaw
 {
 	int horizontal_steps;
@@ -71,6 +70,7 @@ struct ProjectionParamsRaw
 class SpanParams
 {
 public:
+
 	/**
 	 * Enum for the direction of the span.
 	 */
@@ -82,6 +82,7 @@ public:
 	SpanParams()
 	{
 	}
+
 	SpanParams(const Radians& start_angle, const Radians& end_angle, const Radians& step)
 	{
 		_start_angle = start_angle;
@@ -105,21 +106,25 @@ public:
 	{
 		return _start_angle;
 	}
+
 	const Radians&
 	end_angle() const
 	{
 		return _end_angle;
 	}
+
 	const Radians&
 	step() const
 	{
 		return _step;
 	}
+
 	const Radians&
 	span() const
 	{
 		return _span;
 	}
+
 	int
 	num_beams() const
 	{
@@ -133,6 +138,7 @@ public:
 	}
 
 private:
+
 	Radians _start_angle = 0_deg;
 	Radians _end_angle = 0_deg;
 	Radians _step = 0_deg;
@@ -146,6 +152,7 @@ private:
 class ProjectionParams
 {
 public:
+
 	using Ptr = shared_ptr<ProjectionParams>;
 	using ConstPtr = const shared_ptr<const ProjectionParams>;
 
@@ -153,9 +160,11 @@ public:
 	{
 		COLS, ROWS
 	};
+
 	ProjectionParams()
 	{
 	}
+
 	~ProjectionParams()
 	{
 	}
@@ -197,11 +206,13 @@ public:
 	{
 		return _v_span_params.start_angle();
 	}
+
 	inline const Radians&
 	v_end_angle() const
 	{
 		return _v_span_params.end_angle();
 	}
+
 	inline const Radians&
 	v_span() const
 	{
@@ -213,26 +224,31 @@ public:
 	{
 		return _h_span_params.start_angle();
 	}
+
 	inline const Radians&
 	h_end_angle() const
 	{
 		return _h_span_params.end_angle();
 	}
+
 	inline const Radians&
 	h_span() const
 	{
 		return _h_span_params.span();
 	}
+
 	inline size_t
 	rows() const
 	{
 		return _row_angles.size();
 	}
+
 	inline size_t
 	cols() const
 	{
 		return _col_angles.size();
 	}
+
 	inline size_t
 	size() const
 	{
@@ -281,10 +297,13 @@ public:
 
 	const std::vector<float>&
 	RowAngleCosines() const;
+
 	const std::vector<float>&
 	ColAngleCosines() const;
+
 	const std::vector<float>&
 	RowAngleSines() const;
+
 	const std::vector<float>&
 	ColAngleSines() const;
 
@@ -298,6 +317,7 @@ public:
 	 */
 	static std::unique_ptr<ProjectionParams>
 	VLP_16();
+
 	/**
 	 * @brief      Default parameters for 32 beam Velodyne
 	 *
@@ -305,6 +325,7 @@ public:
 	 */
 	static std::unique_ptr<ProjectionParams>
 	HDL_32();
+
 	/**
 	 * @brief      Default parameters for 64 beam Velodyne
 	 *
@@ -312,6 +333,7 @@ public:
 	 */
 	static std::unique_ptr<ProjectionParams>
 	HDL_64();
+
 	/**
 	 * @brief      Parameters for 64 beam velodyne assuming equal spacing between
 	 *             the lasers.
@@ -320,6 +342,7 @@ public:
 	 */
 	static std::unique_ptr<ProjectionParams>
 	HDL_64_EQUAL();
+
 	/**
 	 * @brief      Parameters for Waymo
 	 *
@@ -327,6 +350,7 @@ public:
 	 */
 	static std::unique_ptr<ProjectionParams>
 	WAYMO();
+
 	/**
 	 * @brief      Parameters for Apollo
 	 *
@@ -334,6 +358,7 @@ public:
 	 */
 	static std::unique_ptr<ProjectionParams>
 	APOLLO();
+
 	/**
 	 * @brief      Default parameters for Velodyne from config file
 	 *
@@ -341,6 +366,7 @@ public:
 	 */
 	static std::unique_ptr<ProjectionParams>
 	FromConfigFile(const std::string& path);
+
 	/**
 	 * @brief      Default parameters to cover full sphere
 	 *
@@ -350,6 +376,7 @@ public:
 	FromBeamInclinations(const int& horizontal_steps, const int& beams,
 			const int& horizontal_angle_start, const int& horizontal_angle_end,
 			const std::vector<double>& beam_inclinations);
+
 	/**
 	 * @brief      Default parameters to cover full sphere
 	 *
@@ -359,8 +386,10 @@ public:
 	FullSphere(const Radians& discretization = 5_deg);
 
 private:
+
 	std::vector<Radians>
 	FillVector(const SpanParams& span_params);
+
 	std::vector<Radians>
 	FillVector(const std::vector<SpanParams>& span_params);
 
@@ -384,7 +413,6 @@ private:
 
 	std::shared_ptr<ProjectionParamsRaw> params_raw_;
 };
-
 }  // namespace depth_clustering
 
 #endif  // SRC_PROJECTIONS_PROJECTION_PARAMS_H_
