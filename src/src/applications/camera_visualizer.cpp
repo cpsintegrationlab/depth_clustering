@@ -61,6 +61,7 @@ int
 main(int argc, char* argv[])
 {
 	std::string dataset_path;
+	std::string global_config_path;
 	int display_time = 0;
 	int frame_counter = 0;
 
@@ -69,8 +70,9 @@ main(int argc, char* argv[])
 		if (std::string(argv[1]) == "-h")
 		{
 			std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset path]" << std::endl;
-			std::cout << "\t" << argv[0] << " [dataset path] [display time]" << std::endl
-					<< std::endl;
+			std::cout << "\t" << argv[0] << " [dataset path] [global config path]" << std::endl;
+			std::cout << "\t" << argv[0] << " [dataset path] [global config path] [display time]"
+					<< std::endl << std::endl;
 			return 0;
 		}
 
@@ -80,23 +82,36 @@ main(int argc, char* argv[])
 		{
 			dataset_path += "/";
 		}
+
+		if (argc > 2)
+		{
+			global_config_path = argv[2];
+
+			if (global_config_path != ""
+					&& global_config_path[global_config_path.size() - 1] != '/')
+			{
+				global_config_path += "/";
+			}
+		}
+
+		if (argc > 3)
+		{
+			display_time = std::stoi(std::string(argv[3]));
+		}
 	}
 	else
 	{
 		std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset path]" << std::endl;
-		std::cout << "\t" << argv[0] << " [dataset path] [display time]" << std::endl << std::endl;
+		std::cout << "\t" << argv[0] << " [dataset path] [global config path]" << std::endl;
+		std::cout << "\t" << argv[0] << " [dataset path] [global config path] [display time]"
+				<< std::endl << std::endl;
 		return 0;
-	}
-
-	if (argc > 2)
-	{
-		display_time = std::stoi(std::string(argv[2]));
 	}
 
 	DepthClustering depth_clustering;
 	boost::property_tree::ptree ground_truth_tree;
 
-	if (!depth_clustering.initializeForDataset(dataset_path))
+	if (!depth_clustering.initializeForDataset(dataset_path, global_config_path))
 	{
 		std::cout << "[ERROR]: Failed to initialize for dataset. Quit." << std::endl;
 		return -1;
