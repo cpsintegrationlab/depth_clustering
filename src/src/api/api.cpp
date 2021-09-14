@@ -181,26 +181,38 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 
 	if (parameter_.use_camera_fov)
 	{
-		auto projection_parameter_raw = parameter_projection_lidar_->getProjectionParamsRaw();
+		auto projection_parameter_lidar_raw = parameter_projection_lidar_->getProjectionParamsRaw();
 
-		projection_parameter_raw->updateHorizontalAngles(
+		projection_parameter_lidar_raw->updateHorizontalAngles(
 				parameter_projection_camera_.field_of_view_angle_start,
 				parameter_projection_camera_.field_of_view_angle_end);
 
 		parameter_projection_lidar_ = ProjectionParams::FromBeamInclinations(
-				projection_parameter_raw->horizontal_steps_current, projection_parameter_raw->beams,
-				projection_parameter_raw->horizontal_angle_start,
-				projection_parameter_raw->horizontal_angle_end,
-				projection_parameter_raw->beam_inclinations);
+				projection_parameter_lidar_raw->horizontal_steps_current,
+				projection_parameter_lidar_raw->beams,
+				projection_parameter_lidar_raw->horizontal_angle_start,
+				projection_parameter_lidar_raw->horizontal_angle_end,
+				projection_parameter_lidar_raw->beam_inclinations);
 
-		parameter_projection_lidar_->setProjectionParamsRaw(projection_parameter_raw);
+		parameter_projection_lidar_->setProjectionParamsRaw(projection_parameter_lidar_raw);
 	}
 	else
 	{
 		parameter_projection_lidar_ = parameter_factory_->getLidarProjectionParameter();
+
+		if (parameter_factory_global_)
+		{
+			parameter_factory_global_->setGlobalLidarProjectionParameter(
+					parameter_projection_lidar_);
+		}
 	}
 
 	auto logger_parameter = parameter_factory_->getLoggerParameter();
+
+	if (parameter_factory_global_)
+	{
+		parameter_factory_global_->setGlobalLoggerParameter(logger_parameter);
+	}
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
@@ -311,11 +323,12 @@ DepthClustering::initializeForApollo()
 }
 
 bool
-DepthClustering::initializeForDataset(const std::string& dataset_path, const bool& second_return)
+DepthClustering::initializeForDataset(const std::string& dataset_path,
+		const std::string& global_config_path, const bool& second_return)
 {
 	dataset_path_ = dataset_path;
 
-	if (dataset_path_[dataset_path_.size() - 1] != '/')
+	if (dataset_path_ != "" && dataset_path_[dataset_path_.size() - 1] != '/')
 	{
 		dataset_path_ += "/";
 	}
@@ -329,32 +342,42 @@ DepthClustering::initializeForDataset(const std::string& dataset_path, const boo
 
 	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path_);
 	parameter_ = parameter_factory_->getDepthClusteringParameter();
-	parameter_projection_camera_ = parameter_factory_->getCameraProjectionParameter();
 	parameter_projection_lidar_ = parameter_factory_->getLidarProjectionParameter();
+	parameter_projection_camera_ = parameter_factory_->getCameraProjectionParameter();
+	auto logger_parameter = parameter_factory_->getLoggerParameter();
 
-	if (!parameter_projection_lidar_)
+	if (global_config_path != "")
 	{
-		return false;
+		parameter_factory_global_ = std::make_shared<ParameterFactory>(global_config_path);
+		parameter_factory_global_->setGlobalDepthClusteringParameter(parameter_);
+		parameter_factory_global_->setGlobalLidarProjectionParameter(parameter_projection_lidar_);
+		parameter_factory_global_->setGlobalCameraProjectionParameter(parameter_projection_camera_);
+		parameter_factory_global_->setGlobalLoggerParameter(logger_parameter);
 	}
 
 	if (parameter_.use_camera_fov)
 	{
-		auto projection_parameter_raw = parameter_projection_lidar_->getProjectionParamsRaw();
+		auto projection_parameter_lidar_raw = parameter_projection_lidar_->getProjectionParamsRaw();
 
-		projection_parameter_raw->updateHorizontalAngles(
+		if (!projection_parameter_lidar_raw)
+		{
+			std::cout << "[ERROR]: Raw lidar projection parameter missing." << std::endl;
+			return false;
+		}
+
+		projection_parameter_lidar_raw->updateHorizontalAngles(
 				parameter_projection_camera_.field_of_view_angle_start,
 				parameter_projection_camera_.field_of_view_angle_end);
 
 		parameter_projection_lidar_ = ProjectionParams::FromBeamInclinations(
-				projection_parameter_raw->horizontal_steps_current, projection_parameter_raw->beams,
-				projection_parameter_raw->horizontal_angle_start,
-				projection_parameter_raw->horizontal_angle_end,
-				projection_parameter_raw->beam_inclinations);
+				projection_parameter_lidar_raw->horizontal_steps_current,
+				projection_parameter_lidar_raw->beams,
+				projection_parameter_lidar_raw->horizontal_angle_start,
+				projection_parameter_lidar_raw->horizontal_angle_end,
+				projection_parameter_lidar_raw->beam_inclinations);
 
-		parameter_projection_lidar_->setProjectionParamsRaw(projection_parameter_raw);
+		parameter_projection_lidar_->setProjectionParamsRaw(projection_parameter_lidar_raw);
 	}
-
-	auto logger_parameter = parameter_factory_->getLoggerParameter();
 
 	// Remove extrinsic translation vector since bounding boxes are already in camera frame
 	if (parameter_projection_camera_.extrinsic.size() >= 12)

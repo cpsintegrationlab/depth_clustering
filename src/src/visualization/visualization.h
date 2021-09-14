@@ -86,6 +86,9 @@ private slots:
 	onParameterUpdated();
 
 	void
+	onLoadGlobalConfiguration();
+
+	void
 	onLayerPointCloudUpdated();
 
 	void
@@ -103,7 +106,7 @@ private slots:
 private:
 
 	void
-	openDataset(const std::string& dataset_path);
+	openDataset(const std::string& dataset_path, const std::string& global_config_path = "");
 
 	std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
 	extractGroundPointCloud();
@@ -117,6 +120,15 @@ private:
 	void
 	updateViewerImage();
 
+	void
+	resetViewerImageScene();
+
+	void
+	resetUI();
+
+	void
+	initializeUI();
+
 	std::unique_ptr<Ui::Visualization> ui;
 	std::unique_ptr<QGraphicsScene> scene_empty_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
@@ -127,6 +139,7 @@ private:
 	std::unique_ptr<DepthClustering> depth_clustering_ = nullptr;
 
 	std::string dataset_path_;
+	std::string global_config_path_;
 	volatile bool play_;
 	bool show_bounding_box_;
 	int viewer_point_cloud_layer_index_;

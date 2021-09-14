@@ -99,7 +99,8 @@ public:
 	initializeForApollo();
 
 	bool
-	initializeForDataset(const std::string& dataset_path, const bool& second_return = false);
+	initializeForDataset(const std::string& dataset_path,
+			const std::string& global_config_path = "", const bool& second_return = false);
 
 	void
 	processOneRangeFrameForApollo(const std::string& frame_name,
@@ -126,6 +127,7 @@ public:
 private:
 
 	std::shared_ptr<ParameterFactory> parameter_factory_;
+	std::shared_ptr<ParameterFactory> parameter_factory_global_;
 	std::shared_ptr<ProjectionParams> parameter_projection_lidar_;
 	std::shared_ptr<FolderReader> folder_reader_range_;
 	std::shared_ptr<FolderReader> folder_reader_intensity_;

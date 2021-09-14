@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_18">
+  <layout class="QGridLayout" name="gridLayout_20">
    <item row="0" column="0">
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
@@ -397,26 +397,19 @@
             </widget>
            </item>
            <item row="0" column="4">
-            <widget class="QGroupBox" name="group_field_of_view">
+            <widget class="QGroupBox" name="group_global_configuration">
              <property name="title">
-              <string>Field of View</string>
+              <string>Global Configuration</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
-             <layout class="QGridLayout" name="gridLayout_19">
+             <layout class="QGridLayout" name="gridLayout_18">
               <item row="0" column="0">
-               <widget class="QComboBox" name="combo_field_of_view">
-                <item>
-                 <property name="text">
-                  <string>Default</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Camera</string>
-                 </property>
-                </item>
+               <widget class="QPushButton" name="button_global_configuration">
+                <property name="text">
+                 <string>Load From Folder</string>
+                </property>
                </widget>
               </item>
              </layout>
@@ -429,7 +422,7 @@
            <item row="0" column="2">
             <widget class="QGroupBox" name="group_layer_image_top">
              <property name="title">
-              <string>Top Image Viewer Layer</string>
+              <string>Top Image Viewer</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -521,7 +514,7 @@
            <item row="0" column="4">
             <widget class="QGroupBox" name="group_layer_image_bottom">
              <property name="title">
-              <string>Bottom Image Viewer Layer</string>
+              <string>Bottom Image Viewer</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -567,7 +560,7 @@
            <item row="0" column="3">
             <widget class="QGroupBox" name="group_layer_image_middle">
              <property name="title">
-              <string>Middle Image Viewer Layer</string>
+              <string>Middle Image Viewer</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -659,7 +652,7 @@
            <item row="0" column="0">
             <widget class="QGroupBox" name="group_layer_point_cloud">
              <property name="title">
-              <string>Point Cloud Viewer Layer</string>
+              <string>Point Cloud Viewer</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -697,7 +690,7 @@
              </layout>
             </widget>
            </item>
-           <item row="0" column="7">
+           <item row="0" column="8">
             <widget class="QGroupBox" name="group_page_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -723,6 +716,32 @@
                 <property name="text">
                  <string>Last Page</string>
                 </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="7">
+            <widget class="QGroupBox" name="group_field_of_view">
+             <property name="title">
+              <string>Field of View</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_19">
+              <item row="0" column="0">
+               <widget class="QComboBox" name="combo_field_of_view">
+                <item>
+                 <property name="text">
+                  <string>Default</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Camera</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>

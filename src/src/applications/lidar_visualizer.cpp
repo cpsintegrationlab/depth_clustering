@@ -10,7 +10,9 @@ main(int argc, char* argv[])
 		if (std::string(argv[1]) == "-h")
 		{
 			std::cout << std::endl << "Usage:\t" << argv[0] << std::endl;
-			std::cout << "\t" << argv[0] << " [dataset path]" << std::endl << std::endl;
+			std::cout << "\t" << argv[0] << " [dataset path]" << std::endl;
+			std::cout << "\t" << argv[0] << " [dataset path] [global config path]" << std::endl
+					<< std::endl;
 			return 0;
 		}
 	}

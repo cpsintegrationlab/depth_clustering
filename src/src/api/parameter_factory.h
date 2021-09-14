@@ -20,7 +20,7 @@ class ParameterFactory
 {
 public:
 
-	ParameterFactory(std::string& path);
+	ParameterFactory(const std::string& path);
 
 	DepthClusteringParameter
 	getDepthClusteringParameter();
@@ -34,9 +34,22 @@ public:
 	LoggerParameter
 	getLoggerParameter();
 
+	void
+	setGlobalDepthClusteringParameter(DepthClusteringParameter& parameter);
+
+	void
+	setGlobalLidarProjectionParameter(std::shared_ptr<ProjectionParams> parameter_projection_lidar);
+
+	void
+	setGlobalCameraProjectionParameter(CameraProjectionParameter& parameter_projection_camera);
+
+	void
+	setGlobalLoggerParameter(LoggerParameter& parameter_logger);
+
 private:
 
 	const std::string configuration_file_name_;
+	std::string path_;
 
 	boost::property_tree::ptree top_tree_;
 	boost::optional<boost::property_tree::ptree> depth_clustering_tree_;

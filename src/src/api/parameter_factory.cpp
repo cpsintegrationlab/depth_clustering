@@ -14,21 +14,23 @@
 using boost::property_tree::json_parser::read_json;
 using depth_clustering::ProjectionParamsRaw;
 
-ParameterFactory::ParameterFactory(std::string& path) :
+ParameterFactory::ParameterFactory(const std::string& path) :
 		configuration_file_name_("depth_clustering_config.json")
 {
-	if (path[path.size() - 1] != '/')
+	path_ = path;
+
+	if (path_ != "" && path_[path_.size() - 1] != '/')
 	{
-		path += "/";
+		path_ += "/";
 	}
 
 	try
 	{
-		boost::property_tree::read_json(path + configuration_file_name_, top_tree_);
+		boost::property_tree::read_json(path_ + configuration_file_name_, top_tree_);
 	} catch (boost::exception const &e)
 	{
-		std::cout << "[ERROR]: Failed to load depth clustering configuration file from \"" << path
-				<< "\"." << std::endl;
+		std::cout << "[ERROR]: Failed to load configuration file from \"" << path_ << "\"."
+				<< std::endl;
 		return;
 	}
 
@@ -98,13 +100,6 @@ ParameterFactory::getDepthClusteringParameter()
 	if (size_smooth_window_optional)
 	{
 		parameter.size_smooth_window = *size_smooth_window_optional;
-
-		if (parameter.size_smooth_window != 5 && parameter.size_smooth_window != 7
-				&& parameter.size_smooth_window != 9 && parameter.size_smooth_window != 11)
-		{
-			std::cout << "[WARN]: Invalid ground removal filter window size." << std::endl;
-			parameter.size_smooth_window = 5;
-		}
 	}
 
 	if (use_camera_fov_optional)
@@ -399,4 +394,179 @@ ParameterFactory::getLoggerParameter()
 	}
 
 	return parameter;
+}
+
+void
+ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& parameter)
+{
+	if (!depth_clustering_tree_)
+	{
+		std::cout << "[WARN]: Depth clustering configuration missing." << std::endl;
+		return;
+	}
+
+	auto tree = *depth_clustering_tree_;
+
+	auto distance_clustering_optional = tree.get_optional<float>("distance_clustering");
+	auto angle_clustering_optional = tree.get_optional<float>("angle_clustering");
+	auto angle_ground_removal_optional = tree.get_optional<float>("angle_ground_removal");
+	auto size_cluster_min_optional = tree.get_optional<int>("size_cluster_min");
+	auto size_cluster_max_optional = tree.get_optional<int>("size_cluster_max");
+	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
+	auto use_camera_fov_optional = tree.get_optional<bool>("use_camera_fov");
+	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
+	auto difference_type_optional = tree.get_optional<std::string>("difference_type");
+	auto ground_truth_file_name_optional = tree.get_optional<std::string>("ground_truth_file_name");
+	auto ground_truth_flat_file_name_optional = tree.get_optional<std::string>(
+			"ground_truth_flat_file_name");
+
+	if (distance_clustering_optional)
+	{
+		parameter.distance_clustering = *distance_clustering_optional;
+	}
+
+	if (angle_clustering_optional)
+	{
+		parameter.angle_clustering = Radians
+		{ Radians::IsRadians
+		{ }, static_cast<float>(*angle_clustering_optional * M_PI / 180.0) };
+	}
+
+	if (angle_ground_removal_optional)
+	{
+		parameter.angle_ground_removal = Radians
+		{ Radians::IsRadians
+		{ }, static_cast<float>(*angle_ground_removal_optional * M_PI / 180.0) };
+	}
+
+	if (size_cluster_min_optional)
+	{
+		parameter.size_cluster_min = *size_cluster_min_optional;
+	}
+
+	if (size_cluster_max_optional)
+	{
+		parameter.size_cluster_max = *size_cluster_max_optional;
+	}
+
+	if (size_smooth_window_optional)
+	{
+		parameter.size_smooth_window = *size_smooth_window_optional;
+	}
+
+	if (use_camera_fov_optional)
+	{
+		parameter.use_camera_fov = *use_camera_fov_optional;
+	}
+
+	if (bounding_box_type_optional)
+	{
+		std::string bounding_box_type_string = *bounding_box_type_optional;
+
+		if (bounding_box_type_string == "cube")
+		{
+			parameter.bounding_box_type = BoundingBox::Type::Cube;
+		}
+		else if (bounding_box_type_string == "polygon")
+		{
+			parameter.bounding_box_type = BoundingBox::Type::Polygon;
+		}
+	}
+
+	if (difference_type_optional)
+	{
+		std::string difference_type_string = *difference_type_optional;
+
+		if (difference_type_string == "angles")
+		{
+			parameter.difference_type = DiffFactory::DiffType::ANGLES;
+		}
+		else if (difference_type_string == "angles_precomputed")
+		{
+			parameter.difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
+		}
+		else if (difference_type_string == "line_dist")
+		{
+			parameter.difference_type = DiffFactory::DiffType::LINE_DIST;
+		}
+		else if (difference_type_string == "line_dist_precomputed")
+		{
+			parameter.difference_type = DiffFactory::DiffType::LINE_DIST_PRECOMPUTED;
+		}
+		else if (difference_type_string == "simple")
+		{
+			parameter.difference_type = DiffFactory::DiffType::SIMPLE;
+		}
+		else
+		{
+			parameter.difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
+		}
+	}
+
+	if (ground_truth_file_name_optional)
+	{
+		parameter.ground_truth_file_name = *ground_truth_file_name_optional;
+	}
+
+	if (ground_truth_flat_file_name_optional)
+	{
+		parameter.ground_truth_flat_file_name = *ground_truth_flat_file_name_optional;
+	}
+}
+
+void
+ParameterFactory::setGlobalLidarProjectionParameter(
+		std::shared_ptr<ProjectionParams> parameter_projection_lidar)
+{
+	// No global lidar projection parameters for now
+}
+
+void
+ParameterFactory::setGlobalCameraProjectionParameter(
+		CameraProjectionParameter& parameter_projection_camera)
+{
+	// No global camera projection parameters for now
+}
+
+void
+ParameterFactory::setGlobalLoggerParameter(LoggerParameter& parameter_logger)
+{
+	if (!logger_tree_)
+	{
+		std::cout << "[WARN]: Logger configuration missing." << std::endl;
+		return;
+	}
+
+	auto tree = *logger_tree_;
+
+	auto log_path_optional = tree.get_optional<std::string>("log_path");
+	auto log_file_name_cube_optional = tree.get_optional<std::string>("log_file_name_cube");
+	auto log_file_name_polygon_optional = tree.get_optional<std::string>("log_file_name_polygon");
+	auto log_file_name_flat_optional = tree.get_optional<std::string>("log_file_name_flat");
+	auto log_optional = tree.get_optional<bool>("log");
+
+	if (log_path_optional)
+	{
+		parameter_logger.log_path = *log_path_optional;
+	}
+
+	if (log_file_name_cube_optional)
+	{
+		parameter_logger.log_file_name_cube = *log_file_name_cube_optional;
+	}
+
+	if (log_file_name_polygon_optional)
+	{
+		parameter_logger.log_file_name_polygon = *log_file_name_polygon_optional;
+	}
+
+	if (log_file_name_flat_optional)
+	{
+		parameter_logger.log_file_name_flat = *log_file_name_flat_optional;
+	}
+
+	if (log_optional)
+	{
+		parameter_logger.log = *log_optional;
+	}
 }

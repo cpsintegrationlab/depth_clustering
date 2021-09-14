@@ -305,7 +305,7 @@ Logger::writeBoundingBoxLog(const BoundingBox::Type& bounding_box_type)
 		return;
 	}
 
-	if (parameter_.log_path[parameter_.log_path.size() - 1] != '/')
+	if (parameter_.log_path != "" && parameter_.log_path[parameter_.log_path.size() - 1] != '/')
 	{
 		parameter_.log_path += "/";
 	}
