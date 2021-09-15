@@ -5,7 +5,7 @@
 The core applications depend on the installation of the following packages:
 
 ```bash
-apt install cmake libboost-all-dev libeigen3-dev libopencv-dev freeglut3-dev
+apt install cmake libboost-all-dev libeigen3-dev libopencv-dev
 ```
 
 With the above packages installed, set up the project as follows:
@@ -57,7 +57,7 @@ cd install/release/bin
 The lidar visualizer application depends on the installation of the following additional packages:
 
 ```bash
-apt install qtbase5-dev libqglviewer-dev-qt5
+apt install freeglut3-dev libqglviewer-dev-qt5 qtbase5-dev
 ```
 
 The lidar visualizer application is built independently. With the above packages installed, build the lidar visualizer application as follows:

@@ -37,6 +37,10 @@ if(QGLVIEWER_LIBRARY_RELEASE)
   else()
     set(QGLVIEWER_LIBRARY ${QGLVIEWER_LIBRARY_RELEASE})
   endif()
+
+  set(QGLViewer_FOUND 1)
+else()
+  set(QGLViewer_FOUND 0)
 endif()
 
 include(FindPackageHandleStandardArgs)
