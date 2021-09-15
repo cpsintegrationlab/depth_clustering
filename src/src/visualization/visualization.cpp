@@ -75,7 +75,9 @@ Visualization::Visualization(QWidget* parent) :
 
 	resetUI();
 
-	depth_clustering_ = std::unique_ptr<DepthClustering>(new DepthClustering());
+	depth_clustering_first_return_ = std::make_shared<DepthClustering>();
+	depth_clustering_second_return_ = std::make_shared<DepthClustering>();
+	depth_clustering_ = depth_clustering_first_return_;
 
 	const auto &arguments = QCoreApplication::arguments();
 
@@ -258,7 +260,7 @@ Visualization::onSliderMovedTo(int frame_number)
 	if (frame_paths_names_range.empty()
 			|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 	{
-		std::cerr << "[ERROR]: Range images missing in \"" << dataset_path_ << "\"." << std::endl;
+		std::cerr << "[WARN]: Range images missing in \"" << dataset_path_ << "\"." << std::endl;
 		return;
 	}
 
@@ -307,20 +309,37 @@ Visualization::onSliderMovedTo(int frame_number)
 
 	timer.start();
 
-	updateViewerImageScene();
-
-	std::cout << "[INFO]: Updated image viewers: " << timer.measure(Timer::Units::Micro) << " us."
-			<< std::endl;
-
 	updateViewerPointCloud();
 
-	std::cout << "[INFO]: Updated point cloud viewer: " << timer.measure(Timer::Units::Micro)
-			<< " us." << std::endl;
+	std::cout << "[INFO]: Point cloud viewer updated: " << timer.measure() << " us." << std::endl;
+
+	updateViewerImageScene();
+
+	std::cout << "[INFO]: Image viewers updated: " << timer.measure() << " us." << std::endl;
 }
 
 void
 Visualization::onParameterUpdated()
 {
+	switch (ui->combo_lidar_return->currentIndex())
+	{
+	case 0:
+	{
+		depth_clustering_ = depth_clustering_first_return_;
+		break;
+	}
+	case 1:
+	{
+		depth_clustering_ = depth_clustering_second_return_;
+		break;
+	}
+	default:
+	{
+		depth_clustering_ = depth_clustering_first_return_;
+		break;
+	}
+	}
+
 	DepthClusteringParameter parameter = depth_clustering_->getParameter();
 
 	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
@@ -404,6 +423,7 @@ Visualization::onParameterUpdated()
 	depth_clustering_->getDepthGroundRemover()->AddClient(this);
 	depth_clustering_->getClusterer()->SetLabelImageClient(this);
 
+	resetViewer();
 	onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Updated parameters." << std::endl;
@@ -530,13 +550,14 @@ Visualization::openDataset(const std::string& dataset_path, const std::string& g
 	viewer_image_layer_index_middle_ = 1;
 	viewer_image_layer_index_bottom_ = 2;
 
-	if (!depth_clustering_)
+	if (!depth_clustering_first_return_ || !depth_clustering_second_return_)
 	{
 		std::cerr << "[ERROR]: API missing." << std::endl;
 		return;
 	}
 
-	depth_clustering_->initializeForDataset(dataset_path_, global_config_path_);
+	depth_clustering_first_return_->initializeForDataset(dataset_path_, global_config_path_, false);
+	depth_clustering_second_return_->initializeForDataset(dataset_path_, global_config_path_, true);
 
 	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
 
@@ -601,7 +622,7 @@ Visualization::updateViewerPointCloud()
 
 		if (!cloud_range_ground || !cloud_range_no_ground)
 		{
-			std::cerr << "[ERROR]: Ground cloud missing." << std::endl;
+			std::cerr << "[WARN]: Ground cloud missing." << std::endl;
 
 			const auto cloud_range = depth_clustering_->getCloudRange();
 
@@ -628,7 +649,7 @@ Visualization::updateViewerPointCloud()
 
 		if (!cloud_intensity)
 		{
-			std::cerr << "[ERROR]: Intensity cloud missing." << std::endl;
+			std::cerr << "[WARN]: Intensity cloud missing." << std::endl;
 
 			const auto cloud_range = depth_clustering_->getCloudRange();
 
@@ -653,7 +674,7 @@ Visualization::updateViewerPointCloud()
 
 		if (!cloud_elongation)
 		{
-			std::cerr << "[ERROR]: Elongation cloud missing." << std::endl;
+			std::cerr << "[WARN]: Elongation cloud missing." << std::endl;
 
 			const auto cloud_range = depth_clustering_->getCloudRange();
 
@@ -678,7 +699,7 @@ Visualization::updateViewerPointCloud()
 
 		if (!cloud_confidence)
 		{
-			std::cerr << "[ERROR]: Confidence cloud missing." << std::endl;
+			std::cerr << "[WARN]: Confidence cloud missing." << std::endl;
 
 			const auto cloud_range = depth_clustering_->getCloudRange();
 
@@ -1005,8 +1026,11 @@ Visualization::updateViewerImage()
 }
 
 void
-Visualization::resetViewerImageScene()
+Visualization::resetViewer()
 {
+	ui->viewer_point_cloud->Clear();
+	ui->viewer_point_cloud->update();
+
 	scene_empty_.reset(new QGraphicsScene);
 	scene_empty_->addPixmap(QPixmap::fromImage(QImage()));
 	scene_difference_.reset(new QGraphicsScene);
@@ -1019,15 +1043,14 @@ Visualization::resetViewerImageScene()
 	scene_intensity_->addPixmap(QPixmap::fromImage(QImage()));
 	scene_elongation_.reset(new QGraphicsScene);
 	scene_elongation_->addPixmap(QPixmap::fromImage(QImage()));
+
+	updateViewerImage();
 }
 
 void
 Visualization::resetUI()
 {
-	ui->viewer_point_cloud->Clear();
-	ui->viewer_point_cloud->update();
-
-	resetViewerImageScene();
+	resetViewer();
 
 	ui->button_play->setEnabled(false);
 	ui->button_pause->setEnabled(false);
@@ -1076,6 +1099,7 @@ Visualization::resetUI()
 			SLOT(onLayerImageUpdated()));
 	disconnect(ui->combo_layer_image_bottom, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
+	disconnect(ui->combo_lidar_return, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	disconnect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this,
 			SLOT(onParameterUpdated()));
 }
@@ -1180,6 +1204,7 @@ Visualization::initializeUI()
 			SLOT(onLayerImageUpdated()));
 	connect(ui->combo_layer_image_bottom, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
+	connect(ui->combo_lidar_return, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 
 	ui->button_play->setEnabled(true);

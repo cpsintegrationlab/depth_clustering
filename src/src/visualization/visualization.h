@@ -121,7 +121,7 @@ private:
 	updateViewerImage();
 
 	void
-	resetViewerImageScene();
+	resetViewer();
 
 	void
 	resetUI();
@@ -136,7 +136,9 @@ private:
 	std::unique_ptr<QGraphicsScene> scene_range_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_intensity_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_elongation_ = nullptr;
-	std::unique_ptr<DepthClustering> depth_clustering_ = nullptr;
+	std::shared_ptr<DepthClustering> depth_clustering_ = nullptr;
+	std::shared_ptr<DepthClustering> depth_clustering_first_return_ = nullptr;
+	std::shared_ptr<DepthClustering> depth_clustering_second_return_ = nullptr;
 
 	std::string dataset_path_;
 	std::string global_config_path_;

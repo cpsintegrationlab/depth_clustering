@@ -3,6 +3,7 @@ install/
 data/moosmann/velodyne_slam/scenario_1/*.json
 data/waymo/**/*.json
 data/waymo/**/*.tfrecord
-data/waymo/**/frames_camera/
+data/waymo/**/second_return/
 data/waymo/**/intensity/
 data/waymo/**/elongation/
+data/waymo/**/frames_camera/
