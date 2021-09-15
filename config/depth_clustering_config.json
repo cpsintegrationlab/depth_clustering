@@ -6,7 +6,7 @@
         "size_cluster_min": 10,
         "size_cluster_max": 20000,
         "size_smooth_window": 5,
-        "use_camera_fov": true,
+        "use_camera_fov": false,
         "bounding_box_type": "polygon",
         "difference_type": "angles_precomputed",
         "ground_truth_file_name": "waymo_ground_truth_cube.json",

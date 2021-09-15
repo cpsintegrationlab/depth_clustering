@@ -37,7 +37,7 @@ using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
 		QWidget(parent), ui(new Ui::Visualization), play_(false), show_bounding_box_(true), viewer_point_cloud_layer_index_(
-				4), viewer_image_layer_index_top_(0), viewer_image_layer_index_middle_(1), viewer_image_layer_index_bottom_(
+				5), viewer_image_layer_index_top_(0), viewer_image_layer_index_middle_(1), viewer_image_layer_index_bottom_(
 				2)
 {
 	ui->setupUi(this);
@@ -260,7 +260,7 @@ Visualization::onSliderMovedTo(int frame_number)
 	if (frame_paths_names_range.empty()
 			|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 	{
-		std::cerr << "[WARN]: Range images missing in \"" << dataset_path_ << "\"." << std::endl;
+		std::cerr << "[WARN]: Range image missing in \"" << dataset_path_ << "\"." << std::endl;
 		return;
 	}
 
@@ -277,7 +277,7 @@ Visualization::onSliderMovedTo(int frame_number)
 		if (frame_paths_names_intensity.empty()
 				|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 		{
-			std::cout << "[WARN]: Intensity images missing in \"" << dataset_path_ << "\"."
+			std::cout << "[WARN]: Intensity image missing in \"" << dataset_path_ << "\"."
 					<< std::endl;
 		}
 		else
@@ -297,7 +297,7 @@ Visualization::onSliderMovedTo(int frame_number)
 		if (frame_paths_names_elongation.empty()
 				|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 		{
-			std::cout << "[WARN]: Elongation images missing in \"" << dataset_path_ << "\"."
+			std::cout << "[WARN]: Elongation image missing in \"" << dataset_path_ << "\"."
 					<< std::endl;
 		}
 		else
@@ -305,6 +305,25 @@ Visualization::onSliderMovedTo(int frame_number)
 			depth_clustering_->processOneElongationFrameForDataset(
 					frame_paths_names_elongation[frame_number]);
 		}
+	}
+
+	if (viewer_point_cloud_layer_index_ == 4 && ui->combo_lidar_return->currentIndex() == 0)
+	{
+		auto folder_reader_range_second_return =
+				depth_clustering_second_return_->getFolderReaderRange();
+		const auto &frame_paths_names_range_second_return =
+				folder_reader_range_second_return->GetAllFilePaths();
+
+		if (frame_paths_names_range_second_return.empty()
+				|| frame_number >= static_cast<int>(frame_paths_names_range_second_return.size()))
+		{
+			std::cerr << "[WARN]: Second return range image missing in \"" << dataset_path_ << "\"."
+					<< std::endl;
+			return;
+		}
+
+		depth_clustering_second_return_->processOneRangeFrameForDataset(
+				frame_paths_names_range_second_return[frame_number]);
 	}
 
 	timer.start();
@@ -545,7 +564,7 @@ Visualization::openDataset(const std::string& dataset_path, const std::string& g
 	dataset_path_ = dataset_path;
 	global_config_path_ = global_config_path;
 	play_ = false;
-	viewer_point_cloud_layer_index_ = 4;
+	viewer_point_cloud_layer_index_ = 5;
 	viewer_image_layer_index_top_ = 0;
 	viewer_image_layer_index_middle_ = 1;
 	viewer_image_layer_index_bottom_ = 2;
@@ -565,7 +584,7 @@ Visualization::openDataset(const std::string& dataset_path, const std::string& g
 }
 
 std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
-Visualization::extractGroundPointCloud()
+Visualization::getGroundPointCloudPair()
 {
 	cv::Mat image_range;
 	cv::Mat image_range_no_ground;
@@ -614,11 +633,13 @@ Visualization::updateViewerPointCloud()
 {
 	ui->viewer_point_cloud->Clear();
 
-	if (viewer_point_cloud_layer_index_ == 0)
+	switch (viewer_point_cloud_layer_index_)
 	{
-		const auto cloud_range_separated = extractGroundPointCloud();
-		const auto cloud_range_ground = cloud_range_separated.first;
-		const auto cloud_range_no_ground = cloud_range_separated.second;
+	case 0:
+	{
+		const auto cloud_range_ground_pair = getGroundPointCloudPair();
+		const auto cloud_range_ground = cloud_range_ground_pair.first;
+		const auto cloud_range_no_ground = cloud_range_ground_pair.second;
 
 		if (!cloud_range_ground || !cloud_range_no_ground)
 		{
@@ -642,8 +663,10 @@ Visualization::updateViewerPointCloud()
 			ui->viewer_point_cloud->AddDrawable(
 					DrawableCloud::FromCloudRange(cloud_range_no_ground));
 		}
+
+		break;
 	}
-	else if (viewer_point_cloud_layer_index_ == 1)
+	case 1:
 	{
 		const auto cloud_intensity = depth_clustering_->getCloudIntensity();
 
@@ -667,8 +690,9 @@ Visualization::updateViewerPointCloud()
 			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudIntensity(cloud_intensity));
 		}
 
+		break;
 	}
-	else if (viewer_point_cloud_layer_index_ == 2)
+	case 2:
 	{
 		const auto cloud_elongation = depth_clustering_->getCloudElongation();
 
@@ -692,8 +716,10 @@ Visualization::updateViewerPointCloud()
 			ui->viewer_point_cloud->AddDrawable(
 					DrawableCloud::FromCloudElongation(cloud_elongation));
 		}
+
+		break;
 	}
-	else if (viewer_point_cloud_layer_index_ == 3)
+	case 3:
 	{
 		const auto cloud_confidence = depth_clustering_->getCloudConfidence();
 
@@ -717,8 +743,41 @@ Visualization::updateViewerPointCloud()
 			ui->viewer_point_cloud->AddDrawable(
 					DrawableCloud::FromCloudConfidence(cloud_confidence));
 		}
+
+		break;
 	}
-	else
+	case 4:
+	{
+		if (ui->combo_lidar_return->currentIndex() == 0)
+		{
+			const auto cloud_range = depth_clustering_->getCloudRange();
+
+			if (!cloud_range)
+			{
+				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+			}
+			else
+			{
+				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
+			}
+		}
+
+		const auto cloud_range_second_return = depth_clustering_second_return_->getCloudRange();
+
+		if (!cloud_range_second_return)
+		{
+			std::cerr << "[WARN]: Second return range cloud missing." << std::endl;
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(
+					DrawableCloud::FromCloudRange(cloud_range_second_return,
+							Eigen::Vector3f(0, 1, 0)));
+		}
+
+		break;
+	}
+	default:
 	{
 		const auto cloud_range = depth_clustering_->getCloudRange();
 
@@ -730,6 +789,9 @@ Visualization::updateViewerPointCloud()
 		{
 			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
 		}
+
+		break;
+	}
 	}
 
 	if (show_bounding_box_)
@@ -1120,7 +1182,7 @@ Visualization::initializeUI()
 
 	if (frame_paths_names_range.empty())
 	{
-		std::cerr << "[ERROR]: Range images missing in \"" << dataset_path_ << "\"." << std::endl;
+		std::cerr << "[ERROR]: Range image missing in \"" << dataset_path_ << "\"." << std::endl;
 		return;
 	}
 

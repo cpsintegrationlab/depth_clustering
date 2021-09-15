@@ -109,7 +109,7 @@ private:
 	openDataset(const std::string& dataset_path, const std::string& global_config_path = "");
 
 	std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
-	extractGroundPointCloud();
+	getGroundPointCloudPair();
 
 	void
 	updateViewerPointCloud();

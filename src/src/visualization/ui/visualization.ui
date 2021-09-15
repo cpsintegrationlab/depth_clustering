@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1313</width>
+    <width>1331</width>
     <height>1230</height>
    </rect>
   </property>
@@ -639,11 +639,6 @@
                   <string>Second</string>
                  </property>
                 </item>
-                <item>
-                 <property name="text">
-                  <string>First &amp; Second</string>
-                 </property>
-                </item>
                </widget>
               </item>
              </layout>
@@ -678,6 +673,11 @@
                 <item>
                  <property name="text">
                   <string>Confidence</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Second Return</string>
                  </property>
                 </item>
                 <item>
