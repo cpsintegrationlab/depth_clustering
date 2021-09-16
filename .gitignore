@@ -1,5 +1,6 @@
 build/
 install/
+temp/
 data/moosmann/velodyne_slam/scenario_1/*.json
 data/waymo/**/*.json
 data/waymo/**/*.tfrecord
