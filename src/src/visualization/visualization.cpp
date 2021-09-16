@@ -44,6 +44,7 @@ Visualization::Visualization(QWidget* parent) :
 
 	ui->frame_controls->setFixedHeight(ui->frame_controls->minimumHeight());
 	ui->frame_settings->setFixedHeight(ui->frame_settings->minimumHeight());
+	ui->viewer_camera->setFixedWidth(ui->viewer_camera->height() * 16 / 9);
 	ui->viewer_image_top->setFixedHeight(ui->viewer_image_top->minimumHeight());
 	ui->viewer_image_middle->setFixedHeight(ui->viewer_image_middle->minimumHeight());
 	ui->viewer_image_bottom->setFixedHeight(ui->viewer_image_bottom->minimumHeight());
@@ -167,6 +168,8 @@ Visualization::showEvent(QShowEvent* event)
 {
 	QWidget::showEvent(event);
 
+	resize(minimumWidth(), minimumHeight());
+
 	ui->viewer_point_cloud->update();
 
 	updateViewerImage();
@@ -176,6 +179,8 @@ void
 Visualization::resizeEvent(QResizeEvent* event)
 {
 	QWidget::resizeEvent(event);
+
+	ui->viewer_camera->setFixedWidth(ui->viewer_camera->height() * 16 / 9);
 
 	ui->viewer_point_cloud->update();
 
