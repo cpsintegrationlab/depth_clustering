@@ -1,7 +1,7 @@
 # Find packages
-find_package(OpenGL)
-find_package(QGLViewer)
-find_package(Qt5 COMPONENTS Core Xml OpenGL Gui Widgets)
+find_package(OpenGL QUIET)
+find_package(QGLViewer QUIET)
+find_package(Qt5 QUIET COMPONENTS Core Xml OpenGL Gui Widgets)
 
 if(${OpenGL_FOUND} AND ${QGLViewer_FOUND} AND ${Qt5_FOUND})
 	# Set Qt libraries

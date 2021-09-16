@@ -9,8 +9,8 @@ PROJECT_DIR=$(pwd)/..
 SRC_DIR=$PROJECT_DIR/src
 BUILD_DIR=$PROJECT_DIR/build
 INSTALL_DIR=$PROJECT_DIR/install
-DB_DIR=$BUILD_DIR/$(echo ${DB_TYPE,,})
-RL_DIR=$BUILD_DIR/$(echo ${RL_TYPE,,})
+DB_DIR=$BUILD_DIR/depth_clustering/$(echo ${DB_TYPE,,})
+RL_DIR=$BUILD_DIR/depth_clustering/$(echo ${RL_TYPE,,})
 TEMP_DIR=$PROJECT_DIR/temp
 
 echo "[INFO]: Creating build folders..."

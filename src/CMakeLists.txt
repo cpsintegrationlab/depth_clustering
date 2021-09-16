@@ -15,16 +15,16 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../cmake")
 
 # Set debug installation paths
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/debug/lib)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/debug/lib)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/debug/bin)
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/depth_clustering/debug/lib)
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/depth_clustering/debug/lib)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/depth_clustering/debug/bin)
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 # Set release installation paths
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/release/lib)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/release/lib)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/release/bin)
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/depth_clustering/release/lib)
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/depth_clustering/release/lib)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/depth_clustering/release/bin)
 endif (CMAKE_BUILD_TYPE STREQUAL "Release")
 
 # Find packages
@@ -44,8 +44,8 @@ set(Boost_USE_STATIC_LIBS OFF)
 
 # Set include directories
 include_directories(
-	src
-  	${PROJECT_BINARY_DIR}/src
+	depth_clustering
+	${PROJECT_BINARY_DIR}/depth_clustering
   	SYSTEM ${EIGEN3_INCLUDE_DIR}
   	SYSTEM ${Boost_INCLUDE_DIRS}
 	SYSTEM ${PCL_INCLUDE_DIRS}
@@ -53,4 +53,4 @@ include_directories(
 )
 
 # Add subdirectories
-add_subdirectory(src)
+add_subdirectory(depth_clustering)
