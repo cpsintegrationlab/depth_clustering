@@ -1,10 +1,12 @@
 build/
 install/
+build/
 temp/
+src/eigen/
 data/moosmann/velodyne_slam/scenario_1/*.json
+data/waymo/**/frames_camera/
+data/waymo/**/elongation/
+data/waymo/**/intensity/
+data/waymo/**/second_return/
 data/waymo/**/*.json
 data/waymo/**/*.tfrecord
-data/waymo/**/second_return/
-data/waymo/**/intensity/
-data/waymo/**/elongation/
-data/waymo/**/frames_camera/

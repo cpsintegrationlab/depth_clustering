@@ -23,6 +23,15 @@ BOOST_URL="https://sourceforge.net/projects/boost/files/boost/$BOOST_VER_MAJ.$BO
 BOOST_CFLAGS="-Wno-maybe-uninitialized -Wno-unused-function -Wno-unused-variable -Wno-aligned-new -Wno-parentheses -Wno-deprecated-declarations -fPIC"
 BOOST_BOOTSTRAP_FLAGS="--with-libraries=system,filesystem,regex,program_options"
 
+# Declare Eigen variables
+EIGEN_DIR_SRC=$SRC_DIR/eigen
+EIGEN_DIR_BUILD=$BUILD_DIR/eigen
+EIGEN_DIR_INSTALL=$INSTALL_DIR/eigen
+EIGEN_VER_MAJ=3
+EIGEN_VER_MIN=3
+EIGEN_VER_PAT=4
+EIGEN_URL="https://gitlab.com/libeigen/eigen/-/archive/$EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT/eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
+
 # Declare Depth Clustering variables
 DC_DIR_BUILD_DB=$BUILD_DIR/depth_clustering/$(echo ${DB_TYPE,,})
 DC_DIR_BUILD_RL=$BUILD_DIR/depth_clustering/$(echo ${RL_TYPE,,})
@@ -55,30 +64,12 @@ else
     exit
 fi
 
-# Create build folders
-echo "[INFO]: Creating build folders..."
-if [ -d "$DC_DIR_BUILD_DB" ]; then
-    echo "[INFO]: Removing existing Depth Clustering debug build folder..."
-    rm -rf "$DC_DIR_BUILD_DB"
-fi
-if [ -d "$DC_DIR_BUILD_RL" ]; then
-    echo "[INFO]: Removing existing Depth Clustering release build folder..."
-    rm -rf "$DC_DIR_BUILD_RL"
-fi
-mkdir -p "$DC_DIR_BUILD_DB"
-mkdir -p "$DC_DIR_BUILD_RL"
-RETURN=$?
-if [ $RETURN -ne 0 ]; then
-    echo "[ERROR]: Setup failed. Quit."
-    exit $RETURN
-fi
-
 # Create temporary folder
-echo "[INFO]: Creating temporary folder..."
 if [ -d "$TEMP_DIR" ]; then
 	echo "[INFO]: Removing existing temporary folders..."
 	rm -rf "$TEMP_DIR"
 fi
+echo "[INFO]: Creating temporary folder..."
 mkdir -p "$TEMP_DIR"
 RETURN=$?
 if [ $RETURN -ne 0 ]; then
@@ -89,15 +80,17 @@ fi
 # Install Boost
 echo "[INFO]: Installing Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
 if [ ! -d "$BOOST_DIR_BUILD" ]; then
-	cd "$TEMP_DIR"
-
 	echo "[INFO]: Downloading Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
+	cd "$TEMP_DIR"
 	wget -q --show-progress "$BOOST_URL" -O "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz"
 
 	echo "[INFO]: Extracting Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
 	tar -xzf "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz"
-	mv -v "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}" "$BOOST_DIR_BUILD"
-
+	mv "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}" "$BOOST_DIR_BUILD"
+else
+	echo "[INFO]: Boost build folder exists. Skip."
+fi
+if [ ! -d "$BOOST_DIR_INSTALL" ]; then
 	echo "[INFO]: Building Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
 	cd "$BOOST_DIR_BUILD"
 	./bootstrap.sh "$BOOST_BOOTSTRAP_FLAGS" --prefix="$(printf "%q" "$BOOST_DIR_INSTALL")"
@@ -108,7 +101,41 @@ if [ ! -d "$BOOST_DIR_BUILD" ]; then
 		exit $RETURN
 	fi
 else
-	echo "[INFO]: Boost installation exists. Skip."
+	echo "[INFO]: Boost install folder exists. Skip."
+fi
+
+# Install Eigen
+echo "[INFO]: Installing Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+if [ ! -d "$EIGEN_DIR_SRC" ]; then
+	echo "[INFO]: Downloading Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+	cd "$TEMP_DIR"
+	wget -q --show-progress "$EIGEN_URL"
+
+	echo "[INFO]: Extracting Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+	tar -xzf "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
+	mv "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}" "$EIGEN_DIR_SRC"
+else
+	echo "[INFO]: Eigen source folder exists. Skip."
+fi
+if [ ! -d "$EIGEN_DIR_BUILD" ]; then
+	echo "[INFO]: Setting up Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+	mkdir -p "$EIGEN_DIR_BUILD"
+	cd "$EIGEN_DIR_BUILD"
+	cmake -DCMAKE_INSTALL_PREFIX="$EIGEN_DIR_INSTALL" "$EIGEN_DIR_SRC"
+else
+	echo "[INFO]: Eigen build folder exists. Skip."
+fi
+if [ ! -d "$EIGEN_DIR_INSTALL" ]; then
+	echo "[INFO]: Building Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+	cd "$EIGEN_DIR_BUILD"
+	make -j$CORES install
+	RETURN=$?
+	if [ $RETURN -ne 0 ]; then
+		echo "[ERROR]: Setup failed. Quit."
+		exit $RETURN
+	fi
+else
+	echo "[INFO]: Eigen install folder exists. Skip."
 fi
 
 # Remove temporary folder
@@ -117,24 +144,34 @@ if [ -d "$TEMP_DIR" ]; then
 	rm -rf "$TEMP_DIR"
 fi
 
-# Create Depth Clustering debug project files
-echo "[INFO]: Creating Depth Clustering debug project files..."
-cd "$DC_DIR_BUILD_DB"
-cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
-RETURN=$?
-if [ $RETURN -ne 0 ]; then
-    echo "[ERROR]: Setup failed. Quit."
-    exit $RETURN
+# Create Depth Clustering debug project
+if [ ! -d "$DC_DIR_BUILD_DB" ]; then
+	echo "[INFO]: Creating Depth Clustering debug project..."
+	mkdir -p "$DC_DIR_BUILD_DB"
+	cd "$DC_DIR_BUILD_DB"
+	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
+	RETURN=$?
+	if [ $RETURN -ne 0 ]; then
+		echo "[ERROR]: Setup failed. Quit."
+		exit $RETURN
+	fi
+else
+	echo "[INFO]: Depth Clustering debug project exists. Skip."
 fi
 
-# Create Depth Clustering release project file
-echo "[INFO]: Creating Depth Clustering release project files..."
-cd "$DC_DIR_BUILD_RL"
-cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
-RETURN=$?
-if [ $RETURN -ne 0 ]; then
-    echo "[ERROR]: Setup failed. Quit."
-    exit $RETURN
+# Create Depth Clustering release project
+if [ ! -d "$DC_DIR_BUILD_RL" ]; then
+    echo "[INFO]: Creating Depth Clustering release project..."
+	mkdir -p "$DC_DIR_BUILD_RL"
+	cd "$DC_DIR_BUILD_RL"
+	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
+	RETURN=$?
+	if [ $RETURN -ne 0 ]; then
+		echo "[ERROR]: Setup failed. Quit."
+		exit $RETURN
+	fi
+else
+	echo "[INFO]: Depth Clustering release project exists. Skip."
 fi
 
 echo "[INFO]: Setup completed."
