@@ -3,6 +3,7 @@ install/
 build/
 temp/
 src/eigen/
+src/opencv/
 data/moosmann/velodyne_slam/scenario_1/*.json
 data/waymo/**/frames_camera/
 data/waymo/**/elongation/

@@ -32,37 +32,18 @@ EIGEN_VER_MIN=3
 EIGEN_VER_PAT=4
 EIGEN_URL="https://gitlab.com/libeigen/eigen/-/archive/$EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT/eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
 
+# Declare OpenCV variables
+OPENCV_DIR_SRC=$SRC_DIR/opencv
+OPENCV_DIR_BUILD=$BUILD_DIR/opencv
+OPENCV_DIR_INSTALL=$INSTALL_DIR/opencv
+OPENCV_VER_MAJ=3
+OPENCV_VER_MIN=2
+OPENCV_VER_PAT=0
+OPENCV_URL="https://github.com/opencv/opencv/archive/${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
+
 # Declare Depth Clustering variables
 DC_DIR_BUILD_DB=$BUILD_DIR/depth_clustering/$(echo ${DB_TYPE,,})
 DC_DIR_BUILD_RL=$BUILD_DIR/depth_clustering/$(echo ${RL_TYPE,,})
-
-# Install required packages
-echo "[INFO]: Installing required packages..."
-if [ `cat /proc/version | grep -c "Ubuntu"` -gt 0 ] || [ `cat /proc/version | grep -c "Microsoft"` -gt 0 ]; then
-    sudo apt-get --assume-yes install cmake
-	RETURN=$?
-	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup failed. Quit."
-		exit $RETURN
-	fi
-elif [ `cat /proc/version | grep -c "ARCH"` -gt 0 ]; then
-    sudo pacman -S --noconfirm --needed cmake
-	RETURN=$?
-	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup failed. Quit."
-		exit $RETURN
-	fi
-elif [ `cat /proc/version | grep -c "Red Hat"` -gt 0 ]; then
-	sudo yum --assumeyes install cmake
-	RETURN=$?
-	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup failed. Quit."
-		exit $RETURN
-	fi
-else
-    echo "[ERROR]: Unsupported Operating System. Quit."
-    exit
-fi
 
 # Create temporary folder
 if [ -d "$TEMP_DIR" ]; then
@@ -136,6 +117,40 @@ if [ ! -d "$EIGEN_DIR_INSTALL" ]; then
 	fi
 else
 	echo "[INFO]: Eigen install folder exists. Skip."
+fi
+
+# Install OpenCV
+echo "[INFO]: Installing OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+if [ ! -d "$OPENCV_DIR_SRC" ]; then
+	echo "[INFO]: Downloading OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+	cd "$TEMP_DIR"
+	wget -q --show-progress "$OPENCV_URL"
+
+	echo "[INFO]: Extracting OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+	tar -xzf "${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
+	mv "opencv-${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}" "$OPENCV_DIR_SRC"
+else
+	echo "[INFO]: OpenCV source folder exists. Skip."
+fi
+if [ ! -d "$OPENCV_DIR_BUILD" ]; then
+	echo "[INFO]: Setting up OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+	mkdir -p "$OPENCV_DIR_BUILD"
+	cd "$OPENCV_DIR_BUILD"
+	cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+else
+	echo "[INFO]: OpenCV build folder exists. Skip."
+fi
+if [ ! -d "$OPENCV_DIR_INSTALL" ]; then
+	echo "[INFO]: Building OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+	cd "$OPENCV_DIR_BUILD"
+	make -j$CORES install
+	RETURN=$?
+	if [ $RETURN -ne 0 ]; then
+		echo "[ERROR]: Setup failed. Quit."
+		exit $RETURN
+	fi
+else
+	echo "[INFO]: OpenCV install folder exists. Skip."
 fi
 
 # Remove temporary folder
