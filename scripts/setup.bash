@@ -4,8 +4,8 @@
 ARCH=amd64
 CORES=$(grep -c ^processor /proc/cpuinfo)
 ECLIPSE=4.20.0
-DB_TYPE=debug
-RL_TYPE=release
+DB_TYPE=Debug
+RL_TYPE=Release
 
 # Parse arguments
 if [ "$#" -gt 0 ]; then
@@ -62,8 +62,8 @@ OPENCV_URL="https://github.com/opencv/opencv/archive/${OPENCV_VER_MAJ}.${OPENCV_
 OPENCV_CFLAGS="-fPIC"
 
 # Declare Depth Clustering variables
-DC_DIR_BUILD_DB=$BUILD_DIR/depth_clustering/$DB_TYPE
-DC_DIR_BUILD_RL=$BUILD_DIR/depth_clustering/$RL_TYPE
+DC_DIR_BUILD_DB=$BUILD_DIR/depth_clustering/$(echo ${DB_TYPE,,})
+DC_DIR_BUILD_RL=$BUILD_DIR/depth_clustering/$(echo ${RL_TYPE,,})
 
 # Create build and temporary folders
 if [ -d "$TEMP_DIR" ]; then
@@ -96,6 +96,11 @@ if [ ! -d "$BOOST_DIR_INSTALL" ]; then
 	echo "[INFO]: Building Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
 	cd "$BOOST_DIR_BUILD"
 	./bootstrap.sh "$BOOST_BOOTSTRAP_FLAGS" --prefix="$(printf "%q" "$BOOST_DIR_INSTALL")"
+
+	if [ "$ARCH" = "arm64" ]; then
+		sed -i "/using gcc ;/c\using gcc : arm : aarch64-linux-gnu-g++ ;" project-config.jam
+	fi
+
 	./b2 cxxflags="$BOOST_CFLAGS" cflags="$BOOST_CFLAGS" -j$CORES install
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
@@ -157,7 +162,12 @@ if [ ! -d "$OPENCV_DIR_BUILD" ]; then
 	echo "[INFO]: Setting up OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
 	mkdir -p "$OPENCV_DIR_BUILD"
 	cd "$OPENCV_DIR_BUILD"
-	cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+
+	if [ "$ARCH" = "amd64" ]; then
+		cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+	elif [ "$ARCH" = "arm64" ]; then
+		cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DCMAKE_TOOLCHAIN_FILE="$OPENCV_DIR_SRC/platforms/linux/aarch64-gnu.toolchain.cmake" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+	fi
 else
 	echo "[INFO]: OpenCV build folder exists. Skip."
 fi
@@ -186,7 +196,7 @@ if [ ! -d "$DC_DIR_BUILD_DB" ]; then
 	echo "[INFO]: Creating Depth Clustering debug project..."
 	mkdir -p "$DC_DIR_BUILD_DB"
 	cd "$DC_DIR_BUILD_DB"
-	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$SRC_DIR"
+	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$SRC_DIR"
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
 		echo "[ERROR]: Setup failed. Quit."
@@ -199,7 +209,7 @@ if [ ! -d "$DC_DIR_BUILD_RL" ]; then
     echo "[INFO]: Creating Depth Clustering release project..."
 	mkdir -p "$DC_DIR_BUILD_RL"
 	cd "$DC_DIR_BUILD_RL"
-	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$SRC_DIR"
+	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$SRC_DIR"
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
 		echo "[ERROR]: Setup failed. Quit."
@@ -209,4 +219,4 @@ else
 	echo "[INFO]: Depth Clustering release project exists. Skip."
 fi
 
-echo "[INFO]: Setup completed."
+echo "[INFO]: Setup completed for $ARCH architecture."
