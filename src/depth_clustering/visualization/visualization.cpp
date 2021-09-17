@@ -442,10 +442,13 @@ Visualization::onParameterUpdated()
 	}
 	}
 
-	depth_clustering_->setParameter(parameter);
+	depth_clustering_first_return_->setParameter(parameter);
+	depth_clustering_first_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_first_return_->getClusterer()->SetLabelImageClient(this);
 
-	depth_clustering_->getDepthGroundRemover()->AddClient(this);
-	depth_clustering_->getClusterer()->SetLabelImageClient(this);
+	depth_clustering_second_return_->setParameter(parameter);
+	depth_clustering_second_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
 
 	resetViewer();
 	onSliderMovedTo(ui->slider_frame->value());
@@ -753,6 +756,19 @@ Visualization::updateViewerPointCloud()
 	}
 	case 4:
 	{
+		const auto cloud_range_second_return = depth_clustering_second_return_->getCloudRange();
+
+		if (!cloud_range_second_return)
+		{
+			std::cerr << "[WARN]: Second return range cloud missing." << std::endl;
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(
+					DrawableCloud::FromCloudRange(cloud_range_second_return,
+							Eigen::Vector3f(0, 1, 0)));
+		}
+
 		if (ui->combo_lidar_return->currentIndex() == 0)
 		{
 			const auto cloud_range = depth_clustering_->getCloudRange();
@@ -765,19 +781,6 @@ Visualization::updateViewerPointCloud()
 			{
 				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
 			}
-		}
-
-		const auto cloud_range_second_return = depth_clustering_second_return_->getCloudRange();
-
-		if (!cloud_range_second_return)
-		{
-			std::cerr << "[WARN]: Second return range cloud missing." << std::endl;
-		}
-		else
-		{
-			ui->viewer_point_cloud->AddDrawable(
-					DrawableCloud::FromCloudRange(cloud_range_second_return,
-							Eigen::Vector3f(0, 1, 0)));
 		}
 
 		break;
