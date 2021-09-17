@@ -163,10 +163,10 @@ if [ ! -d "$OPENCV_DIR_BUILD" ]; then
 	mkdir -p "$OPENCV_DIR_BUILD"
 	cd "$OPENCV_DIR_BUILD"
 
-	if [ "$ARCH" = "amd64" ]; then
-		cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
-	elif [ "$ARCH" = "arm64" ]; then
+    if [ "$ARCH" = "arm64" ]; then
 		cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DCMAKE_TOOLCHAIN_FILE="$OPENCV_DIR_SRC/platforms/linux/aarch64-gnu.toolchain.cmake" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+	else
+		cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
 	fi
 else
 	echo "[INFO]: OpenCV build folder exists. Skip."
@@ -196,7 +196,13 @@ if [ ! -d "$DC_DIR_BUILD_DB" ]; then
 	echo "[INFO]: Creating Depth Clustering debug project..."
 	mkdir -p "$DC_DIR_BUILD_DB"
 	cd "$DC_DIR_BUILD_DB"
-	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$SRC_DIR"
+
+	if [ "$ARCH" = "arm64" ]; then
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$SRC_DIR"
+	else
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$SRC_DIR"
+	fi
+
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
 		echo "[ERROR]: Setup failed. Quit."
@@ -209,7 +215,13 @@ if [ ! -d "$DC_DIR_BUILD_RL" ]; then
     echo "[INFO]: Creating Depth Clustering release project..."
 	mkdir -p "$DC_DIR_BUILD_RL"
 	cd "$DC_DIR_BUILD_RL"
-	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$SRC_DIR"
+
+	if [ "$ARCH" = "arm64" ]; then
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$SRC_DIR"
+	else
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$SRC_DIR"
+	fi
+
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
 		echo "[ERROR]: Setup failed. Quit."

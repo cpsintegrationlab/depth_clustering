@@ -9,7 +9,7 @@ target_link_libraries(camera_visualizer api)
 target_link_libraries(ground_truth_projection api)
 
 # amd64-only targets
-if (ARCH STREQUAL "amd64")
+if(ARCH STREQUAL "amd64")
   add_executable(lidar_visualizer EXCLUDE_FROM_ALL lidar_visualizer.cpp)
   target_link_libraries(lidar_visualizer visualization)
 endif()
