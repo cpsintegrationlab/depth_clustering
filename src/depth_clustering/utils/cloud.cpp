@@ -195,41 +195,4 @@ Cloud::FromImageConfidence(const cv::Mat& image, const cv::Mat& image_intensity,
 	// we cannot share ownership of this cloud with others, so create a new one
 	return boost::make_shared<Cloud>(cloud);
 }
-
-// this code will be only there if we use pcl
-#ifdef PCL_FOUND
-
-typename pcl::PointCloud<pcl::PointXYZL>::Ptr
-Cloud::ToPcl() const
-{
-	using pcl::PointXYZL;
-	using PclCloud = pcl::PointCloud<PointXYZL>;
-	PclCloud pcl_cloud;
-	for (const auto &point : _points)
-	{
-		PointXYZL pcl_point;
-		pcl_point.x = point.x();
-		pcl_point.y = point.y();
-		pcl_point.z = point.z();
-		pcl_point.label = point.ring();
-		pcl_cloud.push_back(pcl_point);
-	}
-	return make_shared<PclCloud>(pcl_cloud);
-}
-
-template<>
-Cloud::Ptr
-Cloud::FromPcl(const pcl::PointCloud<pcl::PointXYZL>& pcl_cloud)
-{
-	Cloud cloud;
-	for (const auto &pcl_point : pcl_cloud)
-	{
-		RichPoint point(pcl_point.x, pcl_point.y, pcl_point.z);
-		point.ring() = pcl_point.label;
-		cloud.push_back(point);
-	}
-	return make_shared<Cloud>(cloud);
-}
-
-#endif  // PCL_FOUND
 }  // namespace depth_clustering

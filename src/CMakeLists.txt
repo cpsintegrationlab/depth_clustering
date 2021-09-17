@@ -6,7 +6,7 @@ project(depth_clustering)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -fPIC -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-int-in-bool-context -Wno-alloc-size-larger-than=9223372036854775807 -static-libstdc++ -fPIC")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
@@ -27,29 +27,24 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/depth_clustering/release/bin)
 endif (CMAKE_BUILD_TYPE STREQUAL "Release")
 
+# Set package parameters
+set(Boost_NO_SYSTEM_PATHS TRUE)
+set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/../install/boost)
+set(EIGEN3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../install/eigen/include/eigen3)
+
 # Find packages
-find_package(Threads REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
-find_package(PCL QUIET COMPONENTS common io)
-
-# If PCL found
-if(${PCL_FOUND})
-    add_definitions(-DPCL_FOUND)
-endif()
-
-# Set Boost parameters
-set(Boost_USE_STATIC_LIBS OFF)
+find_package(Eigen3 REQUIRED)
+find_package(OpenCV REQUIRED PATHS ${PROJECT_SOURCE_DIR}/../install/opencv NO_DEFAULT_PATH)
+find_package(Threads REQUIRED)
 
 # Set include directories
 include_directories(
 	depth_clustering
 	${PROJECT_BINARY_DIR}/depth_clustering
-  	SYSTEM ${EIGEN3_INCLUDE_DIR}
-  	SYSTEM ${Boost_INCLUDE_DIRS}
-	SYSTEM ${PCL_INCLUDE_DIRS}
-  	SYSTEM ${OpenCV_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
+	${EIGEN3_INCLUDE_DIR}
+	${OpenCV_INCLUDE_DIRS}
 )
 
 # Add subdirectories

@@ -7,11 +7,6 @@
 #include "utils/velodyne_utils.h"
 #include "visualization/utils/utils.h"
 
-#if PCL_FOUND
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_cloud.h>
-#endif  // PCL_FOUND
-
 using depth_clustering::Cloud;
 using depth_clustering::MatFromPNGRange;
 using depth_clustering::MatFromTIFFRange;
@@ -92,22 +87,13 @@ CloudFromFile(const std::string& file_name, const ProjectionParams& proj_params)
 	QFileInfo fi(QString::fromStdString(file_name));
 	QString name = fi.fileName();
 	Cloud::Ptr cloud = nullptr;
-	if (name.endsWith(".pcd"))
+	if (name.endsWith(".tiff"))
 	{
-#if PCL_FOUND
-		pcl::PointCloud<pcl::PointXYZL> pcl_cloud;
-		pcl::io::loadPCDFile(file_name, pcl_cloud);
-		cloud = Cloud::FromPcl<pcl::PointXYZL>(pcl_cloud);
-		cloud->InitProjection(proj_params);
-#endif  // PCL_FOUND
+		cloud = Cloud::FromImage(MatFromTIFFRange(file_name), proj_params);
 	}
 	else if (name.endsWith(".png") || name.endsWith(".exr"))
 	{
 		cloud = Cloud::FromImage(MatFromPNGRange(file_name), proj_params);
-	}
-	else if (name.endsWith(".tiff"))
-	{
-		cloud = Cloud::FromImage(MatFromTIFFRange(file_name), proj_params);
 	}
 	else if (name.endsWith(".txt"))
 	{
@@ -119,9 +105,5 @@ CloudFromFile(const std::string& file_name, const ProjectionParams& proj_params)
 		cloud = ReadKittiCloud(file_name);
 		cloud->InitProjection(proj_params);
 	}
-	// if (cloud) {
-	//   // if the cloud was actually set, then set the name in the gui
-	//   ui->lbl_cloud_name->setText(name);
-	// }
 	return cloud;
 }

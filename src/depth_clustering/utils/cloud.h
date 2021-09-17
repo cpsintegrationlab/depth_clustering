@@ -23,11 +23,6 @@
 #include <memory>
 #include <vector>
 
-#if PCL_FOUND
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#endif  // PCL_FOUND
-
 #include "projections/cloud_projection.h"
 #include "projections/ring_projection.h"
 #include "projections/spherical_projection.h"
@@ -202,27 +197,6 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	static Cloud::Ptr
 	FromImageConfidence(const cv::Mat& image, const cv::Mat& image_intensity,
 			const cv::Mat& image_elongation, const ProjectionParams& params);
-
-// PCL specific part
-#if PCL_FOUND
-
-	typename pcl::PointCloud<pcl::PointXYZL>::Ptr
-	ToPcl() const;
-
-	template<class PointT>
-	static Cloud::Ptr
-	FromPcl(const pcl::PointCloud<PointT>& pcl_cloud)
-	{
-		Cloud cloud;
-		for (const auto &pcl_point : pcl_cloud)
-		{
-			RichPoint point(pcl_point.x, pcl_point.y, pcl_point.z);
-			cloud.push_back(point);
-		}
-		return make_shared<Cloud>(cloud);
-	}
-
-#endif  // PCL_FOUND
 
 protected:
 

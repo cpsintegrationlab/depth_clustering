@@ -17,8 +17,8 @@ TEMP_DIR=$PROJECT_DIR/temp
 BOOST_DIR_BUILD=$BUILD_DIR/boost
 BOOST_DIR_INSTALL=$INSTALL_DIR/boost
 BOOST_VER_MAJ=1
-BOOST_VER_MIN=64
-BOOST_VER_PAT=0
+BOOST_VER_MIN=65
+BOOST_VER_PAT=1
 BOOST_URL="https://sourceforge.net/projects/boost/files/boost/$BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT/boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz/download"
 BOOST_CFLAGS="-Wno-maybe-uninitialized -Wno-unused-function -Wno-unused-variable -Wno-aligned-new -Wno-parentheses -Wno-deprecated-declarations -fPIC"
 BOOST_BOOTSTRAP_FLAGS="--with-libraries=system,filesystem,regex,program_options"
@@ -40,6 +40,7 @@ OPENCV_VER_MAJ=3
 OPENCV_VER_MIN=2
 OPENCV_VER_PAT=0
 OPENCV_URL="https://github.com/opencv/opencv/archive/${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
+OPENCV_CFLAGS="-fPIC"
 
 # Declare Depth Clustering variables
 DC_DIR_BUILD_DB=$BUILD_DIR/depth_clustering/$(echo ${DB_TYPE,,})
@@ -136,7 +137,7 @@ if [ ! -d "$OPENCV_DIR_BUILD" ]; then
 	echo "[INFO]: Setting up OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
 	mkdir -p "$OPENCV_DIR_BUILD"
 	cd "$OPENCV_DIR_BUILD"
-	cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+	cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
 else
 	echo "[INFO]: OpenCV build folder exists. Skip."
 fi
@@ -159,7 +160,8 @@ if [ -d "$TEMP_DIR" ]; then
 	rm -rf "$TEMP_DIR"
 fi
 
-# Create Depth Clustering debug project
+# Create Depth Clustering project
+echo "[INFO]: Creating Depth Clustering project..."
 if [ ! -d "$DC_DIR_BUILD_DB" ]; then
 	echo "[INFO]: Creating Depth Clustering debug project..."
 	mkdir -p "$DC_DIR_BUILD_DB"
@@ -173,8 +175,6 @@ if [ ! -d "$DC_DIR_BUILD_DB" ]; then
 else
 	echo "[INFO]: Depth Clustering debug project exists. Skip."
 fi
-
-# Create Depth Clustering release project
 if [ ! -d "$DC_DIR_BUILD_RL" ]; then
     echo "[INFO]: Creating Depth Clustering release project..."
 	mkdir -p "$DC_DIR_BUILD_RL"
