@@ -7,4 +7,8 @@ add_subdirectory(image_labelers)
 add_subdirectory(post_processing)
 add_subdirectory(projections)
 add_subdirectory(utils)
-add_subdirectory(visualization)
+
+# amd64-only targets
+if (ARCH STREQUAL "amd64")
+  add_subdirectory(visualization)
+endif()
