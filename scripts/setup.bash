@@ -1,16 +1,35 @@
 #!/bin/bash
 
 # Declare global variables
+ARCH=amd64
 CORES=$(grep -c ^processor /proc/cpuinfo)
 ECLIPSE=4.20.0
-DB_TYPE=Debug
-RL_TYPE=Release
+DB_TYPE=debug
+RL_TYPE=release
+
+# Parse arguments
+if [ "$#" -gt 0 ]; then
+	if [ "$1" = "--arch=amd64" ]; then
+		ARCH=amd64
+	elif [ "$1" = "--arch=arm64" ]; then
+		ARCH=arm64
+	else
+		echo ""
+		printf "Usage:\t$0\n"
+		printf "\t$0 --arch=[amd64, arm64]\n"
+		echo ""
+
+		exit
+	fi
+fi
+
+echo "[INFO]: Setting up for $ARCH architecture..."
 
 # Declare directory variables
 PROJECT_DIR=$(pwd)/..
 SRC_DIR=$PROJECT_DIR/src
-BUILD_DIR=$PROJECT_DIR/build
-INSTALL_DIR=$PROJECT_DIR/install
+BUILD_DIR=$PROJECT_DIR/build/$ARCH
+INSTALL_DIR=$PROJECT_DIR/install/$ARCH
 TEMP_DIR=$PROJECT_DIR/temp
 
 # Declare Boost variables
@@ -43,15 +62,16 @@ OPENCV_URL="https://github.com/opencv/opencv/archive/${OPENCV_VER_MAJ}.${OPENCV_
 OPENCV_CFLAGS="-fPIC"
 
 # Declare Depth Clustering variables
-DC_DIR_BUILD_DB=$BUILD_DIR/depth_clustering/$(echo ${DB_TYPE,,})
-DC_DIR_BUILD_RL=$BUILD_DIR/depth_clustering/$(echo ${RL_TYPE,,})
+DC_DIR_BUILD_DB=$BUILD_DIR/depth_clustering/$DB_TYPE
+DC_DIR_BUILD_RL=$BUILD_DIR/depth_clustering/$RL_TYPE
 
-# Create temporary folder
+# Create build and temporary folders
 if [ -d "$TEMP_DIR" ]; then
 	echo "[INFO]: Removing existing temporary folders..."
 	rm -rf "$TEMP_DIR"
 fi
-echo "[INFO]: Creating temporary folder..."
+echo "[INFO]: Creating build and temporary folders..."
+mkdir -p "$BUILD_DIR"
 mkdir -p "$TEMP_DIR"
 RETURN=$?
 if [ $RETURN -ne 0 ]; then
@@ -166,7 +186,7 @@ if [ ! -d "$DC_DIR_BUILD_DB" ]; then
 	echo "[INFO]: Creating Depth Clustering debug project..."
 	mkdir -p "$DC_DIR_BUILD_DB"
 	cd "$DC_DIR_BUILD_DB"
-	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
+	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$SRC_DIR"
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
 		echo "[ERROR]: Setup failed. Quit."
@@ -179,7 +199,7 @@ if [ ! -d "$DC_DIR_BUILD_RL" ]; then
     echo "[INFO]: Creating Depth Clustering release project..."
 	mkdir -p "$DC_DIR_BUILD_RL"
 	cd "$DC_DIR_BUILD_RL"
-	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE "$SRC_DIR"
+	cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$SRC_DIR"
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
 		echo "[ERROR]: Setup failed. Quit."
