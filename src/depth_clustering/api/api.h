@@ -9,7 +9,6 @@
 #define SRC_API_DEPTH_CLUSTERING_H_
 
 #include <memory>
-#include <thread>
 #include <string>
 
 #include "api/parameter.h"

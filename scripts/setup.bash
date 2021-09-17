@@ -99,9 +99,11 @@ if [ ! -d "$BOOST_DIR_INSTALL" ]; then
 
 	if [ "$ARCH" = "arm64" ]; then
 		sed -i "/using gcc ;/c\using gcc : arm : aarch64-linux-gnu-g++ ;" project-config.jam
+		./b2 cxxflags="$BOOST_CFLAGS" cflags="$BOOST_CFLAGS" link=static -j$CORES install
+	else
+		./b2 cxxflags="$BOOST_CFLAGS" cflags="$BOOST_CFLAGS" -j$CORES install
 	fi
 
-	./b2 cxxflags="$BOOST_CFLAGS" cflags="$BOOST_CFLAGS" -j$CORES install
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
 		echo "[ERROR]: Setup failed. Quit."
@@ -165,9 +167,9 @@ if [ ! -d "$OPENCV_DIR_BUILD" ]; then
 	cd "$OPENCV_DIR_BUILD"
 
     if [ "$ARCH" = "arm64" ]; then
-		cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DCMAKE_TOOLCHAIN_FILE="$OPENCV_DIR_SRC/platforms/linux/aarch64-gnu.toolchain.cmake" -DWITH_CUDA="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+		cmake -DBUILD_SHARED_LIBS="OFF" -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DCMAKE_TOOLCHAIN_FILE="$OPENCV_DIR_SRC/platforms/linux/aarch64-gnu.toolchain.cmake" -DWITH_CUDA="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
 	else
-		cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DWITH_CUDA="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+		cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
 	fi
 else
 	echo "[INFO]: OpenCV build folder exists. Skip."

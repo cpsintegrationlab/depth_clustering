@@ -8,7 +8,7 @@ add_subdirectory(post_processing)
 add_subdirectory(projections)
 add_subdirectory(utils)
 
-# amd64-only targets
+# amd64-only configurations
 if(ARCH STREQUAL "amd64")
   add_subdirectory(visualization)
 endif()

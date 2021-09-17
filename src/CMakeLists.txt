@@ -4,7 +4,7 @@ project(depth_clustering)
 
 # Set compiler parameters
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_C_FLAGS "-Wall -Wextra -fPIC")
+set(CMAKE_C_FLAGS "-Wall -Wextra -static-libc -fPIC")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-int-in-bool-context -Wno-alloc-size-larger-than=9223372036854775807 -static-libstdc++ -fPIC")
@@ -13,6 +13,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# arm64-only configurations
+if(ARCH STREQUAL "arm64")
+	set(CMAKE_EXE_LINKER_FLAGS "-Wl,--whole-archive")
+endif()
 
 # Set CMake module path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../cmake")
@@ -32,7 +37,6 @@ set(EIGEN3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../install/${ARCH}/eigen/include/ei
 find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED PATHS ${PROJECT_SOURCE_DIR}/../install/${ARCH}/opencv NO_DEFAULT_PATH)
-find_package(Threads REQUIRED)
 
 # Set include directories
 include_directories(
