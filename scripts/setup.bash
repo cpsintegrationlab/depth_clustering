@@ -155,6 +155,7 @@ if [ ! -d "$OPENCV_DIR_SRC" ]; then
 	echo "[INFO]: Extracting OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
 	tar -xzf "${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
 	mv "opencv-${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}" "$OPENCV_DIR_SRC"
+	sed -i "46 i find_program(CMAKE_MAKE_PROGRAM NAMES make)" "$OPENCV_DIR_SRC/platforms/linux/arm.toolchain.cmake"
 else
 	echo "[INFO]: OpenCV source folder exists. Skip."
 fi
