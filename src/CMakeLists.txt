@@ -31,7 +31,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../install/${ARCH}/dept
 # Set package parameters
 set(Boost_NO_SYSTEM_PATHS TRUE)
 set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/../install/${ARCH}/boost)
-set(EIGEN3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../install/${ARCH}/eigen/include/eigen3)
+set(EIGEN_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/../install/${ARCH}/eigen/include/eigen3)
 
 # Find packages
 find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
@@ -43,7 +43,7 @@ include_directories(
 	depth_clustering
 	${PROJECT_BINARY_DIR}/depth_clustering
 	${Boost_INCLUDE_DIRS}
-	${EIGEN3_INCLUDE_DIR}
+	${EIGEN_INCLUDE_DIRS}
 	${OpenCV_INCLUDE_DIRS}
 )
 
