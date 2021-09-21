@@ -481,6 +481,27 @@ Visualization::onLoadGlobalConfiguration()
 }
 
 void
+Visualization::onSplitterViewerMoved()
+{
+	static bool viewer_image_camera_was_collapsed;
+
+	if (ui->splitter_viewer->sizes().at(1) != 0)
+	{
+		if (viewer_image_camera_was_collapsed
+				&& !ui->viewer_image_camera->visibleRegion().isEmpty())
+		{
+			onSliderMovedTo(ui->slider_frame->value());
+		}
+
+		viewer_image_camera_was_collapsed = false;
+	}
+	else
+	{
+		viewer_image_camera_was_collapsed = true;
+	}
+}
+
+void
 Visualization::onLayerPointCloudUpdated()
 {
 	viewer_point_cloud_layer_index_ = ui->combo_layer_point_cloud->currentIndex();
@@ -1202,6 +1223,8 @@ Visualization::resetUI()
 	disconnect(ui->combo_lidar_return, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	disconnect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this,
 			SLOT(onParameterUpdated()));
+	disconnect(ui->splitter_viewer, SIGNAL(splitterMoved(int, int)), this,
+			SLOT(onSplitterViewerMoved()));
 }
 
 void
@@ -1306,6 +1329,8 @@ Visualization::initializeUI()
 			SLOT(onLayerImageUpdated()));
 	connect(ui->combo_lidar_return, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->splitter_viewer, SIGNAL(splitterMoved(int, int)), this,
+			SLOT(onSplitterViewerMoved()));
 
 	ui->button_play->setEnabled(true);
 	ui->button_pause->setEnabled(false);

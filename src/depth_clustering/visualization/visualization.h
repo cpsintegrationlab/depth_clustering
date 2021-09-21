@@ -89,6 +89,9 @@ private slots:
 	onLoadGlobalConfiguration();
 
 	void
+	onSplitterViewerMoved();
+
+	void
 	onLayerPointCloudUpdated();
 
 	void
@@ -145,6 +148,7 @@ private:
 	std::string global_config_path_;
 	volatile bool play_;
 	bool shown_;
+	bool viewer_image_camera_visible_;
 	bool show_bounding_box_;
 	int viewer_point_cloud_layer_index_;
 	int viewer_image_layer_index_top_;
