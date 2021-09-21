@@ -157,6 +157,71 @@ DepthClustering::getBoundingBoxFrameFlat() const
 	return bounding_box_->getFrameFlat();
 }
 
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
+DepthClustering::getGroundTruthFrameFlat(const std::string& frame_path_name_range)
+{
+	if (frame_path_name_range == "")
+	{
+		std::cout << "[WARN]: Invalid range frame path and name." << std::endl;
+		return nullptr;
+	}
+
+	std::string frame_name_range = "";
+	std::stringstream ss(frame_path_name_range);
+
+	while (std::getline(ss, frame_name_range, '/'))
+	{
+	}
+
+	if (frame_name_range == "")
+	{
+		std::cout << "[WARN]: Invalid range frame name." << std::endl;
+		return nullptr;
+	}
+
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> ground_truth_frame_flat;
+
+	auto ground_truth_frame_flat_tree_optioal = ground_truth_flat_tree_.get_child_optional(
+			boost::property_tree::ptree::path_type(frame_name_range, '/'));
+
+	if (!ground_truth_frame_flat_tree_optioal)
+	{
+		std::cout << "[WARN]: Missing flat ground truth in frame \"" << frame_name_range << "\"."
+				<< std::endl;
+		return ground_truth_frame_flat;
+	}
+
+	ground_truth_frame_flat = std::make_shared<BoundingBox::Frame<BoundingBox::Flat>>();
+	auto ground_truth_frame_flat_tree = *ground_truth_frame_flat_tree_optioal;
+
+	for (const auto &ground_truth_flat_array_pair : ground_truth_frame_flat_tree)
+	{
+		std::vector<std::string> ground_truth_flat_values;
+		Eigen::Vector2i corner_upper_left;
+		Eigen::Vector2i corner_lower_right;
+		float depth;
+		std::string id;
+
+		for (const auto &ground_truth_flat_value_pair : ground_truth_flat_array_pair.second)
+		{
+			ground_truth_flat_values.push_back(
+					ground_truth_flat_value_pair.second.get_value<std::string>());
+		}
+
+		corner_upper_left << std::stoi(ground_truth_flat_values[0]), std::stoi(
+				ground_truth_flat_values[1]);
+		corner_lower_right << std::stoi(ground_truth_flat_values[2]), std::stoi(
+				ground_truth_flat_values[3]);
+		depth = std::stof(ground_truth_flat_values[4]);
+		id = ground_truth_flat_values[5];
+
+		ground_truth_frame_flat->push_back(
+				std::make_tuple(corner_upper_left, corner_lower_right, depth, id));
+	}
+
+	return ground_truth_frame_flat;
+}
+
 std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>>
 DepthClustering::getClusterer() const
 {
@@ -476,6 +541,16 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 	depth_ground_remover_->AddClient(clusterer_.get());
 	clusterer_->AddClient(bounding_box_.get());
 
+	try
+	{
+		boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_flat_file_name,
+				ground_truth_flat_tree_);
+	} catch (boost::exception const &e)
+	{
+		std::cout << "[WARN]: Failed to load flat ground truth file from \"" << dataset_path_
+				<< "\"." << std::endl;
+	}
+
 	return true;
 }
 
@@ -514,37 +589,37 @@ DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 }
 
 const std::string
-DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_name)
+DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_name_range)
 {
-	if (frame_path_name == "")
+	if (frame_path_name_range == "")
 	{
-		std::cout << "[WARN]: Invalid frame path and name." << std::endl;
+		std::cout << "[WARN]: Invalid range frame path and name." << std::endl;
 		return "";
 	}
 
 	Timer timer;
-	std::string frame_name = "";
-	std::stringstream ss(frame_path_name);
+	std::string frame_name_range = "";
+	std::stringstream ss(frame_path_name_range);
 
-	while (std::getline(ss, frame_name, '/'))
+	while (std::getline(ss, frame_name_range, '/'))
 	{
 	}
 
-	if (frame_name == "")
+	if (frame_name_range == "")
 	{
-		std::cout << "[WARN]: Invalid frame name." << std::endl;
+		std::cout << "[WARN]: Invalid range frame name." << std::endl;
 		return "";
 	}
 
-	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+	std::cout << "[INFO]: Processing \"" << frame_name_range << "\"." << std::endl;
 
 	if (parameter_.dataset_file_type == ".png")
 	{
-		image_range_ = MatFromPNGRange(frame_path_name, parameter_projection_lidar_);
+		image_range_ = MatFromPNGRange(frame_path_name_range, parameter_projection_lidar_);
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_range_ = MatFromTIFFRange(frame_path_name, parameter_projection_lidar_);
+		image_range_ = MatFromTIFFRange(frame_path_name_range, parameter_projection_lidar_);
 	}
 	else
 	{
@@ -565,37 +640,37 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 
 	std::cout << "[INFO]: Bounding box projected: " << timer.measure() << " us." << std::endl;
 
-	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
-	logger_->logBoundingBoxFrameFlat(frame_name);
+	logger_->logBoundingBoxFrame(frame_name_range, parameter_.bounding_box_type);
+	logger_->logBoundingBoxFrameFlat(frame_name_range);
 
 	std::cout << "[INFO]: Logged: " << timer.measure() << " us." << std::endl;
 
-	return frame_name;
+	return frame_name_range;
 }
 
 const std::string
-DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_path_name)
+DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_path_name_intensity)
 {
-	if (frame_path_name == "")
+	if (frame_path_name_intensity == "")
 	{
-		std::cout << "[WARN]: Invalid frame path and name." << std::endl;
+		std::cout << "[WARN]: Invalid intensity frame path and name." << std::endl;
 		return "";
 	}
 
-	std::string frame_name = "";
-	std::stringstream ss(frame_path_name);
+	std::string frame_name_intensity = "";
+	std::stringstream ss(frame_path_name_intensity);
 
-	while (std::getline(ss, frame_name, '/'))
+	while (std::getline(ss, frame_name_intensity, '/'))
 	{
 	}
 
-	if (frame_name == "")
+	if (frame_name_intensity == "")
 	{
-		std::cout << "[WARN]: Invalid frame name." << std::endl;
+		std::cout << "[WARN]: Invalid intensity frame name." << std::endl;
 		return "";
 	}
 
-	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+	std::cout << "[INFO]: Processing \"" << frame_name_intensity << "\"." << std::endl;
 
 	if (parameter_.dataset_file_type == ".png")
 	{
@@ -605,7 +680,8 @@ DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_pat
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_intensity_ = MatFromTIFFIntensity(frame_path_name, parameter_projection_lidar_);
+		image_intensity_ = MatFromTIFFIntensity(frame_path_name_intensity,
+				parameter_projection_lidar_);
 	}
 	else
 	{
@@ -613,32 +689,32 @@ DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_pat
 		return "";
 	}
 
-	return frame_name;
+	return frame_name_intensity;
 }
 
 const std::string
-DepthClustering::processOneElongationFrameForDataset(const std::string& frame_path_name)
+DepthClustering::processOneElongationFrameForDataset(const std::string& frame_path_name_elongation)
 {
-	if (frame_path_name == "")
+	if (frame_path_name_elongation == "")
 	{
-		std::cout << "[WARN]: Invalid frame path and name." << std::endl;
+		std::cout << "[WARN]: Invalid elongation frame path and name." << std::endl;
 		return "";
 	}
 
-	std::string frame_name = "";
-	std::stringstream ss(frame_path_name);
+	std::string frame_name_elongation = "";
+	std::stringstream ss(frame_path_name_elongation);
 
-	while (std::getline(ss, frame_name, '/'))
+	while (std::getline(ss, frame_name_elongation, '/'))
 	{
 	}
 
-	if (frame_name == "")
+	if (frame_name_elongation == "")
 	{
-		std::cout << "[WARN]: Invalid frame name." << std::endl;
+		std::cout << "[WARN]: Invalid elongation frame name." << std::endl;
 		return "";
 	}
 
-	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
+	std::cout << "[INFO]: Processing \"" << frame_name_elongation << "\"." << std::endl;
 
 	if (parameter_.dataset_file_type == ".png")
 	{
@@ -649,7 +725,8 @@ DepthClustering::processOneElongationFrameForDataset(const std::string& frame_pa
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
-		image_elongation_ = MatFromTIFFElongation(frame_path_name, parameter_projection_lidar_);
+		image_elongation_ = MatFromTIFFElongation(frame_path_name_elongation,
+				parameter_projection_lidar_);
 	}
 	else
 	{
@@ -657,66 +734,7 @@ DepthClustering::processOneElongationFrameForDataset(const std::string& frame_pa
 		return "";
 	}
 
-	return frame_name;
-}
-
-void
-DepthClustering::processAllGroundTruthsForDataset()
-{
-	boost::property_tree::ptree ground_truth_tree;
-	LoggerParameter parameter_logger;
-
-	parameter_logger.log_path = dataset_path_;
-	parameter_logger.log_file_name_flat = parameter_.ground_truth_flat_file_name;
-	parameter_logger.log = true;
-
-	std::shared_ptr<BoundingBox> bounding_box = std::make_shared<BoundingBox>(
-			BoundingBox::Type::Cube, parameter_projection_camera_);
-	std::shared_ptr<Logger> logger = std::make_shared<Logger>(parameter_logger);
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> bounding_box_frame_cube =
-			std::make_shared<BoundingBox::Frame<BoundingBox::Cube>>();
-
-	bounding_box->setFrameCube(bounding_box_frame_cube);
-	logger->setBoundingBox(bounding_box);
-
-	boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_file_name,
-			ground_truth_tree);
-
-	for (const auto &bounding_box_frame_cube_pair : ground_truth_tree)
-	{
-		const auto &bounding_box_frame_name_cube = bounding_box_frame_cube_pair.first;
-
-		for (const auto &bounding_box_cube_array_pair : bounding_box_frame_cube_pair.second)
-		{
-			std::vector<std::string> bounding_box_cube_values;
-			Eigen::Vector3f center;
-			Eigen::Vector3f extent;
-			float rotation;
-			std::string id;
-
-			for (const auto &bounding_box_cube_value_pair : bounding_box_cube_array_pair.second)
-			{
-				bounding_box_cube_values.push_back(
-						bounding_box_cube_value_pair.second.get_value<std::string>());
-			}
-
-			center << std::stof(bounding_box_cube_values[0]), std::stof(
-					bounding_box_cube_values[1]), std::stof(bounding_box_cube_values[2]);
-			extent << std::stof(bounding_box_cube_values[3]), std::stof(
-					bounding_box_cube_values[4]), std::stof(bounding_box_cube_values[5]);
-			rotation = std::stof(bounding_box_cube_values[6]);
-			id = bounding_box_cube_values[7];
-
-			bounding_box_frame_cube->push_back(std::make_tuple(center, extent, rotation, id));
-		}
-
-		bounding_box->produceFrameFlat();
-		logger->logBoundingBoxFrameFlat(bounding_box_frame_name_cube);
-		bounding_box->clearFrames();
-	}
-
-	std::cout << std::endl;
-	logger->writeBoundingBoxLog(BoundingBox::Type::Flat);
+	return frame_name_elongation;
 }
 
 void

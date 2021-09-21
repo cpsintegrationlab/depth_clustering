@@ -54,17 +54,24 @@ Visualization::Visualization(QWidget* parent) :
 	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
 	ui->combo_layer_image_bottom->setCurrentIndex(viewer_image_layer_index_bottom_);
 
+	ui->viewer_image_camera->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_camera->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_camera->setRenderHints(
+			QPainter::SmoothPixmapTransform | QPainter::Antialiasing
+					| QPainter::HighQualityAntialiasing);
 	ui->viewer_image_top->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_top->setCacheMode(QGraphicsView::CacheBackground);
 	ui->viewer_image_top->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	ui->viewer_image_middle->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_middle->setCacheMode(QGraphicsView::CacheBackground);
 	ui->viewer_image_middle->setRenderHints(
-			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+			QPainter::SmoothPixmapTransform | QPainter::Antialiasing
+					| QPainter::HighQualityAntialiasing);
 	ui->viewer_image_bottom->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_bottom->setCacheMode(QGraphicsView::CacheBackground);
 	ui->viewer_image_bottom->setRenderHints(
-			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+			QPainter::SmoothPixmapTransform | QPainter::Antialiasing
+					| QPainter::HighQualityAntialiasing);
 	ui->viewer_point_cloud->installEventFilter(this);
 	ui->viewer_point_cloud->setAutoFillBackground(true);
 
@@ -347,6 +354,9 @@ Visualization::onSliderMovedTo(int frame_number)
 		depth_clustering_second_return_->processOneRangeFrameForDataset(
 				frame_paths_names_range_second_return[frame_number]);
 	}
+
+	ground_truth_frame_flat_ = depth_clustering_->getGroundTruthFrameFlat(
+			frame_paths_names_range[frame_number]);
 
 	timer.start();
 
@@ -863,7 +873,7 @@ Visualization::updateViewerPointCloud()
 				auto center = std::get<0>(cube);
 				auto extent = std::get<1>(cube);
 
-				auto cube_drawable = DrawableCube::Create(center, extent);
+				auto cube_drawable = DrawableCube::Create(center, extent, Eigen::Vector3f(0, 1, 0));
 
 				ui->viewer_point_cloud->AddDrawable(std::move(cube_drawable));
 			}
@@ -885,7 +895,8 @@ Visualization::updateViewerPointCloud()
 				auto hull = std::get<0>(polygon);
 				auto diff_z = std::get<1>(polygon);
 
-				auto polygon_drawable = DrawablePolygon3d::Create(hull, diff_z);
+				auto polygon_drawable = DrawablePolygon3d::Create(hull, diff_z,
+						Eigen::Vector3f(0, 1, 0));
 
 				ui->viewer_point_cloud->AddDrawable(std::move(polygon_drawable));
 			}
@@ -916,7 +927,75 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		if (!shown_ || !ui->viewer_image_camera->visibleRegion().isEmpty())
 		{
 			auto image_camera = depth_clustering_->getImageCamera(frame_path_name_camera);
+			auto bounding_box_frame_flat = depth_clustering_->getBoundingBoxFrameFlat();
+
 			QImage qimage_camera = MatToQImage(image_camera);
+			QFont font;
+			QPen pen_bounding_box;
+			QPen pen_ground_truth;
+			QPainter painter(&qimage_camera);
+
+			font.setPixelSize(30);
+			font.setBold(QFont::Bold);
+
+			pen_bounding_box.setWidth(5);
+			pen_bounding_box.setColor(Qt::green);
+
+			pen_ground_truth.setWidth(5);
+			pen_ground_truth.setColor(Qt::red);
+
+			painter.setFont(font);
+			painter.setRenderHints(
+					QPainter::SmoothPixmapTransform | QPainter::Antialiasing
+							| QPainter::HighQualityAntialiasing);
+
+			if (ground_truth_frame_flat_)
+			{
+				for (const auto &ground_truth_flat : *ground_truth_frame_flat_)
+				{
+					painter.setPen(pen_ground_truth);
+
+					painter.drawRect(std::get<0>(ground_truth_flat).x(),
+							std::get<0>(ground_truth_flat).y(),
+							std::get<1>(ground_truth_flat).x() - std::get<0>(ground_truth_flat).x(),
+							std::get<1>(ground_truth_flat).y()
+									- std::get<0>(ground_truth_flat).y());
+
+					painter.drawText(std::get<0>(ground_truth_flat).x(),
+							std::get<1>(ground_truth_flat).y() + 30,
+							QString::fromStdString(
+									"depth: " + std::to_string(std::get<2>(ground_truth_flat))));
+				}
+			}
+			else
+			{
+				std::cout << "[WARN]: Flat ground truth frame missing." << std::endl;
+			}
+
+			if (bounding_box_frame_flat)
+			{
+				for (const auto &bounding_box_flat : *bounding_box_frame_flat)
+				{
+					painter.setPen(pen_bounding_box);
+
+					painter.drawRect(std::get<0>(bounding_box_flat).x(),
+							std::get<0>(bounding_box_flat).y(),
+							std::get<1>(bounding_box_flat).x() - std::get<0>(bounding_box_flat).x(),
+							std::get<1>(bounding_box_flat).y()
+									- std::get<0>(bounding_box_flat).y());
+
+					painter.drawText(std::get<0>(bounding_box_flat).x(),
+							std::get<0>(bounding_box_flat).y() - 15,
+							QString::fromStdString(
+									"depth: " + std::to_string(std::get<2>(bounding_box_flat))));
+				}
+			}
+			else
+			{
+				std::cout << "[WARN]: Flat bounding box frame missing." << std::endl;
+			}
+
+			painter.end();
 
 			scene_camera_.reset(new QGraphicsScene);
 			scene_camera_->addPixmap(QPixmap::fromImage(qimage_camera));

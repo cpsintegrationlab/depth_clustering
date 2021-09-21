@@ -133,6 +133,11 @@ private:
 	initializeUI();
 
 	std::unique_ptr<Ui::Visualization> ui;
+
+	std::shared_ptr<DepthClustering> depth_clustering_ = nullptr;
+	std::shared_ptr<DepthClustering> depth_clustering_first_return_ = nullptr;
+	std::shared_ptr<DepthClustering> depth_clustering_second_return_ = nullptr;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> ground_truth_frame_flat_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_empty_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_camera_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
@@ -140,9 +145,6 @@ private:
 	std::unique_ptr<QGraphicsScene> scene_range_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_intensity_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_elongation_ = nullptr;
-	std::shared_ptr<DepthClustering> depth_clustering_ = nullptr;
-	std::shared_ptr<DepthClustering> depth_clustering_first_return_ = nullptr;
-	std::shared_ptr<DepthClustering> depth_clustering_second_return_ = nullptr;
 
 	std::string dataset_path_;
 	std::string global_config_path_;
