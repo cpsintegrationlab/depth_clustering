@@ -1,8 +1,8 @@
 # Depth Clustering
 
-## Command-Line Application
+## Project Setup
 
-The command-line application depend on the installation of the following essential packages:
+This project depends on the installation of the following essential packages:
 
 ```bash
 apt install build-essential cmake tar wget
@@ -15,7 +15,9 @@ cd scripts
 ./setup.bash
 ```
 
-Then, build the command-line application as follows:
+## Command-Line Application
+
+With the project set up, build the command-line application as follows:
 
 ```bash
 cd build/amd64/depth_clustering/release
