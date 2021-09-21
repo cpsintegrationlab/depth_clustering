@@ -90,4 +90,4 @@ make
 
 The cross-compiled binaries and libraries for arm64 would be located in `install/arm64/depth_clustering/release`
 
-Note: the visualizer application is not supported for the arm64 architecture.
+Note: the visualizer application is currently not supported for the arm64 architecture.
