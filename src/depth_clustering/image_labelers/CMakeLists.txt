@@ -1,8 +1,7 @@
 # Add libraries
-add_library(image_labeler SHARED abstract_image_labeler.cpp)
-
-# Set library link targets
-target_link_libraries(image_labeler difference)
-
-# Add subdirectories
-add_subdirectory(diff_helpers)
+add_library(
+	dc_image_labelers SHARED
+	diff_helpers/angle_diff.cpp
+	diff_helpers/line_dist_diff.cpp
+	abstract_image_labeler.cpp
+)

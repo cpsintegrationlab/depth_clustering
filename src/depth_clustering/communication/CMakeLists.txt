@@ -1,2 +1,5 @@
 # Add libraries
-add_library(identifiable SHARED identifiable.cpp)
+add_library(
+	dc_communication SHARED
+	identifiable.cpp
+)

@@ -1,20 +1,19 @@
 # Add libraries
 add_library(
-	api SHARED
+	dc_api SHARED
 	api.cpp
 	parameter_factory.cpp
 )
 
 # Set library link targets
 target_link_libraries(
-	api
-	identifiable
-	image_labeler
-	velodyne_utils
-	projections
-	ground_remove
-	folder_reader
-	post_processing
+	dc_api
+	dc_communication
+	dc_ground_removal
+	dc_image_labelers
+	dc_post_processing
+	dc_projections
+	dc_utils
 	${Boost_LIBRARIES}
 	${OpenCV_LIBS}
 )

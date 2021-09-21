@@ -1,12 +1,14 @@
 # Add libraries
-add_library(ground_remove SHARED depth_ground_remover.cpp)
+add_library(
+	dc_ground_removal SHARED
+	depth_ground_remover.cpp
+)
 
 # Set library link targets
 target_link_libraries(
-	ground_remove
-	identifiable
-	velodyne_utils
-	difference
-	${PCL_LIBRARIES}
+	dc_ground_removal
+	dc_communication
+	dc_image_labelers
+	dc_utils
 	${OpenCV_LIBS}
 )

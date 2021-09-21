@@ -6,7 +6,6 @@
 # Add gtest based cpp test target and link libraries
 
 add_library(test_help_funcs SHARED helper_funcs.cpp)
-target_link_libraries(test_help_funcs ${PCL_LIBRARIES})
 
 add_executable(depth_clustering_test
                  test_main.cpp
@@ -31,7 +30,6 @@ target_link_libraries(depth_clustering_test
                     ground_remove
                     difference
                     ${catkin_LIBRARIES}
-                    ${PCL_LIBRARIES}
                     ${OpenCV_LIBS}
                     ${GTEST_LIBRARIES})
 

@@ -25,9 +25,6 @@ if(${OpenGL_FOUND} AND ${QGLViewer_FOUND} AND ${Qt5_FOUND})
 	    SYSTEM ${QGLVIEWER_INCLUDE_DIR}
 	)
 
-	# Set CMake parameters
-	set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 	# Set Qt parameters
 	set(
 		QT_SOURCES
@@ -48,33 +45,24 @@ if(${OpenGL_FOUND} AND ${QGLViewer_FOUND} AND ${Qt5_FOUND})
 
 	# Add libraries
 	add_library(
-		visualization SHARED EXCLUDE_FROM_ALL
+		dc_visualization SHARED EXCLUDE_FROM_ALL
+		drawables/drawable_cloud.cpp
+		drawables/drawable_cube.cpp
+		drawables/drawable_polygon3d.cpp
+		utils/utils.cpp
+		viewer/viewer.cpp
 		${QT_SOURCES}
-		${QT_UI_FILES_MOC}
 		${QT_HEADERS_MOC}
+		${QT_UI_FILES_MOC}
 	)
 
 	# Set library link targets
 	target_link_libraries(
-		visualization
-		api
-		viewer
-		drawable
-		visualization_utils
-		identifiable
-		ground_remove
-		image_labeler
-		velodyne_utils
-		folder_reader
-		bbox
-		post_processing
-		${OpenCV_LIBS}
+		dc_visualization
+		dc_api
+		${OPENGL_gl_LIBRARY}
+		${OPENGL_glu_LIBRARY}
 		${QGLVIEWER_LIBRARY}
 		${QT_LIBRARIES}
 	)
-
-	# Add subdirectories
-	add_subdirectory(drawables)
-	add_subdirectory(viewer)
-	add_subdirectory(utils)
 endif()
