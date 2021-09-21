@@ -795,7 +795,7 @@
            <bool>false</bool>
           </property>
          </widget>
-         <widget class="QGraphicsView" name="viewer_camera">
+         <widget class="QGraphicsView" name="viewer_image_camera">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>

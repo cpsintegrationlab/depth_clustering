@@ -115,7 +115,7 @@ private:
 	updateViewerPointCloud();
 
 	void
-	updateViewerImageScene();
+	updateViewerImageScene(const std::string& frame_path_name_camera);
 
 	void
 	updateViewerImage();
@@ -131,6 +131,7 @@ private:
 
 	std::unique_ptr<Ui::Visualization> ui;
 	std::unique_ptr<QGraphicsScene> scene_empty_ = nullptr;
+	std::unique_ptr<QGraphicsScene> scene_camera_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_segmentation_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_range_ = nullptr;
@@ -143,6 +144,7 @@ private:
 	std::string dataset_path_;
 	std::string global_config_path_;
 	volatile bool play_;
+	bool shown_;
 	bool show_bounding_box_;
 	int viewer_point_cloud_layer_index_;
 	int viewer_image_layer_index_top_;

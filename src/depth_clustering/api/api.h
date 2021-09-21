@@ -61,6 +61,9 @@ public:
 	Cloud::ConstPtr
 	getCloudConfidence() const;
 
+	const cv::Mat
+	getImageCamera(const std::string& frame_path_name_camera) const;
+
 	const cv::Mat&
 	getImageRange() const;
 
@@ -78,6 +81,9 @@ public:
 
 	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>>
 	getClusterer() const;
+
+	std::shared_ptr<FolderReader>
+	getFolderReaderCamera() const;
 
 	std::shared_ptr<FolderReader>
 	getFolderReaderRange() const;
@@ -128,6 +134,7 @@ private:
 	std::shared_ptr<ParameterFactory> parameter_factory_;
 	std::shared_ptr<ParameterFactory> parameter_factory_global_;
 	std::shared_ptr<ProjectionParams> parameter_projection_lidar_;
+	std::shared_ptr<FolderReader> folder_reader_camera_;
 	std::shared_ptr<FolderReader> folder_reader_range_;
 	std::shared_ptr<FolderReader> folder_reader_intensity_;
 	std::shared_ptr<FolderReader> folder_reader_elongation_;

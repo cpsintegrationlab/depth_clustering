@@ -122,6 +122,14 @@ FixKITTIDepth(const cv::Mat& original)
 }
 
 cv::Mat
+MatFromPNGCamera(const string& path)
+{
+	cv::Mat image_camera = cv::imread(path, CV_LOAD_IMAGE_COLOR);
+	cv::cvtColor(image_camera, image_camera, cv::COLOR_BGR2RGB);
+	return image_camera;
+}
+
+cv::Mat
 MatFromPNGRange(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
 {
 	cv::Mat image_range = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);

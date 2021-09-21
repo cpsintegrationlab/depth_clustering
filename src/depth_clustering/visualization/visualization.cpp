@@ -36,15 +36,15 @@ using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
-		QWidget(parent), ui(new Ui::Visualization), play_(false), show_bounding_box_(true), viewer_point_cloud_layer_index_(
-				5), viewer_image_layer_index_top_(0), viewer_image_layer_index_middle_(1), viewer_image_layer_index_bottom_(
-				2)
+		QWidget(parent), ui(new Ui::Visualization), play_(false), shown_(false), show_bounding_box_(
+				true), viewer_point_cloud_layer_index_(5), viewer_image_layer_index_top_(0), viewer_image_layer_index_middle_(
+				1), viewer_image_layer_index_bottom_(2)
 {
 	ui->setupUi(this);
 
 	ui->frame_controls->setFixedHeight(ui->frame_controls->minimumHeight());
 	ui->frame_settings->setFixedHeight(ui->frame_settings->minimumHeight());
-	ui->viewer_camera->setFixedWidth(ui->viewer_camera->height() * 16 / 9);
+	ui->viewer_image_camera->setFixedWidth(ui->viewer_image_camera->height() * 16 / 9);
 	ui->viewer_image_top->setFixedHeight(ui->viewer_image_top->minimumHeight());
 	ui->viewer_image_middle->setFixedHeight(ui->viewer_image_middle->minimumHeight());
 	ui->viewer_image_bottom->setFixedHeight(ui->viewer_image_bottom->minimumHeight());
@@ -173,6 +173,8 @@ Visualization::showEvent(QShowEvent* event)
 	ui->viewer_point_cloud->update();
 
 	updateViewerImage();
+
+	shown_ = true;
 }
 
 void
@@ -180,7 +182,7 @@ Visualization::resizeEvent(QResizeEvent* event)
 {
 	QWidget::resizeEvent(event);
 
-	ui->viewer_camera->setFixedWidth(ui->viewer_camera->height() * 16 / 9);
+	ui->viewer_image_camera->setFixedWidth(ui->viewer_image_camera->height() * 16 / 9);
 
 	ui->viewer_point_cloud->update();
 
@@ -260,13 +262,28 @@ Visualization::onSliderMovedTo(int frame_number)
 {
 	Timer timer;
 	auto folder_reader_range = depth_clustering_->getFolderReaderRange();
+	auto folder_reader_camera = depth_clustering_->getFolderReaderCamera();
 	const auto &frame_paths_names_range = folder_reader_range->GetAllFilePaths();
+	const auto &frame_paths_names_camera = folder_reader_camera->GetAllFilePaths();
+	std::string frame_path_name_camera = "";
 
 	if (frame_paths_names_range.empty()
 			|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 	{
 		std::cerr << "[WARN]: Range image missing in \"" << dataset_path_ << "\"." << std::endl;
 		return;
+	}
+
+	if (frame_paths_names_camera.empty()
+			|| frame_number >= static_cast<int>(frame_paths_names_camera.size()))
+	{
+		std::cerr << "[WARN]: Camera image missing in \"" << dataset_path_ << "\"." << std::endl;
+		ui->viewer_image_camera->setVisible(false);
+	}
+	else
+	{
+		frame_path_name_camera = frame_paths_names_camera[frame_number];
+		ui->viewer_image_camera->setVisible(true);
 	}
 
 	std::cout << std::endl;
@@ -337,7 +354,8 @@ Visualization::onSliderMovedTo(int frame_number)
 
 	std::cout << "[INFO]: Point cloud viewer updated: " << timer.measure() << " us." << std::endl;
 
-	updateViewerImageScene();
+	updateViewerImageScene(frame_path_name_camera);
+	updateViewerImage();
 
 	std::cout << "[INFO]: Image viewers updated: " << timer.measure() << " us." << std::endl;
 }
@@ -870,8 +888,20 @@ Visualization::updateViewerPointCloud()
 }
 
 void
-Visualization::updateViewerImageScene()
+Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 {
+	if (frame_path_name_camera != "")
+	{
+		if (!shown_ || !ui->viewer_image_camera->visibleRegion().isEmpty())
+		{
+			auto image_camera = depth_clustering_->getImageCamera(frame_path_name_camera);
+			QImage qimage_camera = MatToQImage(image_camera);
+
+			scene_camera_.reset(new QGraphicsScene);
+			scene_camera_->addPixmap(QPixmap::fromImage(qimage_camera));
+		}
+	}
+
 	if (viewer_image_layer_index_top_ == 0 || viewer_image_layer_index_middle_ == 0
 			|| viewer_image_layer_index_bottom_ == 0)
 	{
@@ -884,8 +914,6 @@ Visualization::updateViewerImageScene()
 
 		scene_difference_.reset(new QGraphicsScene);
 		scene_difference_->addPixmap(QPixmap::fromImage(qimage_difference));
-
-		updateViewerImage();
 	}
 
 	if (viewer_image_layer_index_top_ == 2 || viewer_image_layer_index_middle_ == 2
@@ -910,8 +938,6 @@ Visualization::updateViewerImageScene()
 
 		scene_range_.reset(new QGraphicsScene);
 		scene_range_->addPixmap(QPixmap::fromImage(qimage_range));
-
-		updateViewerImage();
 	}
 
 	if (viewer_image_layer_index_top_ == 3 || viewer_image_layer_index_middle_ == 3
@@ -938,8 +964,6 @@ Visualization::updateViewerImageScene()
 
 		scene_intensity_.reset(new QGraphicsScene);
 		scene_intensity_->addPixmap(QPixmap::fromImage(qimage_intensity));
-
-		updateViewerImage();
 	}
 
 	if (viewer_image_layer_index_top_ == 4 || viewer_image_layer_index_middle_ == 4
@@ -966,14 +990,18 @@ Visualization::updateViewerImageScene()
 
 		scene_elongation_.reset(new QGraphicsScene);
 		scene_elongation_->addPixmap(QPixmap::fromImage(qimage_elongation));
-
-		updateViewerImage();
 	}
 }
 
 void
 Visualization::updateViewerImage()
 {
+	if (!shown_ || !ui->viewer_image_camera->visibleRegion().isEmpty())
+	{
+		ui->viewer_image_camera->setScene(scene_camera_.get());
+		ui->viewer_image_camera->fitInView(scene_camera_->itemsBoundingRect());
+	}
+
 	switch (viewer_image_layer_index_top_)
 	{
 	case 0:
@@ -1103,6 +1131,8 @@ Visualization::resetViewer()
 
 	scene_empty_.reset(new QGraphicsScene);
 	scene_empty_->addPixmap(QPixmap::fromImage(QImage()));
+	scene_camera_.reset(new QGraphicsScene);
+	scene_camera_->addPixmap(QPixmap::fromImage(QImage()));
 	scene_difference_.reset(new QGraphicsScene);
 	scene_difference_->addPixmap(QPixmap::fromImage(QImage()));
 	scene_segmentation_.reset(new QGraphicsScene);

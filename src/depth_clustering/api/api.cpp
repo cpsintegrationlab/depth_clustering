@@ -18,6 +18,7 @@
 
 using boost::property_tree::json_parser::read_json;
 using depth_clustering::DiffFactory;
+using depth_clustering::MatFromPNGCamera;
 using depth_clustering::MatFromPNGRange;
 using depth_clustering::MatFromTIFFElongation;
 using depth_clustering::MatFromTIFFIntensity;
@@ -109,6 +110,18 @@ DepthClustering::getCloudConfidence() const
 			*parameter_projection_lidar_);
 }
 
+const cv::Mat
+DepthClustering::getImageCamera(const std::string& frame_path_name_camera) const
+{
+	if (frame_path_name_camera == "")
+	{
+		std::cout << "[WARN]: Invalid camera frame path and name." << std::endl;
+		return cv::Mat();
+	}
+
+	return MatFromPNGCamera(frame_path_name_camera);
+}
+
 const cv::Mat&
 DepthClustering::getImageRange() const
 {
@@ -148,6 +161,12 @@ std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>>
 DepthClustering::getClusterer() const
 {
 	return clusterer_;
+}
+
+std::shared_ptr<FolderReader>
+DepthClustering::getFolderReaderCamera() const
+{
+	return folder_reader_camera_;
 }
 
 std::shared_ptr<FolderReader>
@@ -395,6 +414,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 			+ "/intensity/";
 	std::string dataset_path_elongation = dataset_path_ + "frames_lidar/"
 			+ dataset_path_lidar_return + "/elongation/";
+	std::string dataset_path_camera = dataset_path_ + "frames_camera/";
 
 	folder_reader_range_ = std::make_shared<FolderReader>(dataset_path_range,
 			parameter_.dataset_file_type, FolderReader::Order::SORTED);
@@ -402,6 +422,8 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 			parameter_.dataset_file_type, FolderReader::Order::SORTED);
 	folder_reader_elongation_ = std::make_shared<FolderReader>(dataset_path_elongation,
 			parameter_.dataset_file_type, FolderReader::Order::SORTED);
+	folder_reader_camera_ = std::make_shared<FolderReader>(dataset_path_camera, ".png",
+			FolderReader::Order::SORTED);
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);

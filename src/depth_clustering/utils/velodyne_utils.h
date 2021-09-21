@@ -54,6 +54,9 @@ Cloud::Ptr
 ReadKittiCloudTxt(const std::string& path);
 
 cv::Mat
+MatFromPNGCamera(const std::string& path);
+
+cv::Mat
 MatFromPNGRange(const std::string& path, std::shared_ptr<ProjectionParams> projection_parameter =
 		nullptr);
 
