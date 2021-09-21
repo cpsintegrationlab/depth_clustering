@@ -1,4 +1,4 @@
-# Depth Clustering
+# Depth Clustering 2.0
 
 ## Project Setup
 
