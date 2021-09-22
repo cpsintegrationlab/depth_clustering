@@ -17,7 +17,11 @@ public:
 
 	explicit
 	Viewer(QWidget* parent = 0) :
-			QGLViewer(parent)
+			QGLViewer(parent), range_lidar_(75.0)
+	{
+	}
+
+	~Viewer() override
 	{
 	}
 
@@ -27,9 +31,11 @@ public:
 	void
 	Clear();
 
-	~Viewer() override
-	{
-	}
+	void
+	resetViewFOVFull();
+
+	void
+	resetViewFOVCamera();
 
 protected:
 
@@ -41,6 +47,7 @@ protected:
 
 private:
 
+	const double range_lidar_;
 	std::vector<Drawable::Ptr> _drawables;
 	mutable std::mutex _cloud_mutex;
 };

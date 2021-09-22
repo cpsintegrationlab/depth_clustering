@@ -175,9 +175,16 @@ Visualization::showEvent(QShowEvent* event)
 {
 	QWidget::showEvent(event);
 
-	resize(minimumWidth(), minimumHeight());
+	const auto &parameter = depth_clustering_->getParameter();
 
-	ui->viewer_point_cloud->update();
+	if (parameter.use_camera_fov)
+	{
+		ui->viewer_point_cloud->resetViewFOVCamera();
+	}
+	else
+	{
+		ui->viewer_point_cloud->resetViewFOVFull();
+	}
 
 	updateViewerImage();
 
@@ -398,7 +405,6 @@ Visualization::onParameterUpdated()
 	parameter.size_cluster_min = ui->spin_size_cluster_min->value();
 	parameter.size_cluster_max = ui->spin_size_cluster_max->value();
 	parameter.size_smooth_window = ui->combo_size_smooth_window->currentIndex() * 2 + 5;
-	parameter.use_camera_fov = static_cast<bool>(ui->combo_field_of_view->currentIndex());
 
 	BoundingBox::Type bounding_box_type = BoundingBox::Type::Cube;
 
@@ -584,15 +590,58 @@ Visualization::onDifferenceTypeUpdated()
 
 	parameter.difference_type = difference_type;
 
-	depth_clustering_->setParameter(parameter);
+	depth_clustering_first_return_->setParameter(parameter);
+	depth_clustering_first_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_first_return_->getClusterer()->SetLabelImageClient(this);
 
-	depth_clustering_->getDepthGroundRemover()->AddClient(this);
-	depth_clustering_->getClusterer()->SetDiffType(difference_type);
-	depth_clustering_->getClusterer()->SetLabelImageClient(this);
+	depth_clustering_second_return_->setParameter(parameter);
+	depth_clustering_second_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
 
+	resetViewer();
 	onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Updated difference type." << std::endl;
+}
+
+void
+Visualization::onFieldOfViewUpdated()
+{
+	DepthClusteringParameter parameter = depth_clustering_->getParameter();
+
+	parameter.use_camera_fov = static_cast<bool>(ui->combo_field_of_view->currentIndex());
+
+	switch (ui->combo_field_of_view->currentIndex())
+	{
+	case 0:
+	{
+		ui->viewer_point_cloud->resetViewFOVFull();
+		break;
+	}
+	case 1:
+	{
+		ui->viewer_point_cloud->resetViewFOVCamera();
+		break;
+	}
+	default:
+	{
+		ui->viewer_point_cloud->resetViewFOVFull();
+		break;
+	}
+	}
+
+	depth_clustering_first_return_->setParameter(parameter);
+	depth_clustering_first_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_first_return_->getClusterer()->SetLabelImageClient(this);
+
+	depth_clustering_second_return_->setParameter(parameter);
+	depth_clustering_second_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
+
+	resetViewer();
+	onSliderMovedTo(ui->slider_frame->value());
+
+	std::cout << "[INFO]: Updated field of view." << std::endl;
 }
 
 void
@@ -1290,7 +1339,7 @@ Visualization::resetUI()
 			SLOT(onParameterUpdated()));
 	disconnect(ui->button_global_configuration, SIGNAL(released()), this,
 			SLOT(onLoadGlobalConfiguration()));
-	disconnect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	disconnect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onFieldOfViewUpdated()));
 	disconnect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
 	disconnect(ui->combo_layer_image_top, SIGNAL(activated(int)), this,
@@ -1337,6 +1386,16 @@ Visualization::initializeUI()
 	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
 	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
 	ui->combo_field_of_view->setCurrentIndex(static_cast<int>(parameter.use_camera_fov));
+
+	if (parameter.use_camera_fov)
+	{
+		ui->viewer_point_cloud->resetViewFOVCamera();
+	}
+	else
+	{
+		ui->viewer_point_cloud->resetViewFOVFull();
+	}
+
 	ui->combo_layer_point_cloud->setCurrentIndex(viewer_point_cloud_layer_index_);
 	ui->combo_layer_image_top->setCurrentIndex(viewer_image_layer_index_top_);
 	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
@@ -1398,7 +1457,7 @@ Visualization::initializeUI()
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->button_global_configuration, SIGNAL(released()), this,
 			SLOT(onLoadGlobalConfiguration()));
-	connect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onFieldOfViewUpdated()));
 	connect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
 	connect(ui->combo_layer_image_top, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));

@@ -6,7 +6,6 @@
 
 #include "visualization/viewer/viewer.h"
 
-using qglviewer::Quaternion;
 using std::lock_guard;
 using std::mutex;
 
@@ -25,6 +24,27 @@ Viewer::Clear()
 }
 
 void
+Viewer::resetViewFOVFull()
+{
+	setSceneCenter(qglviewer::Vec(0, 0, 0));
+	setSceneRadius(range_lidar_);
+	camera()->setOrientation(qglviewer::Quaternion(0, 0, -0.7071068, 0.7071068));
+	camera()->showEntireScene();
+	update();
+}
+
+void
+Viewer::resetViewFOVCamera()
+{
+	setSceneCenter(qglviewer::Vec(range_lidar_ / 2, 0, 0));
+	setSceneRadius(range_lidar_ / 2);
+	camera()->setOrientation(qglviewer::Quaternion(0, 0, -0.7071068, 0.7071068));
+	camera()->setPosition(qglviewer::Vec(0, 0, 700));
+	camera()->showEntireScene();
+	update();
+}
+
+void
 Viewer::draw()
 {
 	lock_guard<mutex> guard(_cloud_mutex);
@@ -37,9 +57,7 @@ Viewer::draw()
 void
 Viewer::init()
 {
-	setSceneRadius(75.0);
 	setBackgroundColor(QColor(0, 0, 0));
-	camera()->setOrientation(Quaternion(0, 0, -0.7071068, 0.7071068));
-	camera()->showEntireScene();
+	resetViewFOVFull();
 	glDisable(GL_LIGHTING);
 }
