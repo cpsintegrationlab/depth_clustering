@@ -989,72 +989,80 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 			auto bounding_box_frame_flat = depth_clustering_->getBoundingBoxFrameFlat();
 
 			QImage qimage_camera = MatToQImage(image_camera);
-			QFont font;
-			QPen pen_bounding_box;
-			QPen pen_ground_truth;
-			QPainter painter(&qimage_camera);
 
-			font.setPixelSize(30);
-			font.setBold(QFont::Bold);
-
-			pen_bounding_box.setWidth(5);
-			pen_bounding_box.setColor(Qt::green);
-
-			pen_ground_truth.setWidth(5);
-			pen_ground_truth.setColor(Qt::red);
-
-			painter.setFont(font);
-			painter.setRenderHints(
-					QPainter::SmoothPixmapTransform | QPainter::Antialiasing
-							| QPainter::HighQualityAntialiasing);
-
-			if (ground_truth_frame_flat_)
+			if (show_bounding_box_)
 			{
-				for (const auto &ground_truth_flat : *ground_truth_frame_flat_)
+				QFont font;
+				QPen pen_bounding_box;
+				QPen pen_ground_truth;
+				QPainter painter(&qimage_camera);
+
+				font.setPixelSize(30);
+				font.setBold(QFont::Bold);
+
+				pen_bounding_box.setWidth(5);
+				pen_bounding_box.setColor(Qt::green);
+
+				pen_ground_truth.setWidth(5);
+				pen_ground_truth.setColor(Qt::red);
+
+				painter.setFont(font);
+				painter.setRenderHints(
+						QPainter::SmoothPixmapTransform | QPainter::Antialiasing
+								| QPainter::HighQualityAntialiasing);
+
+				if (ground_truth_frame_flat_)
 				{
-					painter.setPen(pen_ground_truth);
+					for (const auto &ground_truth_flat : *ground_truth_frame_flat_)
+					{
+						painter.setPen(pen_ground_truth);
 
-					painter.drawRect(std::get<0>(ground_truth_flat).x(),
-							std::get<0>(ground_truth_flat).y(),
-							std::get<1>(ground_truth_flat).x() - std::get<0>(ground_truth_flat).x(),
-							std::get<1>(ground_truth_flat).y()
-									- std::get<0>(ground_truth_flat).y());
+						painter.drawRect(std::get<0>(ground_truth_flat).x(),
+								std::get<0>(ground_truth_flat).y(),
+								std::get<1>(ground_truth_flat).x()
+										- std::get<0>(ground_truth_flat).x(),
+								std::get<1>(ground_truth_flat).y()
+										- std::get<0>(ground_truth_flat).y());
 
-					painter.drawText(std::get<0>(ground_truth_flat).x(),
-							std::get<1>(ground_truth_flat).y() + 30,
-							QString::fromStdString(
-									"depth: " + std::to_string(std::get<2>(ground_truth_flat))));
+						painter.drawText(std::get<0>(ground_truth_flat).x(),
+								std::get<1>(ground_truth_flat).y() + 30,
+								QString::fromStdString(
+										"depth: "
+												+ std::to_string(std::get<2>(ground_truth_flat))));
+					}
 				}
-			}
-			else
-			{
-				std::cout << "[WARN]: Flat ground truth frame missing." << std::endl;
-			}
-
-			if (bounding_box_frame_flat)
-			{
-				for (const auto &bounding_box_flat : *bounding_box_frame_flat)
+				else
 				{
-					painter.setPen(pen_bounding_box);
-
-					painter.drawRect(std::get<0>(bounding_box_flat).x(),
-							std::get<0>(bounding_box_flat).y(),
-							std::get<1>(bounding_box_flat).x() - std::get<0>(bounding_box_flat).x(),
-							std::get<1>(bounding_box_flat).y()
-									- std::get<0>(bounding_box_flat).y());
-
-					painter.drawText(std::get<0>(bounding_box_flat).x(),
-							std::get<0>(bounding_box_flat).y() - 15,
-							QString::fromStdString(
-									"depth: " + std::to_string(std::get<2>(bounding_box_flat))));
+					std::cout << "[WARN]: Flat ground truth frame missing." << std::endl;
 				}
-			}
-			else
-			{
-				std::cout << "[WARN]: Flat bounding box frame missing." << std::endl;
-			}
 
-			painter.end();
+				if (bounding_box_frame_flat)
+				{
+					for (const auto &bounding_box_flat : *bounding_box_frame_flat)
+					{
+						painter.setPen(pen_bounding_box);
+
+						painter.drawRect(std::get<0>(bounding_box_flat).x(),
+								std::get<0>(bounding_box_flat).y(),
+								std::get<1>(bounding_box_flat).x()
+										- std::get<0>(bounding_box_flat).x(),
+								std::get<1>(bounding_box_flat).y()
+										- std::get<0>(bounding_box_flat).y());
+
+						painter.drawText(std::get<0>(bounding_box_flat).x(),
+								std::get<0>(bounding_box_flat).y() - 15,
+								QString::fromStdString(
+										"depth: "
+												+ std::to_string(std::get<2>(bounding_box_flat))));
+					}
+				}
+				else
+				{
+					std::cout << "[WARN]: Flat bounding box frame missing." << std::endl;
+				}
+
+				painter.end();
+			}
 
 			scene_camera_.reset(new QGraphicsScene);
 			scene_camera_->addPixmap(QPixmap::fromImage(qimage_camera));
