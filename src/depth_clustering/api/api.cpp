@@ -607,7 +607,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 
 	try
 	{
-		boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_file_name,
+		boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_cube_file_name,
 				ground_truth_cube_tree_);
 	} catch (boost::exception const &e)
 	{

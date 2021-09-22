@@ -29,7 +29,7 @@ struct DepthClusteringParameter
 	DiffFactory::DiffType difference_type;
 	std::string dataset_file_type;
 	std::string dataset_name;
-	std::string ground_truth_file_name;
+	std::string ground_truth_cube_file_name;
 	std::string ground_truth_flat_file_name;
 
 	DepthClusteringParameter() :
@@ -37,7 +37,7 @@ struct DepthClusteringParameter
 					10), size_cluster_max(20000), size_smooth_window(5), use_camera_fov(true), bounding_box_type(
 					BoundingBox::Type::Cube), difference_type(
 					DiffFactory::DiffType::ANGLES_PRECOMPUTED), dataset_file_type(".tiff"), dataset_name(
-					""), ground_truth_file_name("waymo_ground_truth_cube.json"), ground_truth_flat_file_name(
+					""), ground_truth_cube_file_name("waymo_ground_truth_cube.json"), ground_truth_flat_file_name(
 					"depth_clustering_ground_truth_flat.json")
 	{
 	}

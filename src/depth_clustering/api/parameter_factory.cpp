@@ -64,7 +64,8 @@ ParameterFactory::getDepthClusteringParameter()
 	auto difference_type_optional = tree.get_optional<std::string>("difference_type");
 	auto dataset_file_type_optional = tree.get_optional<std::string>("dataset_file_type");
 	auto dataset_name_optional = tree.get_optional<std::string>("dataset_name");
-	auto ground_truth_file_name_optional = tree.get_optional<std::string>("ground_truth_file_name");
+	auto ground_truth_cube_file_name_optional = tree.get_optional<std::string>(
+			"ground_truth_cube_file_name");
 	auto ground_truth_flat_file_name_optional = tree.get_optional<std::string>(
 			"ground_truth_flat_file_name");
 
@@ -161,9 +162,9 @@ ParameterFactory::getDepthClusteringParameter()
 		parameter.dataset_name = *dataset_name_optional;
 	}
 
-	if (ground_truth_file_name_optional)
+	if (ground_truth_cube_file_name_optional)
 	{
-		parameter.ground_truth_file_name = *ground_truth_file_name_optional;
+		parameter.ground_truth_cube_file_name = *ground_truth_cube_file_name_optional;
 	}
 
 	if (ground_truth_flat_file_name_optional)
@@ -416,7 +417,7 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 	auto use_camera_fov_optional = tree.get_optional<bool>("use_camera_fov");
 	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
 	auto difference_type_optional = tree.get_optional<std::string>("difference_type");
-	auto ground_truth_file_name_optional = tree.get_optional<std::string>("ground_truth_file_name");
+	auto ground_truth_cube_file_name_optional = tree.get_optional<std::string>("ground_truth_cube_file_name");
 	auto ground_truth_flat_file_name_optional = tree.get_optional<std::string>(
 			"ground_truth_flat_file_name");
 
@@ -503,9 +504,9 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 		}
 	}
 
-	if (ground_truth_file_name_optional)
+	if (ground_truth_cube_file_name_optional)
 	{
-		parameter.ground_truth_file_name = *ground_truth_file_name_optional;
+		parameter.ground_truth_cube_file_name = *ground_truth_cube_file_name_optional;
 	}
 
 	if (ground_truth_flat_file_name_optional)
