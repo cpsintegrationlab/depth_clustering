@@ -32,6 +32,7 @@ struct ProjectionParamsRaw
 	int horizontal_angle_start;
 	int horizontal_angle_end;
 	std::vector<double> beam_inclinations;
+	std::vector<double> extrinsic;
 
 	int horizontal_steps_current;
 	int horizontal_step_start;
@@ -39,7 +40,7 @@ struct ProjectionParamsRaw
 
 	ProjectionParamsRaw() :
 			horizontal_steps(2650), beams(64), horizontal_angle_start(180), horizontal_angle_end(
-					-180), beam_inclinations()
+					-180), beam_inclinations(), extrinsic()
 	{
 		updateHorizontalAngles(horizontal_angle_start, horizontal_angle_end);
 	}

@@ -193,6 +193,7 @@ ParameterFactory::getLidarProjectionParameter()
 	auto horizontal_angle_start_optional = tree.get_optional<int>("horizontal_angle_start");
 	auto horizontal_angle_end_optional = tree.get_optional<int>("horizontal_angle_end");
 	auto beam_inclinations_optional = tree.get_child_optional("beam_inclinations");
+	auto extrinsic_optional = tree.get_child_optional("extrinsic");
 
 	if (horizontal_steps_optional)
 	{
@@ -222,6 +223,17 @@ ParameterFactory::getLidarProjectionParameter()
 		{
 			projection_parameter_raw->beam_inclinations.push_back(
 					beam_inclinations_pair.second.get_value<double>());
+		}
+	}
+
+	if (extrinsic_optional)
+	{
+		projection_parameter_raw->extrinsic.clear();
+
+		for (const auto &extrinsic_pair : *extrinsic_optional)
+		{
+			projection_parameter_raw->extrinsic.push_back(
+					extrinsic_pair.second.get_value<double>());
 		}
 	}
 
@@ -417,7 +429,8 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 	auto use_camera_fov_optional = tree.get_optional<bool>("use_camera_fov");
 	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
 	auto difference_type_optional = tree.get_optional<std::string>("difference_type");
-	auto ground_truth_cube_file_name_optional = tree.get_optional<std::string>("ground_truth_cube_file_name");
+	auto ground_truth_cube_file_name_optional = tree.get_optional<std::string>(
+			"ground_truth_cube_file_name");
 	auto ground_truth_flat_file_name_optional = tree.get_optional<std::string>(
 			"ground_truth_flat_file_name");
 

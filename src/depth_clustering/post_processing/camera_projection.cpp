@@ -367,20 +367,21 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 		return;
 	}
 
-	Eigen::Matrix4f world_to_camera; // Camera extrinsic matrix, [R|t]
-	Eigen::Matrix4f world_to_camera_axes; // Camera extrinsic matrix axes transformation matrix
+	Eigen::Matrix4f camera_to_world; // Camera-to-world extrinsic transformation matrix, [R|t]
+	Eigen::Matrix4f world_to_camera; // World-to-camera extrinsic transformation matrix, [R|t]
+	Eigen::Matrix4f world_to_camera_axes; // World-to-camera extrinsic axes transformation matrix
 
-	// Construct camera extrinsic matrix
+	// Construct camera-to-world extrinsic transformation matrix
 	for (size_t i = 0; i < parameter_.extrinsic.size(); i++)
 	{
-		world_to_camera(i / 4, i % 4) = parameter_.extrinsic[i];
+		camera_to_world(i / 4, i % 4) = parameter_.extrinsic[i];
 	}
 
-	// Construct camera extrinsic matrix axes transformation matrix
+	// Construct world-to-camera extrinsic axes transformation matrix
 	world_to_camera_axes << 0, -1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 1;
 
-	// Inverse given camera-to-world extrinsic and transformation axes into camera frame
-	world_to_camera = world_to_camera_axes * world_to_camera.inverse();
+	// Obtain world-to-camera extrinsic transformation matrix
+	world_to_camera = world_to_camera_axes * camera_to_world.inverse();
 
 	// Process all bounding boxes in the frame
 	for (const auto &bounding_box : *bounding_box_frame_cube_)
@@ -477,20 +478,21 @@ CameraProjection::projectFromBoundingBoxFramePolygon()
 		return;
 	}
 
-	Eigen::Matrix4f world_to_camera; // Camera extrinsic matrix, [R|t]
-	Eigen::Matrix4f world_to_camera_axes; // Camera extrinsic matrix axes transformation matrix
+	Eigen::Matrix4f camera_to_world; // Camera-to-world extrinsic transformation matrix, [R|t]
+	Eigen::Matrix4f world_to_camera; // World-to-camera extrinsic transformation matrix, [R|t]
+	Eigen::Matrix4f world_to_camera_axes; // World-to-camera extrinsic axes transformation matrix
 
-	// Construct camera extrinsic matrix
+	// Construct camera-to-world extrinsic transformation matrix
 	for (size_t i = 0; i < parameter_.extrinsic.size(); i++)
 	{
-		world_to_camera(i / 4, i % 4) = parameter_.extrinsic[i];
+		camera_to_world(i / 4, i % 4) = parameter_.extrinsic[i];
 	}
 
-	// Construct camera extrinsic matrix axes transformation matrix
+	// Construct world-to-camera extrinsic axes transformation matrix
 	world_to_camera_axes << 0, -1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 1;
 
-	// Inverse given camera-to-world extrinsic and transformation axes into camera frame
-	world_to_camera = world_to_camera_axes * world_to_camera.inverse();
+	// Obtain world-to-camera extrinsic transformation matrix
+	world_to_camera = world_to_camera_axes * camera_to_world.inverse();
 
 	// Process all bounding boxes in the frame
 	for (const auto &bounding_box : *bounding_box_frame_polygon_)

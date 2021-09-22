@@ -917,14 +917,29 @@ Visualization::updateViewerPointCloud()
 	{
 		if (ground_truth_frame_cube_)
 		{
+			const auto projection_parameter_lidar_raw =
+					depth_clustering_->getLidarProjectionParameter()->getProjectionParamsRaw();
+
+			Eigen::Matrix4f world_to_lidar; // World-to-lidar extrinsic transformation matrix, [R|t]
+			Eigen::Matrix4f lidar_to_world; // Lidar-to-world extrinsic transformation matrix, [R|t]
+
+			world_to_lidar << 1, 0, 0, projection_parameter_lidar_raw->extrinsic[3], 0, 1, 0, projection_parameter_lidar_raw->extrinsic[7], 0, 0, 1, projection_parameter_lidar_raw->extrinsic[11], 0, 0, 0, 1;
+
+			// Obtain lidar-to-world extrinsic transformation matrix
+			lidar_to_world = world_to_lidar.inverse();
+
 			for (const auto &ground_truth_cube : *ground_truth_frame_cube_)
 			{
-				auto center = std::get<0>(ground_truth_cube);
+				auto center_lidar = std::get<0>(ground_truth_cube);
 				auto extent = std::get<1>(ground_truth_cube);
 				auto rotation = std::get<2>(ground_truth_cube);
 
-				auto cube_drawable = DrawableCube::Create(center, extent, Eigen::Vector3f(1, 0, 0),
-						rotation);
+				Eigen::Vector4f center_world = lidar_to_world
+						* Eigen::Vector4f(center_lidar(0), center_lidar(1), center_lidar(2), 1);
+
+				auto cube_drawable = DrawableCube::Create(
+						Eigen::Vector3f(center_world(0), center_world(1), center_world(2)), extent,
+						Eigen::Vector3f(1, 0, 0), rotation);
 
 				ui->viewer_point_cloud->AddDrawable(std::move(cube_drawable));
 			}
