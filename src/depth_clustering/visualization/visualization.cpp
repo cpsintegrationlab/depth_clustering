@@ -681,8 +681,18 @@ Visualization::openDataset(const std::string& dataset_path, const std::string& g
 		return;
 	}
 
-	depth_clustering_first_return_->initializeForDataset(dataset_path_, global_config_path_, false);
-	depth_clustering_second_return_->initializeForDataset(dataset_path_, global_config_path_, true);
+	auto depth_clustering_first_return_initialized =
+			depth_clustering_first_return_->initializeForDataset(dataset_path_, global_config_path_,
+					false);
+	auto depth_clustering_second_return_initialized =
+			depth_clustering_second_return_->initializeForDataset(dataset_path_,
+					global_config_path_, true);
+
+	if (!depth_clustering_first_return_initialized || !depth_clustering_second_return_initialized)
+	{
+		std::cerr << "[ERROR]: Failed to open dataset at \"" << dataset_path_ << "\"." << std::endl;
+		return;
+	}
 
 	std::cout << "[INFO]: Opened dataset at \"" << dataset_path_ << "\"." << std::endl;
 
