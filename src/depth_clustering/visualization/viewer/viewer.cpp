@@ -28,7 +28,7 @@ Viewer::resetViewFOVFull()
 {
 	setSceneCenter(qglviewer::Vec(0, 0, 0));
 	setSceneRadius(range_lidar_);
-	camera()->setOrientation(qglviewer::Quaternion(0, 0, -0.7071068, 0.7071068));
+	camera()->setOrientation(qglviewer::Quaternion(0, 0, -0.7071068, 0.7071068)); // Euler (x, y, z): (0, 0, -90)
 	camera()->showEntireScene();
 	update();
 }
@@ -38,8 +38,7 @@ Viewer::resetViewFOVCamera()
 {
 	setSceneCenter(qglviewer::Vec(range_lidar_ / 2, 0, 0));
 	setSceneRadius(range_lidar_ / 2);
-	camera()->setOrientation(qglviewer::Quaternion(0, 0, -0.7071068, 0.7071068));
-	camera()->setPosition(qglviewer::Vec(0, 0, 700));
+	camera()->setOrientation(qglviewer::Quaternion(0, 0, -0.7071068, 0.7071068)); // Euler (x, y, z): (0, 0, -90)
 	camera()->showEntireScene();
 	update();
 }
