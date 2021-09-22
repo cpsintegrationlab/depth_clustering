@@ -4,6 +4,7 @@
 
 #include <GL/glut.h>
 
+#include "utils/radians.h"
 #include "visualization/drawables/drawable_cube.h"
 
 namespace depth_clustering
@@ -11,14 +12,10 @@ namespace depth_clustering
 void
 DrawableCube::Draw() const
 {
-	if (_scale.z() < 0.3)
-	{
-		return;
-	}
-
 	glPushMatrix();
 	glTranslatef(_center.x(), _center.y(), _center.z());
 	glScalef(_scale.x(), _scale.y(), _scale.z());
+	glRotatef(Radians::FromRadians(rotation_).ToDegrees(), 0, 0, 1);
 	glColor3f(_color[0], _color[1], _color[2]);
 	glLineWidth(4.0f);
 	glBegin(GL_LINE_STRIP);

@@ -79,6 +79,9 @@ public:
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
 	getBoundingBoxFrameFlat() const;
 
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>>
+	getGroundTruthFrameCube(const std::string& frame_path_name_range);
+
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
 	getGroundTruthFrameFlat(const std::string& frame_path_name_range);
 
@@ -153,6 +156,7 @@ private:
 	cv::Mat image_intensity_;
 	cv::Mat image_elongation_;
 
+	boost::property_tree::ptree ground_truth_cube_tree_;
 	boost::property_tree::ptree ground_truth_flat_tree_;
 };
 

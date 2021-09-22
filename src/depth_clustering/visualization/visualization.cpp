@@ -362,6 +362,9 @@ Visualization::onSliderMovedTo(int frame_number)
 				frame_paths_names_range_second_return[frame_number]);
 	}
 
+	ground_truth_frame_cube_ = depth_clustering_->getGroundTruthFrameCube(
+			frame_paths_names_range[frame_number]);
+
 	ground_truth_frame_flat_ = depth_clustering_->getGroundTruthFrameFlat(
 			frame_paths_names_range[frame_number]);
 
@@ -912,6 +915,25 @@ Visualization::updateViewerPointCloud()
 
 	if (show_bounding_box_)
 	{
+		if (ground_truth_frame_cube_)
+		{
+			for (const auto &ground_truth_cube : *ground_truth_frame_cube_)
+			{
+				auto center = std::get<0>(ground_truth_cube);
+				auto extent = std::get<1>(ground_truth_cube);
+				auto rotation = std::get<2>(ground_truth_cube);
+
+				auto cube_drawable = DrawableCube::Create(center, extent, Eigen::Vector3f(1, 0, 0),
+						rotation);
+
+				ui->viewer_point_cloud->AddDrawable(std::move(cube_drawable));
+			}
+		}
+		else
+		{
+			std::cout << "[WARN]: Cube ground truth frame missing." << std::endl;
+		}
+
 		auto bounding_box = depth_clustering_->getBoundingBox();
 		const auto &parameter = depth_clustering_->getParameter();
 

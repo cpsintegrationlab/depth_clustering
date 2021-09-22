@@ -157,6 +157,70 @@ DepthClustering::getBoundingBoxFrameFlat() const
 	return bounding_box_->getFrameFlat();
 }
 
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>>
+DepthClustering::getGroundTruthFrameCube(const std::string& frame_path_name_range)
+{
+	if (frame_path_name_range == "")
+	{
+		std::cout << "[WARN]: Invalid range frame path and name." << std::endl;
+		return nullptr;
+	}
+
+	std::string frame_name_range = "";
+	std::stringstream ss(frame_path_name_range);
+
+	while (std::getline(ss, frame_name_range, '/'))
+	{
+	}
+
+	if (frame_name_range == "")
+	{
+		std::cout << "[WARN]: Invalid range frame name." << std::endl;
+		return nullptr;
+	}
+
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> ground_truth_frame_cube;
+
+	auto ground_truth_frame_cube_tree_optioal = ground_truth_cube_tree_.get_child_optional(
+			boost::property_tree::ptree::path_type(frame_name_range, '/'));
+
+	if (!ground_truth_frame_cube_tree_optioal)
+	{
+		std::cout << "[WARN]: Missing cube ground truth in frame \"" << frame_name_range << "\"."
+				<< std::endl;
+		return ground_truth_frame_cube;
+	}
+
+	ground_truth_frame_cube = std::make_shared<BoundingBox::Frame<BoundingBox::Cube>>();
+	auto ground_truth_frame_cube_tree = *ground_truth_frame_cube_tree_optioal;
+
+	for (const auto &ground_truth_cube_array_pair : ground_truth_frame_cube_tree)
+	{
+		std::vector<std::string> ground_truth_cube_values;
+		Eigen::Vector3f center;
+		Eigen::Vector3f extent;
+		float rotation;
+		std::string id;
+
+		for (const auto &ground_truth_cube_value_pair : ground_truth_cube_array_pair.second)
+		{
+			ground_truth_cube_values.push_back(
+					ground_truth_cube_value_pair.second.get_value<std::string>());
+		}
+
+		center << std::stof(ground_truth_cube_values[0]), std::stof(ground_truth_cube_values[1]), std::stof(
+				ground_truth_cube_values[2]);
+		extent << std::stof(ground_truth_cube_values[3]), std::stof(ground_truth_cube_values[4]), std::stof(
+				ground_truth_cube_values[5]);
+		rotation = std::stof(ground_truth_cube_values[6]);
+		id = ground_truth_cube_values[7];
+
+		ground_truth_frame_cube->push_back(std::make_tuple(center, extent, rotation, id));
+	}
+
+	return ground_truth_frame_cube;
+}
+
 std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
 DepthClustering::getGroundTruthFrameFlat(const std::string& frame_path_name_range)
 {
@@ -540,6 +604,16 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 
 	depth_ground_remover_->AddClient(clusterer_.get());
 	clusterer_->AddClient(bounding_box_.get());
+
+	try
+	{
+		boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_file_name,
+				ground_truth_cube_tree_);
+	} catch (boost::exception const &e)
+	{
+		std::cout << "[WARN]: Failed to load cube ground truth file from \"" << dataset_path_
+				<< "\"." << std::endl;
+	}
 
 	try
 	{
