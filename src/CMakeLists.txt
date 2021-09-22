@@ -2,8 +2,11 @@
 cmake_minimum_required(VERSION 2.8)
 project(depth_clustering)
 
-# Set compiler parameters
+# Set CMake parameters
 set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../cmake")
+
+# Set compiler parameters
 set(CMAKE_C_FLAGS "-Wall -Wextra -static-libc -fPIC")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
@@ -18,9 +21,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(ARCH STREQUAL "arm64")
 	set(CMAKE_EXE_LINKER_FLAGS "-Wl,--whole-archive")
 endif()
-
-# Set CMake module path
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../cmake")
 
 # Set installation paths
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_PATH)
