@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "visualization/drawables/drawable.h"
-#include "utils/mem_utils.h"
 
 namespace depth_clustering {
 
@@ -25,8 +24,8 @@ class DrawablePolygon3d : public Drawable {
   static DrawablePolygon3d::UniquePtr Create(
       const AlignedEigenVectors& polygon, float height,
       const Eigen::Vector3f& color = Eigen::Vector3f(1.0f, 0.5f, 0.2f)) {
-    return mem_utils::make_unique<DrawablePolygon3d>(
-        DrawablePolygon3d(polygon, height, color));
+    return std::unique_ptr<DrawablePolygon3d>(
+        new DrawablePolygon3d(polygon, height, color));
   }
 
   ~DrawablePolygon3d() override {}

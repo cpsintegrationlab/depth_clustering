@@ -20,8 +20,6 @@
 #include <Eigen/Geometry>
 #include <cassert>
 
-#include "utils/useful_typedefs.h"
-
 namespace depth_clustering {
 
 /**
@@ -33,8 +31,8 @@ class Pose : public Eigen::Affine3f {
 
   using Vector6f = Eigen::Matrix<float, 6, 1>;
 
-  using Ptr = shared_ptr<Pose>;
-  using ConstPtr = shared_ptr<const Pose>;
+  using Ptr = std::shared_ptr<Pose>;
+  using ConstPtr = std::shared_ptr<const Pose>;
   using Base = Eigen::Affine3f;
 
   Pose() : Base(), _likelihood(1.0f) {

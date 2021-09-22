@@ -29,7 +29,6 @@
 #include "utils/cloud.h"
 #include "utils/radians.h"
 #include "utils/timer.h"
-#include "utils/useful_typedefs.h"
 
 #include "clusterers/abstract_clusterer.h"
 #include "image_labelers/diff_helpers/diff_factory.h"

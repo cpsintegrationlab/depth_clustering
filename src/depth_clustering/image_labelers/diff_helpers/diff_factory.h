@@ -22,7 +22,6 @@
 #include "image_labelers/diff_helpers/angle_diff.h"
 #include "image_labelers/diff_helpers/line_dist_diff.h"
 #include "image_labelers/diff_helpers/simple_diff.h"
-#include "utils/mem_utils.h"
 
 namespace depth_clustering {
 

@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "utils/radians.h"
-#include "utils/useful_typedefs.h"
 
 namespace depth_clustering
 {
@@ -153,8 +152,8 @@ class ProjectionParams
 {
 public:
 
-	using Ptr = shared_ptr<ProjectionParams>;
-	using ConstPtr = const shared_ptr<const ProjectionParams>;
+	using Ptr = std::shared_ptr<ProjectionParams>;
+	using ConstPtr = const std::shared_ptr<const ProjectionParams>;
 
 	enum class Set
 	{

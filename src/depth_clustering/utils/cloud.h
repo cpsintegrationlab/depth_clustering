@@ -27,7 +27,6 @@
 #include "projections/ring_projection.h"
 #include "projections/spherical_projection.h"
 #include "utils/pose.h"
-#include "utils/useful_typedefs.h"
 
 namespace depth_clustering
 {
@@ -41,8 +40,8 @@ class Cloud
 {
 public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	using Ptr = shared_ptr<Cloud>;
-	using ConstPtr = shared_ptr<const Cloud>;
+	using Ptr = std::shared_ptr<Cloud>;
+	using ConstPtr = std::shared_ptr<const Cloud>;
 
 	Cloud() :
 			_points

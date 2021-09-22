@@ -24,8 +24,6 @@
 #include <string>
 #include <vector>
 
-#include "utils/mem_utils.h"
-
 namespace depth_clustering
 {
 
@@ -182,124 +180,124 @@ ProjectionParams::FindClosest(const vector<Radians>& vec, const Radians& val)
 std::unique_ptr<ProjectionParams>
 ProjectionParams::VLP_16()
 {
-	auto params = ProjectionParams();
-	params.SetSpan(SpanParams(-180_deg, 180_deg, 870), SpanParams::Direction::HORIZONTAL);
-	params.SetSpan(SpanParams(15_deg, -15_deg, 16), SpanParams::Direction::VERTICAL);
-	params.FillCosSin();
-	if (!params.valid())
+	auto params = std::unique_ptr<ProjectionParams>(new ProjectionParams);
+	params->SetSpan(SpanParams(-180_deg, 180_deg, 870), SpanParams::Direction::HORIZONTAL);
+	params->SetSpan(SpanParams(15_deg, -15_deg, 16), SpanParams::Direction::VERTICAL);
+	params->FillCosSin();
+	if (!params->valid())
 	{
 		fprintf(stderr, "ERROR: params are not valid!\n");
 		return nullptr;
 	}
-	return mem_utils::make_unique<ProjectionParams>(params);
+	return params;
 }
 
 std::unique_ptr<ProjectionParams>
 ProjectionParams::HDL_32()
 {
-	auto params = ProjectionParams();
-	params.SetSpan(SpanParams(-180_deg, 180_deg, 870), SpanParams::Direction::HORIZONTAL);
-	params.SetSpan(SpanParams(10.0_deg, -30.0_deg, 32), SpanParams::Direction::VERTICAL);
-	params.FillCosSin();
-	if (!params.valid())
+	auto params = std::unique_ptr<ProjectionParams>(new ProjectionParams);
+	params->SetSpan(SpanParams(-180_deg, 180_deg, 870), SpanParams::Direction::HORIZONTAL);
+	params->SetSpan(SpanParams(10.0_deg, -30.0_deg, 32), SpanParams::Direction::VERTICAL);
+	params->FillCosSin();
+	if (!params->valid())
 	{
 		fprintf(stderr, "ERROR: params are not valid!\n");
 		return nullptr;
 	}
-	return mem_utils::make_unique<ProjectionParams>(params);
+	return params;
 }
 
 std::unique_ptr<ProjectionParams>
 ProjectionParams::HDL_64_EQUAL()
 {
-	auto params = ProjectionParams();
-	params.SetSpan(SpanParams(-180_deg, 180_deg, 870), SpanParams::Direction::HORIZONTAL);
-	params.SetSpan(SpanParams(2.0_deg, -24.0_deg, 64), SpanParams::Direction::VERTICAL);
-	params.FillCosSin();
-	if (!params.valid())
+	auto params = std::unique_ptr<ProjectionParams>(new ProjectionParams);
+	params->SetSpan(SpanParams(-180_deg, 180_deg, 870), SpanParams::Direction::HORIZONTAL);
+	params->SetSpan(SpanParams(2.0_deg, -24.0_deg, 64), SpanParams::Direction::VERTICAL);
+	params->FillCosSin();
+	if (!params->valid())
 	{
 		fprintf(stderr, "ERROR: params are not valid!\n");
 		return nullptr;
 	}
-	return mem_utils::make_unique<ProjectionParams>(params);
+	return params;
 }
 
 std::unique_ptr<ProjectionParams>
 ProjectionParams::HDL_64()
 {
-	auto params = ProjectionParams();
-	params.SetSpan(SpanParams(-180_deg, 180_deg, 870), SpanParams::Direction::HORIZONTAL);
+	auto params = std::unique_ptr<ProjectionParams>(new ProjectionParams);
+	params->SetSpan(SpanParams(-180_deg, 180_deg, 870), SpanParams::Direction::HORIZONTAL);
 	SpanParams span_top(2.0_deg, -8.5_deg, 32);
 	SpanParams span_bottom(-8.87_deg, -24.87_deg, 32);
 	vector<SpanParams> spans =
 	{
 	{ span_top, span_bottom } };
-	params.SetSpan(spans, SpanParams::Direction::VERTICAL);
-	params.FillCosSin();
-	if (!params.valid())
+	params->SetSpan(spans, SpanParams::Direction::VERTICAL);
+	params->FillCosSin();
+	if (!params->valid())
 	{
 		fprintf(stderr, "ERROR: params are not valid!\n");
 		return nullptr;
 	}
-	return mem_utils::make_unique<ProjectionParams>(params);
+	return params;
 }
 
 std::unique_ptr<ProjectionParams>
 ProjectionParams::WAYMO()
 {
-	auto params = ProjectionParams();
-	params.SetSpan(SpanParams(-180_deg, 180_deg, 2650), SpanParams::Direction::HORIZONTAL);
+	auto params = std::unique_ptr<ProjectionParams>(new ProjectionParams);
+	params->SetSpan(SpanParams(-180_deg, 180_deg, 2650), SpanParams::Direction::HORIZONTAL);
 	SpanParams span_top(17.74_deg, 0.14_deg, 50);
 	SpanParams span_bottom(-0.035_deg, -2.21_deg, 14);
 	vector<SpanParams> spans =
 	{
 	{ span_top, span_bottom } };
-	params.SetSpan(spans, SpanParams::Direction::VERTICAL);
-	params.FillCosSin();
-	if (!params.valid())
+	params->SetSpan(spans, SpanParams::Direction::VERTICAL);
+	params->FillCosSin();
+	if (!params->valid())
 	{
 		fprintf(stderr, "ERROR: params are not valid!\n");
 		return nullptr;
 	}
-	return mem_utils::make_unique<ProjectionParams>(params);
+	return params;
 }
 
 std::unique_ptr<ProjectionParams>
 ProjectionParams::APOLLO()
 {
-	auto params = ProjectionParams();
-	params.SetSpan(SpanParams(-180_deg, 180_deg, 360), SpanParams::Direction::HORIZONTAL);
-	params.SetSpan(SpanParams(10.665_deg, -30.665_deg, 32), SpanParams::Direction::VERTICAL);
-	params.FillCosSin();
-	if (!params.valid())
+	auto params = std::unique_ptr<ProjectionParams>(new ProjectionParams);
+	params->SetSpan(SpanParams(-180_deg, 180_deg, 360), SpanParams::Direction::HORIZONTAL);
+	params->SetSpan(SpanParams(10.665_deg, -30.665_deg, 32), SpanParams::Direction::VERTICAL);
+	params->FillCosSin();
+	if (!params->valid())
 	{
 		fprintf(stderr, "ERROR: params are not valid!\n");
 		return nullptr;
 	}
-	return mem_utils::make_unique<ProjectionParams>(params);
+	return params;
 }
 
 std::unique_ptr<ProjectionParams>
 ProjectionParams::FullSphere(const Radians& discretization)
 {
-	auto params = ProjectionParams();
-	params.SetSpan(SpanParams(-180_deg, 180_deg, discretization),
+	auto params = std::unique_ptr<ProjectionParams>(new ProjectionParams);
+	params->SetSpan(SpanParams(-180_deg, 180_deg, discretization),
 			SpanParams::Direction::HORIZONTAL);
-	params.SetSpan(SpanParams(-90_deg, 90_deg, discretization), SpanParams::Direction::VERTICAL);
-	params.FillCosSin();
-	if (!params.valid())
+	params->SetSpan(SpanParams(-90_deg, 90_deg, discretization), SpanParams::Direction::VERTICAL);
+	params->FillCosSin();
+	if (!params->valid())
 	{
 		fprintf(stderr, "ERROR: params are not valid!\n");
 		return nullptr;
 	}
-	return mem_utils::make_unique<ProjectionParams>(params);
+	return params;
 }
 
 std::unique_ptr<ProjectionParams>
 ProjectionParams::FromConfigFile(const std::string& path)
 {
 	fprintf(stderr, "INFO: Reading config.\n");
-	ProjectionParams params;
+	auto params = std::unique_ptr<ProjectionParams>(new ProjectionParams);
 	// we need to fill this thing. Parsing text files again. Is that what PhD in
 	// Robotics is about?
 	std::ifstream file(path.c_str());
@@ -327,30 +325,30 @@ ProjectionParams::FromConfigFile(const std::string& path)
 			}
 			int cols = std::stoi(str_angles[0]);
 			int rows = std::stoi(str_angles[1]);
-			params._h_span_params = SpanParams(Radians::FromDegrees(std::stod(str_angles[2])),
+			params->_h_span_params = SpanParams(Radians::FromDegrees(std::stod(str_angles[2])),
 					Radians::FromDegrees(std::stod(str_angles[3])), cols);
 			fprintf(stderr, "start:%f, stop:%f, span:%f, step:%f\n",
-					params._h_span_params.start_angle().ToDegrees(),
-					params._h_span_params.end_angle().ToDegrees(),
-					params._h_span_params.span().ToDegrees(),
-					params._h_span_params.step().ToDegrees());
+					params->_h_span_params.start_angle().ToDegrees(),
+					params->_h_span_params.end_angle().ToDegrees(),
+					params->_h_span_params.span().ToDegrees(),
+					params->_h_span_params.step().ToDegrees());
 
 			// fill the cols spacing
 			for (int c = 0; c < cols; ++c)
 			{
-				params._col_angles.push_back(
-						params._h_span_params.start_angle() + params._h_span_params.step() * c);
+				params->_col_angles.push_back(
+						params->_h_span_params.start_angle() + params->_h_span_params.step() * c);
 			}
 
 			// fill the rows
-			params._v_span_params = SpanParams(Radians::FromDegrees(std::stod(str_angles[4])),
+			params->_v_span_params = SpanParams(Radians::FromDegrees(std::stod(str_angles[4])),
 					Radians::FromDegrees(std::stod(str_angles.back())), rows);
 			// fill the rows with respect to img.cfg spacings
 			for (size_t i = 4; i < str_angles.size(); ++i)
 			{
-				params._row_angles.push_back(Radians::FromDegrees(std::stof(str_angles[i])));
+				params->_row_angles.push_back(Radians::FromDegrees(std::stof(str_angles[i])));
 			}
-			if (params._row_angles.size() != static_cast<size_t>(rows))
+			if (params->_row_angles.size() != static_cast<size_t>(rows))
 			{
 				fprintf(stderr, "ERROR: wrong config\n");
 				return nullptr;
@@ -358,16 +356,16 @@ ProjectionParams::FromConfigFile(const std::string& path)
 		}
 	}
 	// fill cos and sin arrays
-	params.FillCosSin();
+	params->FillCosSin();
 	// check validity
-	if (!params.valid())
+	if (!params->valid())
 	{
 		fprintf(stderr, "ERROR: the config read was not valid.\n");
 		return nullptr;
 	}
 	fprintf(stderr, "INFO: Params sucessfully read. Rows: %lu, Cols: %lu\n",
-			params._row_angles.size(), params._col_angles.size());
-	return mem_utils::make_unique<ProjectionParams>(params);
+			params->_row_angles.size(), params->_col_angles.size());
+	return params;
 }
 
 std::unique_ptr<ProjectionParams>
@@ -375,42 +373,42 @@ ProjectionParams::FromBeamInclinations(const int& horizontal_steps, const int& b
 		const int& horizontal_angle_start, const int& horizontal_angle_end,
 		const std::vector<double>& beam_inclinations)
 {
-	ProjectionParams parameter;
+	auto parameter = std::unique_ptr<ProjectionParams>(new ProjectionParams);
 	int cols = horizontal_steps;
 	int rows = beams;
 
-	parameter._h_span_params = SpanParams(Radians::FromDegrees(horizontal_angle_start),
+	parameter->_h_span_params = SpanParams(Radians::FromDegrees(horizontal_angle_start),
 			Radians::FromDegrees(horizontal_angle_end), cols);
 
 	for (int col = 0; col < cols; col++)
 	{
-		parameter._col_angles.push_back(
-				parameter._h_span_params.start_angle() + parameter._h_span_params.step() * col);
+		parameter->_col_angles.push_back(
+				parameter->_h_span_params.start_angle() + parameter->_h_span_params.step() * col);
 	}
 
-	parameter._v_span_params = SpanParams(Radians::FromDegrees(beam_inclinations.front()),
+	parameter->_v_span_params = SpanParams(Radians::FromDegrees(beam_inclinations.front()),
 			Radians::FromDegrees(beam_inclinations.back()), rows);
 
 	for (const auto &beam_inclination : beam_inclinations)
 	{
-		parameter._row_angles.push_back(Radians::FromDegrees(beam_inclination));
+		parameter->_row_angles.push_back(Radians::FromDegrees(beam_inclination));
 	}
 
-	if (parameter._row_angles.size() != static_cast<size_t>(rows))
+	if (parameter->_row_angles.size() != static_cast<size_t>(rows))
 	{
 		std::cout << "[ERROR]: Invalid beam inclinations." << std::endl;
 		return nullptr;
 	}
 
-	parameter.FillCosSin();
+	parameter->FillCosSin();
 
-	if (!parameter.valid())
+	if (!parameter->valid())
 	{
 		std::cout << "[ERROR]: Invalid lidar projection parameter." << std::endl;
 		return nullptr;
 	}
 
-	return mem_utils::make_unique<ProjectionParams>(parameter);
+	return parameter;
 }
 
 const std::vector<float>&

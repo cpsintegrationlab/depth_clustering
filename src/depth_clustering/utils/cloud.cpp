@@ -62,7 +62,7 @@ Cloud::Transform(const Pose& pose) const
 {
 	Cloud cloud_copy(*this);
 	cloud_copy.TransformInPlace(pose);
-	return make_shared<Cloud>(cloud_copy);
+	return std::make_shared<Cloud>(cloud_copy);
 }
 
 void
@@ -110,7 +110,7 @@ Cloud::FromImage(const cv::Mat& image, const ProjectionParams& params)
 	}
 	cloud.SetProjectionPtr(proj);
 	// we cannot share ownership of this cloud with others, so create a new one
-	return boost::make_shared<Cloud>(cloud);
+	return std::make_shared<Cloud>(cloud);
 }
 
 Cloud::Ptr
@@ -137,7 +137,7 @@ Cloud::FromImageIntensity(const cv::Mat& image, const cv::Mat& image_intensity,
 	}
 	cloud.SetProjectionPtr(proj);
 	// we cannot share ownership of this cloud with others, so create a new one
-	return boost::make_shared<Cloud>(cloud);
+	return std::make_shared<Cloud>(cloud);
 }
 
 Cloud::Ptr
@@ -164,7 +164,7 @@ Cloud::FromImageElongation(const cv::Mat& image, const cv::Mat& image_elongation
 	}
 	cloud.SetProjectionPtr(proj);
 	// we cannot share ownership of this cloud with others, so create a new one
-	return boost::make_shared<Cloud>(cloud);
+	return std::make_shared<Cloud>(cloud);
 }
 
 Cloud::Ptr
@@ -193,6 +193,6 @@ Cloud::FromImageConfidence(const cv::Mat& image, const cv::Mat& image_intensity,
 	}
 	cloud.SetProjectionPtr(proj);
 	// we cannot share ownership of this cloud with others, so create a new one
-	return boost::make_shared<Cloud>(cloud);
+	return std::make_shared<Cloud>(cloud);
 }
 }  // namespace depth_clustering

@@ -2,8 +2,9 @@
 // In case of any problems with the code please contact me.
 // Email: igor.bogoslavskyi@uni-bonn.de.
 
-#include "./drawable_polygon3d.h"
 #include <GL/glut.h>
+
+#include "visualization/drawables/drawable_polygon3d.h"
 
 namespace depth_clustering {
 

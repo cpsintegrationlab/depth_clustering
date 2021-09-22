@@ -2,8 +2,9 @@
 // In case of any problems with the code please contact me.
 // Email: igor.bogoslavskyi@uni-bonn.de.
 
-#include "./drawable_cube.h"
 #include <GL/glut.h>
+
+#include "visualization/drawables/drawable_cube.h"
 
 namespace depth_clustering
 {

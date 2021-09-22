@@ -8,7 +8,6 @@
 #include <Eigen/Core>
 
 #include "visualization/drawables/drawable.h"
-#include "utils/mem_utils.h"
 
 namespace depth_clustering {
 
@@ -22,8 +21,8 @@ class DrawableCube : public Drawable {
   static DrawableCube::UniquePtr Create(
       const Eigen::Vector3f& center, const Eigen::Vector3f& scale,
       const Eigen::Vector3f& color = Eigen::Vector3f(1.0f, 0.5f, 0.2f)) {
-    return mem_utils::make_unique<DrawableCube>(
-        DrawableCube(center, scale, color));
+    return std::unique_ptr<DrawableCube>(
+        new DrawableCube(center, scale, color));
   }
 
   ~DrawableCube() override {}

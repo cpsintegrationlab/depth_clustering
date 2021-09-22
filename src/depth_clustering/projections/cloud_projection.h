@@ -30,7 +30,6 @@
 
 #include "utils/radians.h"
 #include "utils/rich_point.h"
-#include "utils/useful_typedefs.h"
 
 namespace depth_clustering {
 
@@ -44,8 +43,8 @@ class CloudProjection {
   using PointMatrix = std::vector<PointColumn>;
 
  public:
-  using Ptr = shared_ptr<CloudProjection>;
-  using ConstPtr = shared_ptr<const CloudProjection>;
+  using Ptr = std::shared_ptr<CloudProjection>;
+  using ConstPtr = std::shared_ptr<const CloudProjection>;
 
   enum class Type { SPHERICAL, CYLLINDRICAL };
 

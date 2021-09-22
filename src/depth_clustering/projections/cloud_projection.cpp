@@ -17,11 +17,7 @@
 #include <string>
 #include <vector>
 
-#include "utils/mem_utils.h"
-
 namespace depth_clustering {
-
-using mem_utils::make_unique;
 
 CloudProjection::PointContainer::PointContainer() {}
 
