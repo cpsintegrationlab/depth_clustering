@@ -37,39 +37,37 @@ using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
 		QWidget(parent), ui(new Ui::Visualization), play_(false), shown_(false), show_bounding_box_(
-				true), viewer_point_cloud_layer_index_(5), viewer_image_layer_index_top_(0), viewer_image_layer_index_middle_(
-				1), viewer_image_layer_index_bottom_(2)
+				true), viewer_point_cloud_layer_index_(5), viewer_image_layer_index_left_(0), viewer_image_layer_index_middle_(
+				1), viewer_image_layer_index_right_(2)
 {
 	ui->setupUi(this);
 
 	ui->frame_controls->setFixedHeight(ui->frame_controls->minimumHeight());
 	ui->frame_settings->setFixedHeight(ui->frame_settings->minimumHeight());
 	ui->viewer_image_camera->setFixedWidth(ui->viewer_image_camera->height() * 16 / 9);
-	ui->viewer_image_top->setFixedHeight(ui->viewer_image_top->minimumHeight());
-	ui->viewer_image_middle->setFixedHeight(ui->viewer_image_middle->minimumHeight());
-	ui->viewer_image_bottom->setFixedHeight(ui->viewer_image_bottom->minimumHeight());
+	ui->frame_viewer_image->setFixedHeight(ui->frame_viewer_image->minimumHeight());
 
 	ui->combo_layer_point_cloud->setCurrentIndex(viewer_point_cloud_layer_index_);
-	ui->combo_layer_image_top->setCurrentIndex(viewer_image_layer_index_top_);
+	ui->combo_layer_image_left->setCurrentIndex(viewer_image_layer_index_left_);
 	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
-	ui->combo_layer_image_bottom->setCurrentIndex(viewer_image_layer_index_bottom_);
+	ui->combo_layer_image_right->setCurrentIndex(viewer_image_layer_index_right_);
 
 	ui->viewer_image_camera->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_camera->setCacheMode(QGraphicsView::CacheBackground);
 	ui->viewer_image_camera->setRenderHints(
 			QPainter::SmoothPixmapTransform | QPainter::Antialiasing
 					| QPainter::HighQualityAntialiasing);
-	ui->viewer_image_top->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	ui->viewer_image_top->setCacheMode(QGraphicsView::CacheBackground);
-	ui->viewer_image_top->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+	ui->viewer_image_left->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_left->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_left->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	ui->viewer_image_middle->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_middle->setCacheMode(QGraphicsView::CacheBackground);
 	ui->viewer_image_middle->setRenderHints(
 			QPainter::SmoothPixmapTransform | QPainter::Antialiasing
 					| QPainter::HighQualityAntialiasing);
-	ui->viewer_image_bottom->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	ui->viewer_image_bottom->setCacheMode(QGraphicsView::CacheBackground);
-	ui->viewer_image_bottom->setRenderHints(
+	ui->viewer_image_right->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	ui->viewer_image_right->setCacheMode(QGraphicsView::CacheBackground);
+	ui->viewer_image_right->setRenderHints(
 			QPainter::SmoothPixmapTransform | QPainter::Antialiasing
 					| QPainter::HighQualityAntialiasing);
 	ui->viewer_point_cloud->installEventFilter(this);
@@ -103,8 +101,8 @@ Visualization::Visualization(QWidget* parent) :
 void
 Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client_id)
 {
-	if (viewer_image_layer_index_top_ == 1 || viewer_image_layer_index_middle_ == 1
-			|| viewer_image_layer_index_bottom_ == 1)
+	if (viewer_image_layer_index_left_ == 1 || viewer_image_layer_index_middle_ == 1
+			|| viewer_image_layer_index_right_ == 1)
 	{
 		QImage qimage_segmentation = MatToQImage(
 				AbstractImageLabeler::LabelsToColor(image_segmentation));
@@ -315,8 +313,8 @@ Visualization::onSliderMovedTo(int frame_number)
 	depth_clustering_->processOneRangeFrameForDataset(frame_paths_names_range[frame_number]);
 
 	if (viewer_point_cloud_layer_index_ == 1 || viewer_point_cloud_layer_index_ == 3
-			|| viewer_image_layer_index_top_ == 3 || viewer_image_layer_index_middle_ == 3
-			|| viewer_image_layer_index_bottom_ == 3)
+			|| viewer_image_layer_index_left_ == 3 || viewer_image_layer_index_middle_ == 3
+			|| viewer_image_layer_index_right_ == 3)
 	{
 		auto folder_reader_intensity = depth_clustering_->getFolderReaderIntensity();
 		const auto &frame_paths_names_intensity = folder_reader_intensity->GetAllFilePaths();
@@ -335,8 +333,8 @@ Visualization::onSliderMovedTo(int frame_number)
 	}
 
 	if (viewer_point_cloud_layer_index_ == 2 || viewer_point_cloud_layer_index_ == 3
-			|| viewer_image_layer_index_top_ == 4 || viewer_image_layer_index_middle_ == 4
-			|| viewer_image_layer_index_bottom_ == 4)
+			|| viewer_image_layer_index_left_ == 4 || viewer_image_layer_index_middle_ == 4
+			|| viewer_image_layer_index_right_ == 4)
 	{
 		auto folder_reader_elongation = depth_clustering_->getFolderReaderElongation();
 		const auto &frame_paths_names_elongation = folder_reader_elongation->GetAllFilePaths();
@@ -542,9 +540,9 @@ Visualization::onLayerPointCloudUpdated()
 void
 Visualization::onLayerImageUpdated()
 {
-	viewer_image_layer_index_top_ = ui->combo_layer_image_top->currentIndex();
+	viewer_image_layer_index_left_ = ui->combo_layer_image_left->currentIndex();
 	viewer_image_layer_index_middle_ = ui->combo_layer_image_middle->currentIndex();
-	viewer_image_layer_index_bottom_ = ui->combo_layer_image_bottom->currentIndex();
+	viewer_image_layer_index_right_ = ui->combo_layer_image_right->currentIndex();
 
 	onSliderMovedTo(ui->slider_frame->value());
 }
@@ -685,9 +683,9 @@ Visualization::openDataset(const std::string& dataset_path, const std::string& g
 	global_config_path_ = global_config_path;
 	play_ = false;
 	viewer_point_cloud_layer_index_ = 5;
-	viewer_image_layer_index_top_ = 0;
+	viewer_image_layer_index_left_ = 0;
 	viewer_image_layer_index_middle_ = 1;
-	viewer_image_layer_index_bottom_ = 2;
+	viewer_image_layer_index_right_ = 2;
 
 	if (!depth_clustering_first_return_ || !depth_clustering_second_return_)
 	{
@@ -1117,8 +1115,8 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		}
 	}
 
-	if (viewer_image_layer_index_top_ == 0 || viewer_image_layer_index_middle_ == 0
-			|| viewer_image_layer_index_bottom_ == 0)
+	if (viewer_image_layer_index_left_ == 0 || viewer_image_layer_index_middle_ == 0
+			|| viewer_image_layer_index_right_ == 0)
 	{
 		auto image_range = depth_clustering_->getImageRange();
 		auto difference_type = depth_clustering_->getParameter().difference_type;
@@ -1131,8 +1129,8 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		scene_difference_->addPixmap(QPixmap::fromImage(qimage_difference));
 	}
 
-	if (viewer_image_layer_index_top_ == 2 || viewer_image_layer_index_middle_ == 2
-			|| viewer_image_layer_index_bottom_ == 2)
+	if (viewer_image_layer_index_left_ == 2 || viewer_image_layer_index_middle_ == 2
+			|| viewer_image_layer_index_right_ == 2)
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_range = depth_clustering_->getImageRange();
@@ -1155,8 +1153,8 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		scene_range_->addPixmap(QPixmap::fromImage(qimage_range));
 	}
 
-	if (viewer_image_layer_index_top_ == 3 || viewer_image_layer_index_middle_ == 3
-			|| viewer_image_layer_index_bottom_ == 3)
+	if (viewer_image_layer_index_left_ == 3 || viewer_image_layer_index_middle_ == 3
+			|| viewer_image_layer_index_right_ == 3)
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_intensity = depth_clustering_->getImageIntensity();
@@ -1181,8 +1179,8 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		scene_intensity_->addPixmap(QPixmap::fromImage(qimage_intensity));
 	}
 
-	if (viewer_image_layer_index_top_ == 4 || viewer_image_layer_index_middle_ == 4
-			|| viewer_image_layer_index_bottom_ == 4)
+	if (viewer_image_layer_index_left_ == 4 || viewer_image_layer_index_middle_ == 4
+			|| viewer_image_layer_index_right_ == 4)
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_elongation = depth_clustering_->getImageElongation();
@@ -1217,42 +1215,42 @@ Visualization::updateViewerImage()
 		ui->viewer_image_camera->fitInView(scene_camera_->itemsBoundingRect());
 	}
 
-	switch (viewer_image_layer_index_top_)
+	switch (viewer_image_layer_index_left_)
 	{
 	case 0:
 	{
-		ui->viewer_image_top->setScene(scene_difference_.get());
-		ui->viewer_image_top->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_left->setScene(scene_difference_.get());
+		ui->viewer_image_left->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
 	case 1:
 	{
-		ui->viewer_image_top->setScene(scene_segmentation_.get());
-		ui->viewer_image_top->fitInView(scene_segmentation_->itemsBoundingRect());
+		ui->viewer_image_left->setScene(scene_segmentation_.get());
+		ui->viewer_image_left->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
 	case 2:
 	{
-		ui->viewer_image_top->setScene(scene_range_.get());
-		ui->viewer_image_top->fitInView(scene_range_->itemsBoundingRect());
+		ui->viewer_image_left->setScene(scene_range_.get());
+		ui->viewer_image_left->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
 	case 3:
 	{
-		ui->viewer_image_top->setScene(scene_intensity_.get());
-		ui->viewer_image_top->fitInView(scene_intensity_->itemsBoundingRect());
+		ui->viewer_image_left->setScene(scene_intensity_.get());
+		ui->viewer_image_left->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
 	case 4:
 	{
-		ui->viewer_image_top->setScene(scene_elongation_.get());
-		ui->viewer_image_top->fitInView(scene_elongation_->itemsBoundingRect());
+		ui->viewer_image_left->setScene(scene_elongation_.get());
+		ui->viewer_image_left->fitInView(scene_elongation_->itemsBoundingRect());
 		break;
 	}
 	default:
 	{
-		ui->viewer_image_top->setScene(scene_empty_.get());
-		ui->viewer_image_top->fitInView(scene_empty_->itemsBoundingRect());
+		ui->viewer_image_left->setScene(scene_empty_.get());
+		ui->viewer_image_left->fitInView(scene_empty_->itemsBoundingRect());
 		break;
 	}
 	}
@@ -1297,42 +1295,42 @@ Visualization::updateViewerImage()
 	}
 	}
 
-	switch (viewer_image_layer_index_bottom_)
+	switch (viewer_image_layer_index_right_)
 	{
 	case 0:
 	{
-		ui->viewer_image_bottom->setScene(scene_difference_.get());
-		ui->viewer_image_bottom->fitInView(scene_difference_->itemsBoundingRect());
+		ui->viewer_image_right->setScene(scene_difference_.get());
+		ui->viewer_image_right->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
 	case 1:
 	{
-		ui->viewer_image_bottom->setScene(scene_segmentation_.get());
-		ui->viewer_image_bottom->fitInView(scene_segmentation_->itemsBoundingRect());
+		ui->viewer_image_right->setScene(scene_segmentation_.get());
+		ui->viewer_image_right->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
 	case 2:
 	{
-		ui->viewer_image_bottom->setScene(scene_range_.get());
-		ui->viewer_image_bottom->fitInView(scene_range_->itemsBoundingRect());
+		ui->viewer_image_right->setScene(scene_range_.get());
+		ui->viewer_image_right->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
 	case 3:
 	{
-		ui->viewer_image_bottom->setScene(scene_intensity_.get());
-		ui->viewer_image_bottom->fitInView(scene_intensity_->itemsBoundingRect());
+		ui->viewer_image_right->setScene(scene_intensity_.get());
+		ui->viewer_image_right->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
 	case 4:
 	{
-		ui->viewer_image_bottom->setScene(scene_elongation_.get());
-		ui->viewer_image_bottom->fitInView(scene_elongation_->itemsBoundingRect());
+		ui->viewer_image_right->setScene(scene_elongation_.get());
+		ui->viewer_image_right->fitInView(scene_elongation_->itemsBoundingRect());
 		break;
 	}
 	default:
 	{
-		ui->viewer_image_bottom->setScene(scene_empty_.get());
-		ui->viewer_image_bottom->fitInView(scene_empty_->itemsBoundingRect());
+		ui->viewer_image_right->setScene(scene_empty_.get());
+		ui->viewer_image_right->fitInView(scene_empty_->itemsBoundingRect());
 		break;
 	}
 	}
@@ -1381,9 +1379,9 @@ Visualization::resetUI()
 	ui->button_global_configuration->setEnabled(false);
 	ui->combo_field_of_view->setEnabled(false);
 	ui->combo_layer_point_cloud->setEnabled(false);
-	ui->combo_layer_image_top->setEnabled(false);
+	ui->combo_layer_image_left->setEnabled(false);
 	ui->combo_layer_image_middle->setEnabled(false);
-	ui->combo_layer_image_bottom->setEnabled(false);
+	ui->combo_layer_image_right->setEnabled(false);
 	ui->combo_lidar_return->setEnabled(false);
 	ui->combo_bounding_box_type->setEnabled(false);
 
@@ -1408,11 +1406,11 @@ Visualization::resetUI()
 	disconnect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onFieldOfViewUpdated()));
 	disconnect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
-	disconnect(ui->combo_layer_image_top, SIGNAL(activated(int)), this,
+	disconnect(ui->combo_layer_image_left, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
 	disconnect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
-	disconnect(ui->combo_layer_image_bottom, SIGNAL(activated(int)), this,
+	disconnect(ui->combo_layer_image_right, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
 	disconnect(ui->combo_lidar_return, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	disconnect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this,
@@ -1463,9 +1461,9 @@ Visualization::initializeUI()
 	}
 
 	ui->combo_layer_point_cloud->setCurrentIndex(viewer_point_cloud_layer_index_);
-	ui->combo_layer_image_top->setCurrentIndex(viewer_image_layer_index_top_);
+	ui->combo_layer_image_left->setCurrentIndex(viewer_image_layer_index_left_);
 	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
-	ui->combo_layer_image_bottom->setCurrentIndex(viewer_image_layer_index_bottom_);
+	ui->combo_layer_image_right->setCurrentIndex(viewer_image_layer_index_right_);
 	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
 
 	switch (parameter.difference_type)
@@ -1526,11 +1524,10 @@ Visualization::initializeUI()
 	connect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onFieldOfViewUpdated()));
 	connect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
-	connect(ui->combo_layer_image_top, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
+	connect(ui->combo_layer_image_left, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
 	connect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
-	connect(ui->combo_layer_image_bottom, SIGNAL(activated(int)), this,
-			SLOT(onLayerImageUpdated()));
+	connect(ui->combo_layer_image_right, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
 	connect(ui->combo_lidar_return, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->splitter_viewer, SIGNAL(splitterMoved(int, int)), this,
@@ -1550,9 +1547,9 @@ Visualization::initializeUI()
 	ui->button_global_configuration->setEnabled(true);
 	ui->combo_field_of_view->setEnabled(true);
 	ui->combo_layer_point_cloud->setEnabled(true);
-	ui->combo_layer_image_top->setEnabled(true);
+	ui->combo_layer_image_left->setEnabled(true);
 	ui->combo_layer_image_middle->setEnabled(true);
-	ui->combo_layer_image_bottom->setEnabled(true);
+	ui->combo_layer_image_right->setEnabled(true);
 	ui->combo_lidar_return->setEnabled(true);
 	ui->combo_bounding_box_type->setEnabled(true);
 }

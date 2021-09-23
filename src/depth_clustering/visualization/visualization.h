@@ -157,9 +157,9 @@ private:
 	bool viewer_image_camera_visible_;
 	bool show_bounding_box_;
 	int viewer_point_cloud_layer_index_;
-	int viewer_image_layer_index_top_;
+	int viewer_image_layer_index_left_;
 	int viewer_image_layer_index_middle_;
-	int viewer_image_layer_index_bottom_;
+	int viewer_image_layer_index_right_;
 
 	cv::Mat image_range_;
 	cv::Mat image_range_no_ground_;

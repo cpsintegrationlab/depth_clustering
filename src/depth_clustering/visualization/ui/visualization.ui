@@ -25,7 +25,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_20">
+  <layout class="QGridLayout" name="gridLayout_21">
    <item row="0" column="0">
     <widget class="QSplitter" name="splitter_overall">
      <property name="orientation">
@@ -151,7 +151,7 @@
        <item row="0" column="4">
         <widget class="QStackedWidget" name="stacked_settings">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="page_settings_1">
           <layout class="QGridLayout" name="gridLayout_8">
@@ -426,16 +426,16 @@
          <widget class="QWidget" name="page_settings_2">
           <layout class="QGridLayout" name="gridLayout_13">
            <item row="0" column="2">
-            <widget class="QGroupBox" name="group_layer_image_top">
+            <widget class="QGroupBox" name="group_layer_image_left">
              <property name="title">
-              <string>Top Image Viewer</string>
+              <string>Left Image Viewer</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
              <layout class="QGridLayout" name="gridLayout_11">
               <item row="0" column="0">
-               <widget class="QComboBox" name="combo_layer_image_top">
+               <widget class="QComboBox" name="combo_layer_image_left">
                 <item>
                  <property name="text">
                   <string>Clustering</string>
@@ -518,16 +518,16 @@
             </widget>
            </item>
            <item row="0" column="4">
-            <widget class="QGroupBox" name="group_layer_image_bottom">
+            <widget class="QGroupBox" name="group_layer_image_right">
              <property name="title">
-              <string>Bottom Image Viewer</string>
+              <string>Right Image Viewer</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
              <layout class="QGridLayout" name="gridLayout_15">
               <item row="0" column="0">
-               <widget class="QComboBox" name="combo_layer_image_bottom">
+               <widget class="QComboBox" name="combo_layer_image_right">
                 <item>
                  <property name="text">
                   <string>Clustering</string>
@@ -813,77 +813,99 @@
        </item>
       </layout>
      </widget>
-     <widget class="QGraphicsView" name="viewer_image_top">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
+     <widget class="QFrame" name="frame_viewer_image">
       <property name="minimumSize">
        <size>
-        <width>900</width>
-        <height>80</height>
+        <width>0</width>
+        <height>100</height>
        </size>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
-      <property name="renderHints">
-       <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
       </property>
-      <property name="viewportUpdateMode">
-       <enum>QGraphicsView::SmartViewportUpdate</enum>
-      </property>
-     </widget>
-     <widget class="QGraphicsView" name="viewer_image_middle">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>900</width>
-        <height>80</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="renderHints">
-       <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-      </property>
-      <property name="viewportUpdateMode">
-       <enum>QGraphicsView::SmartViewportUpdate</enum>
-      </property>
-     </widget>
-     <widget class="QGraphicsView" name="viewer_image_bottom">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>900</width>
-        <height>80</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
+      <layout class="QGridLayout" name="gridLayout_20">
+       <item row="0" column="0">
+        <widget class="QGraphicsView" name="viewer_image_left">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="renderHints">
+          <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
+         </property>
+         <property name="viewportUpdateMode">
+          <enum>QGraphicsView::SmartViewportUpdate</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QGraphicsView" name="viewer_image_middle">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="renderHints">
+          <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
+         </property>
+         <property name="viewportUpdateMode">
+          <enum>QGraphicsView::SmartViewportUpdate</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QGraphicsView" name="viewer_image_right">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
