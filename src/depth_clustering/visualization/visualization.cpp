@@ -44,7 +44,6 @@ Visualization::Visualization(QWidget* parent) :
 
 	ui->frame_controls->setFixedHeight(ui->frame_controls->minimumHeight());
 	ui->frame_settings->setFixedHeight(ui->frame_settings->minimumHeight());
-	ui->viewer_image_camera->setFixedWidth(ui->viewer_image_camera->height() * 16 / 9);
 	ui->frame_viewer_image->setFixedHeight(ui->frame_viewer_image->minimumHeight());
 
 	ui->combo_layer_point_cloud->setCurrentIndex(viewer_point_cloud_layer_index_);
@@ -184,6 +183,10 @@ Visualization::showEvent(QShowEvent* event)
 		ui->viewer_point_cloud->resetViewFOVFull();
 	}
 
+	resize(minimumWidth(), minimumHeight());
+
+	ui->viewer_image_camera->setFixedWidth(ui->viewer_image_camera->height() * 16 / 10);
+
 	updateViewerImage();
 
 	shown_ = true;
@@ -194,7 +197,7 @@ Visualization::resizeEvent(QResizeEvent* event)
 {
 	QWidget::resizeEvent(event);
 
-	ui->viewer_image_camera->setFixedWidth(ui->viewer_image_camera->height() * 16 / 9);
+	ui->viewer_image_camera->setFixedWidth(ui->viewer_image_camera->height() * 16 / 10);
 
 	ui->viewer_point_cloud->update();
 
