@@ -276,8 +276,11 @@ Visualization::onSliderMovedTo(int frame_number)
 {
 	Timer timer;
 	auto folder_reader_range = depth_clustering_->getFolderReaderRange();
+	auto folder_reader_range_first_return = depth_clustering_first_return_->getFolderReaderRange();
 	auto folder_reader_camera = depth_clustering_->getFolderReaderCamera();
 	const auto &frame_paths_names_range = folder_reader_range->GetAllFilePaths();
+	const auto &frame_paths_names_range_first_return =
+			folder_reader_range_first_return->GetAllFilePaths();
 	const auto &frame_paths_names_camera = folder_reader_camera->GetAllFilePaths();
 	std::string frame_path_name_camera = "";
 
@@ -285,6 +288,14 @@ Visualization::onSliderMovedTo(int frame_number)
 			|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 	{
 		std::cerr << "[WARN]: Range image missing in \"" << dataset_path_ << "\"." << std::endl;
+		return;
+	}
+
+	if (frame_paths_names_range_first_return.empty()
+			|| frame_number >= static_cast<int>(frame_paths_names_range_first_return.size()))
+	{
+		std::cerr << "[WARN]: First return range image missing in \"" << dataset_path_ << "\"."
+				<< std::endl;
 		return;
 	}
 
@@ -363,10 +374,10 @@ Visualization::onSliderMovedTo(int frame_number)
 	}
 
 	ground_truth_frame_cube_ = depth_clustering_->getGroundTruthFrameCube(
-			frame_paths_names_range[frame_number]);
+			frame_paths_names_range_first_return[frame_number]);
 
 	ground_truth_frame_flat_ = depth_clustering_->getGroundTruthFrameFlat(
-			frame_paths_names_range[frame_number]);
+			frame_paths_names_range_first_return[frame_number]);
 
 	timer.start();
 
