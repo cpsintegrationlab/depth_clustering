@@ -1161,6 +1161,8 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_intensity = depth_clustering_->getImageIntensity();
+		const auto intensity_norm_factor =
+				depth_clustering_->getLidarProjectionParameter()->getProjectionParamsRaw()->intensity_norm_factor;
 		QImage qimage_intensity;
 
 		if (parameter.dataset_file_type == ".png")
@@ -1171,7 +1173,7 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		}
 		else if (parameter.dataset_file_type == ".tiff")
 		{
-			qimage_intensity = MatTIFFIntensityToQImage(image_intensity);
+			qimage_intensity = MatTIFFIntensityToQImage(image_intensity, intensity_norm_factor);
 		}
 		else
 		{

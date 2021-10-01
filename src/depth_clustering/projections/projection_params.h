@@ -31,6 +31,7 @@ struct ProjectionParamsRaw
 	int beams;
 	int horizontal_angle_start;
 	int horizontal_angle_end;
+	double intensity_norm_factor;
 	std::vector<double> beam_inclinations;
 	std::vector<double> extrinsic;
 
@@ -40,7 +41,7 @@ struct ProjectionParamsRaw
 
 	ProjectionParamsRaw() :
 			horizontal_steps(2650), beams(64), horizontal_angle_start(180), horizontal_angle_end(
-					-180), beam_inclinations(), extrinsic()
+					-180), intensity_norm_factor(0.71), beam_inclinations(), extrinsic()
 	{
 		updateHorizontalAngles(horizontal_angle_start, horizontal_angle_end);
 	}
@@ -170,7 +171,7 @@ public:
 	}
 
 	inline std::shared_ptr<ProjectionParamsRaw>
-	getProjectionParamsRaw()
+	getProjectionParamsRaw() const
 	{
 		return params_raw_;
 	}

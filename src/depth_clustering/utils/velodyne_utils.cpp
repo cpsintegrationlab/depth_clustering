@@ -154,7 +154,7 @@ MatFromTIFFIntensity(const string& path, std::shared_ptr<ProjectionParams> proje
 	cv::Mat image_intensity = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_intensity.convertTo(image_intensity, CV_32F);
 	image_intensity /= 65535.0;
-	image_intensity *= 2.0;
+	image_intensity *= projection_parameter->getProjectionParamsRaw()->intensity_norm_factor;
 	return LimitHorizontalFieldOfView(image_intensity, projection_parameter);
 }
 

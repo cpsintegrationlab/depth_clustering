@@ -28,7 +28,7 @@ QImage
 MatTIFFRangeToQImage(const cv::Mat& image);
 
 QImage
-MatTIFFIntensityToQImage(const cv::Mat& image);
+MatTIFFIntensityToQImage(const cv::Mat& image, const double& intensity_norm_factor);
 
 QImage
 MatTIFFElongationToQImage(const cv::Mat& image);

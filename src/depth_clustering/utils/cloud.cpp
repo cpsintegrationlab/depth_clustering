@@ -130,7 +130,9 @@ Cloud::FromImageIntensity(const cv::Mat& image, const cv::Mat& image_intensity,
 				continue;
 			}
 			RichPoint point = proj->UnprojectPoint(image, r, c);
-			point.setIntensity(image_intensity.at<float>(r, c));
+			const float intensity_normalized = image_intensity.at<float>(r, c)
+					/ params.getProjectionParamsRaw()->intensity_norm_factor;
+			point.setIntensity(intensity_normalized);
 			cloud.push_back(point);
 			proj->at(r, c).points().push_back(cloud.points().size() - 1);
 		}
@@ -157,7 +159,8 @@ Cloud::FromImageElongation(const cv::Mat& image, const cv::Mat& image_elongation
 				continue;
 			}
 			RichPoint point = proj->UnprojectPoint(image, r, c);
-			point.setElongation(image_elongation.at<float>(r, c));
+			const float elongation_normalized = image_elongation.at<float>(r, c) / 1.5;
+			point.setElongation(elongation_normalized);
 			cloud.push_back(point);
 			proj->at(r, c).points().push_back(cloud.points().size() - 1);
 		}
@@ -184,8 +187,11 @@ Cloud::FromImageConfidence(const cv::Mat& image, const cv::Mat& image_intensity,
 				continue;
 			}
 			RichPoint point = proj->UnprojectPoint(image, r, c);
-			point.setIntensity(image_intensity.at<float>(r, c));
-			point.setElongation(image_elongation.at<float>(r, c));
+			const float intensity_normalized = image_intensity.at<float>(r, c)
+					/ params.getProjectionParamsRaw()->intensity_norm_factor;
+			const float elongation_normalized = image_elongation.at<float>(r, c) / 1.5;
+			point.setIntensity(intensity_normalized);
+			point.setElongation(elongation_normalized);
 			point.calculateConfidence();
 			cloud.push_back(point);
 			proj->at(r, c).points().push_back(cloud.points().size() - 1);

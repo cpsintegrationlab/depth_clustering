@@ -192,6 +192,7 @@ ParameterFactory::getLidarProjectionParameter()
 	auto beams_optional = tree.get_optional<int>("beams");
 	auto horizontal_angle_start_optional = tree.get_optional<int>("horizontal_angle_start");
 	auto horizontal_angle_end_optional = tree.get_optional<int>("horizontal_angle_end");
+	auto intensity_norm_factor_optional = tree.get_optional<double>("intensity_norm_factor");
 	auto beam_inclinations_optional = tree.get_child_optional("beam_inclinations");
 	auto extrinsic_optional = tree.get_child_optional("extrinsic");
 
@@ -213,6 +214,11 @@ ParameterFactory::getLidarProjectionParameter()
 	if (horizontal_angle_end_optional)
 	{
 		projection_parameter_raw->horizontal_angle_end = *horizontal_angle_end_optional;
+	}
+
+	if (intensity_norm_factor_optional)
+	{
+		projection_parameter_raw->intensity_norm_factor = *intensity_norm_factor_optional;
 	}
 
 	if (beam_inclinations_optional)

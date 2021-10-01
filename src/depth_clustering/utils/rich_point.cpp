@@ -50,10 +50,10 @@ RichPoint::operator==(const RichPoint& other) const
 void
 RichPoint::calculateConfidence()
 {
-	float intensity_normalized = intensity_ / 2.0 + 1; // 1 - 2
-	float elongation_normalized = elongation_ / 1.5 + 1; // 1 - 2
+	float intensity_shifted = intensity_ + 1; // 1 - 2
+	float elongation_shifted = elongation_ + 1; // 1 - 2
 
-	confidence_ = intensity_normalized / elongation_normalized; // 0.5 - 2
+	confidence_ = intensity_shifted / elongation_shifted; // 0.5 - 2
 	confidence_ = fabs((confidence_ - 0.5) / 1.5); // 0 - 1
 }
 }  // namespace depth_clustering

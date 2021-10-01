@@ -184,10 +184,6 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 			bounding_box_polygon_hull_vector_array.push_back(
 					std::make_pair("", bounding_box_polygon_hull_vector_array_value));
 
-			bounding_box_polygon_hull_vector_array_value.put_value(id);
-			bounding_box_polygon_hull_vector_array.push_back(
-					std::make_pair("", bounding_box_polygon_hull_vector_array_value));
-
 			bounding_box_polygon_hull_array.push_back(
 					std::make_pair("", bounding_box_polygon_hull_vector_array));
 
@@ -197,6 +193,9 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 		bounding_box_polygon_array.push_back(std::make_pair("", bounding_box_polygon_hull_array));
 
 		bounding_box_polygon_array_value.put_value(diff_z);
+		bounding_box_polygon_array.push_back(std::make_pair("", bounding_box_polygon_array_value));
+
+		bounding_box_polygon_array_value.put_value(id);
 		bounding_box_polygon_array.push_back(std::make_pair("", bounding_box_polygon_array_value));
 
 		auto bounding_box_polygon_frame_array_optional =

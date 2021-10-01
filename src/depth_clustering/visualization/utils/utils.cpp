@@ -70,9 +70,9 @@ MatTIFFRangeToQImage(const cv::Mat& image)
 }
 
 QImage
-MatTIFFIntensityToQImage(const cv::Mat& image)
+MatTIFFIntensityToQImage(const cv::Mat& image, const double& intensity_norm_factor)
 {
-	return MatToQImage(image, 255 / 2);
+	return MatToQImage(image, 255 / intensity_norm_factor);
 }
 
 QImage
