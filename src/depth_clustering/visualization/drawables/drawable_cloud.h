@@ -48,7 +48,7 @@ public:
 private:
 
 	void
-	setRGBColorWithValue(const float& value, const float& value_max = 1) const;
+	setRGBColorWithValue(const float& value) const;
 
 	Cloud::ConstPtr _cloud_ptr = nullptr;
 	Eigen::Vector3f _color = Eigen::Vector3f::Ones();

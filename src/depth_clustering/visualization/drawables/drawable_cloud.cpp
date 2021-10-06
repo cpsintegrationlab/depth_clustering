@@ -23,11 +23,11 @@ DrawableCloud::Draw() const
 	{
 		if (color_from_intensity_)
 		{
-			setRGBColorWithValue(point.intensity(), 2);
+			setRGBColorWithValue(point.intensity());
 		}
 		else if (color_from_elongation_)
 		{
-			setRGBColorWithValue(point.elongation(), 1.5);
+			setRGBColorWithValue(point.elongation());
 		}
 		else if (color_from_confidence_)
 		{
@@ -74,21 +74,19 @@ DrawableCloud::FromCloudConfidence(const Cloud::ConstPtr& cloud)
 }
 
 void
-DrawableCloud::setRGBColorWithValue(const float& value, const float& value_max) const
+DrawableCloud::setRGBColorWithValue(const float& value) const
 {
-	// https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
-	float value_normalized = value / value_max;
-
-	if (value_normalized < 0 || value_normalized > 1)
+	if (value < 0 || value > 1)
 	{
-		glColor3f(1, 1, 1);
+		glColor3f(_color[0], _color[1], _color[2]);
 		return;
 	}
 
-	int value_int_low = std::floor(value_normalized * 255);
+	int value_int_low = std::floor(value * 255);
 	int value_int_high = std::min(255, value_int_low + 1);
-	float value_fraction = value_normalized * 255 - value_int_low;
+	float value_fraction = value * 255 - value_int_low;
 
+	// https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
 	float red = colormap_turbo[value_int_low][0]
 			+ (colormap_turbo[value_int_high][0] - colormap_turbo[value_int_low][0])
 					* value_fraction;
