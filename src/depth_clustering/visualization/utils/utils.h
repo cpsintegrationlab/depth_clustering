@@ -31,7 +31,7 @@ QImage
 MatTIFFIntensityToQImage(const cv::Mat& image, const double& intensity_norm_factor);
 
 QImage
-MatTIFFElongationToQImage(const cv::Mat& image);
+MatTIFFElongationToQImage(const cv::Mat& image, const double& elongation_norm_factor);
 
 dc::Cloud::Ptr
 CloudFromFile(const std::string& file_name, const dc::ProjectionParams& proj_params);

@@ -76,9 +76,9 @@ MatTIFFIntensityToQImage(const cv::Mat& image, const double& intensity_norm_fact
 }
 
 QImage
-MatTIFFElongationToQImage(const cv::Mat& image)
+MatTIFFElongationToQImage(const cv::Mat& image, const double& elongation_norm_factor)
 {
-	return MatToQImage(image, 255 / 1.5);
+	return MatToQImage(image, 255 / elongation_norm_factor);
 }
 
 Cloud::Ptr

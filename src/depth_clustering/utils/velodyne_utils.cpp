@@ -164,7 +164,7 @@ MatFromTIFFElongation(const string& path, std::shared_ptr<ProjectionParams> proj
 	cv::Mat image_elongation = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_elongation.convertTo(image_elongation, CV_32F);
 	image_elongation /= 65535.0;
-	image_elongation *= 1.5;
+	image_elongation *= projection_parameter->getProjectionParamsRaw()->elongation_norm_factor;
 	return LimitHorizontalFieldOfView(image_elongation, projection_parameter);
 }
 

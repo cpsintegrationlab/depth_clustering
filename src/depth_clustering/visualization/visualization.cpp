@@ -1189,6 +1189,8 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_elongation = depth_clustering_->getImageElongation();
+		const auto elongation_norm_factor =
+				depth_clustering_->getLidarProjectionParameter()->getProjectionParamsRaw()->elongation_norm_factor;
 		QImage qimage_elongation;
 
 		if (parameter.dataset_file_type == ".png")
@@ -1199,7 +1201,7 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		}
 		else if (parameter.dataset_file_type == ".tiff")
 		{
-			qimage_elongation = MatTIFFElongationToQImage(image_elongation);
+			qimage_elongation = MatTIFFElongationToQImage(image_elongation, elongation_norm_factor);
 		}
 		else
 		{
