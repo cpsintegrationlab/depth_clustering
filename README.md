@@ -1,5 +1,13 @@
 # Depth Clustering 2.0
 
+## Table of Contents
+
+1. [Project Setup](#project-setup)
+2. [Command-Line Application](#command-line-application)
+3. [Visualizer Application](#visualizer-application)
+4. [Cross-Compilation](#cross-compilation)
+5. [Batch Execution Script](#batch-execution-script)
+
 ## Project Setup
 
 This project depends on the installation of the following essential packages:
@@ -28,10 +36,10 @@ To run the command-line application, do as follows:
 
 ```bash
 cd install/amd64/depth_clustering/release/bin
-./depth_clustering dataset_path global_config_path
+./depth_clustering dataset_segment_path global_config_path
 ```
 
-Note: the `global_config_path` is an optional parameter that specifies the path to a folder containing a global configuration file. The global configuration file enables the same set of configurations to be applied across various datasets. Regardless of the presence of the `global_config_path`, the applications would first attempt to load the configuration file under the `dataset_path` folder first. When specified, the global configuration file would be loaded, and the loaded global configurations would then override the existing configurations.
+Note: the `global_config_path` is an optional parameter that specifies the path to a folder containing a global configuration file. The global configuration file enables the same set of configurations to be applied across various datasets. Regardless of the presence of the `global_config_path`, the applications would first attempt to load the configuration file under the `dataset_segment_path` folder first. When specified, the global configuration file would be loaded, and the loaded global configurations would then override the existing configurations.
 
 ## Visualizer Application
 
@@ -59,10 +67,10 @@ To launch the visualizer application with a dataset path, do as follows:
 
 ```bash
 cd install/amd64/depth_clustering/release/bin
-./visualizer dataset_path global_config_path
+./visualizer dataset_segment_path global_config_path
 ```
 
-Note: any resulting output JSON files would be stored under the provided `dataset_path` folder. Two example datasets are provided under the `data` folder.
+Note: any resulting output JSON files would be stored under the provided `dataset_segment_path` folder. Two example datasets are provided under the `data` folder.
 
 ## Cross-Compilation
 
@@ -91,3 +99,21 @@ make
 The cross-compiled binaries and libraries for arm64 would be located in `install/arm64/depth_clustering/release`
 
 Note: the visualizer application is currently not supported for the arm64 architecture.
+
+## Batch Execution Script
+
+We have included a batch execution script in `scripts` for the command-line application.
+
+The batch execution script exploits the parallelism in multi-core processors and expediate the executions of the command-line application over a large set of dataset segments by concurrently executing multiple instances of the command-line application in parallel. The maximum number of concurrent instances is currently limited to the number of logical CPU cores in the system.
+
+To run the command-line application for a set of dataset segments, do the following:
+
+```bash
+cd scripts
+./depth_clustering.bash dataset_path arguments
+```
+
+Note:
+1. The `dataset_path` is the path to the folder containing a set of dataset segments.
+2. The `arguments` are passed directly to the command-line application. For multiple arguments, enclose all of them with quotes `""`.
+3. The batch execution script expects all dataset segments to be directly under `dataset_path`.
