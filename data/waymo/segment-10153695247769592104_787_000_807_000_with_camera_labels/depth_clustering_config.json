@@ -20,6 +20,7 @@
         "horizontal_angle_start": 180,
         "horizontal_angle_end": -180,
         "intensity_norm_factor": 0.24907998008863205,
+        "elongation_norm_factor": 0.2546832374783579,
         "beam_inclinations": [
             2.4701296740174232,
             2.2820460709506403,
