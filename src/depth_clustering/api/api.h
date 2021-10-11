@@ -102,7 +102,8 @@ public:
 
 	bool
 	initializeForDataset(const std::string& dataset_path,
-			const std::string& global_config_path = "", const bool& second_return = false);
+			const std::string& file_path_name_config_global = "",
+			const bool& second_return = false);
 
 	void
 	processOneFrameForApollo(const std::string& frame_name,

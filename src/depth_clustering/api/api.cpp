@@ -436,7 +436,7 @@ DepthClustering::initializeForApollo()
 
 bool
 DepthClustering::initializeForDataset(const std::string& dataset_path,
-		const std::string& global_config_path, const bool& second_return)
+		const std::string& file_path_name_config_global, const bool& second_return)
 {
 	dataset_path_ = dataset_path;
 
@@ -452,15 +452,16 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 		dataset_path_lidar_return = "second_return";
 	}
 
-	parameter_factory_ = std::make_shared<ParameterFactory>(dataset_path_);
+	parameter_factory_ = std::make_shared<ParameterFactory>(
+			dataset_path_ + "depth_clustering_config.json");
 	parameter_ = parameter_factory_->getDepthClusteringParameter();
 	parameter_projection_lidar_ = parameter_factory_->getLidarProjectionParameter();
 	parameter_projection_camera_ = parameter_factory_->getCameraProjectionParameter();
 	auto logger_parameter = parameter_factory_->getLoggerParameter();
 
-	if (global_config_path != "")
+	if (file_path_name_config_global != "")
 	{
-		parameter_factory_global_ = std::make_shared<ParameterFactory>(global_config_path);
+		parameter_factory_global_ = std::make_shared<ParameterFactory>(file_path_name_config_global);
 		parameter_factory_global_->setGlobalDepthClusteringParameter(parameter_);
 		parameter_factory_global_->setGlobalLidarProjectionParameter(parameter_projection_lidar_);
 		parameter_factory_global_->setGlobalCameraProjectionParameter(parameter_projection_camera_);

@@ -206,7 +206,8 @@ Visualization::resizeEvent(QResizeEvent* event)
 void
 Visualization::onOpen()
 {
-	openDataset(QFileDialog::getExistingDirectory(this).toStdString(), global_config_path_);
+	openDataset(QFileDialog::getExistingDirectory(this).toStdString(),
+			file_path_name_config_global_);
 }
 
 void
@@ -505,7 +506,8 @@ Visualization::onParameterUpdated()
 void
 Visualization::onLoadGlobalConfiguration()
 {
-	openDataset(dataset_path_, QFileDialog::getExistingDirectory(this).toStdString());
+	openDataset(dataset_path_,
+			QFileDialog::getOpenFileName(this, QString(), QString(), tr("JSON Files (*.json)")).toStdString());
 }
 
 void
@@ -669,7 +671,8 @@ Visualization::onLastPage()
 }
 
 void
-Visualization::openDataset(const std::string& dataset_path, const std::string& global_config_path)
+Visualization::openDataset(const std::string& dataset_path,
+		const std::string& file_path_name_config_global)
 {
 	if (dataset_path == "")
 	{
@@ -680,7 +683,7 @@ Visualization::openDataset(const std::string& dataset_path, const std::string& g
 	resetUI();
 
 	dataset_path_ = dataset_path;
-	global_config_path_ = global_config_path;
+	file_path_name_config_global_ = file_path_name_config_global;
 	play_ = false;
 	viewer_point_cloud_layer_index_ = 5;
 	viewer_image_layer_index_left_ = 0;
@@ -694,11 +697,11 @@ Visualization::openDataset(const std::string& dataset_path, const std::string& g
 	}
 
 	auto depth_clustering_first_return_initialized =
-			depth_clustering_first_return_->initializeForDataset(dataset_path_, global_config_path_,
-					false);
+			depth_clustering_first_return_->initializeForDataset(dataset_path_,
+					file_path_name_config_global_, false);
 	auto depth_clustering_second_return_initialized =
 			depth_clustering_second_return_->initializeForDataset(dataset_path_,
-					global_config_path_, true);
+					file_path_name_config_global_, true);
 
 	if (!depth_clustering_first_return_initialized || !depth_clustering_second_return_initialized)
 	{

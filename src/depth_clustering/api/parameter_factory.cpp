@@ -14,23 +14,15 @@
 using boost::property_tree::json_parser::read_json;
 using depth_clustering::ProjectionParamsRaw;
 
-ParameterFactory::ParameterFactory(const std::string& path) :
-		configuration_file_name_("depth_clustering_config.json")
+ParameterFactory::ParameterFactory(const std::string& file_path_name_config)
 {
-	path_ = path;
-
-	if (path_ != "" && path_[path_.size() - 1] != '/')
-	{
-		path_ += "/";
-	}
-
 	try
 	{
-		boost::property_tree::read_json(path_ + configuration_file_name_, top_tree_);
+		boost::property_tree::read_json(file_path_name_config, top_tree_);
 	} catch (boost::exception const &e)
 	{
-		std::cout << "[ERROR]: Failed to load configuration file from \"" << path_ << "\"."
-				<< std::endl;
+		std::cout << "[ERROR]: Failed to load configuration file: \"" << file_path_name_config
+				<< "\"." << std::endl;
 		return;
 	}
 

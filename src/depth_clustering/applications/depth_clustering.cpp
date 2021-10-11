@@ -11,7 +11,7 @@ int
 main(int argc, char* argv[])
 {
 	std::string dataset_path;
-	std::string global_config_path;
+	std::string file_path_name_config_global;
 
 	if (argc > 1)
 	{
@@ -19,7 +19,7 @@ main(int argc, char* argv[])
 		{
 			std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset segment path]"
 					<< std::endl;
-			std::cout << "\t" << argv[0] << " [dataset segment path] [global config path]"
+			std::cout << "\t" << argv[0] << " [dataset segment path] [global config file]"
 					<< std::endl << std::endl;
 			return 0;
 		}
@@ -33,26 +33,20 @@ main(int argc, char* argv[])
 
 		if (argc > 2)
 		{
-			global_config_path = argv[2];
-
-			if (global_config_path != ""
-					&& global_config_path[global_config_path.size() - 1] != '/')
-			{
-				global_config_path += "/";
-			}
+			file_path_name_config_global = argv[2];
 		}
 	}
 	else
 	{
 		std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset segment path]" << std::endl;
-		std::cout << "\t" << argv[0] << " [dataset segment path] [global config path]" << std::endl
+		std::cout << "\t" << argv[0] << " [dataset segment path] [global config file]" << std::endl
 				<< std::endl;
 		return 0;
 	}
 
 	DepthClustering depth_clustering;
 
-	if (!depth_clustering.initializeForDataset(dataset_path, global_config_path))
+	if (!depth_clustering.initializeForDataset(dataset_path, file_path_name_config_global))
 	{
 		std::cout << "[ERROR]: Failed to initialize for dataset. Quit." << std::endl;
 		return -1;

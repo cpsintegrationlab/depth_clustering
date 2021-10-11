@@ -43,7 +43,8 @@ public:
 	OnNewObjectReceived(const Cloud& cloud_no_ground, int client_id = 0) override;
 
 	void
-	OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int client_id = 0) override;
+	OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int client_id = 0)
+			override;
 
 	virtual
 	~Visualization();
@@ -109,7 +110,8 @@ private slots:
 private:
 
 	void
-	openDataset(const std::string& dataset_path, const std::string& global_config_path = "");
+	openDataset(const std::string& dataset_path, const std::string& file_path_name_config_global =
+			"");
 
 	std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
 	getGroundPointCloudPair();
@@ -148,7 +150,7 @@ private:
 	std::unique_ptr<QGraphicsScene> scene_elongation_ = nullptr;
 
 	std::string dataset_path_;
-	std::string global_config_path_;
+	std::string file_path_name_config_global_;
 	volatile bool play_;
 	bool shown_;
 	bool viewer_image_camera_visible_;

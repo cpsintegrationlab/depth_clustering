@@ -414,7 +414,7 @@
               <item row="0" column="0">
                <widget class="QPushButton" name="button_global_configuration">
                 <property name="text">
-                 <string>Load From Folder</string>
+                 <string>Load From File</string>
                 </property>
                </widget>
               </item>

@@ -36,10 +36,10 @@ To run the command-line application, do as follows:
 
 ```bash
 cd install/amd64/depth_clustering/release/bin
-./depth_clustering dataset_segment_path global_config_path
+./depth_clustering dataset_segment_path global_config_file
 ```
 
-Note: the `global_config_path` is an optional parameter that specifies the path to a folder containing a global configuration file. The global configuration file enables the same set of configurations to be applied across various datasets. Regardless of the presence of the `global_config_path`, the applications would first attempt to load the configuration file under the `dataset_segment_path` folder first. When specified, the global configuration file would be loaded, and the loaded global configurations would then override the existing configurations.
+Note: the `global_config_file` is an optional parameter that specifies the path to a global configuration file. The global configuration file enables the same set of configurations to be applied across various datasets. Regardless of the presence of the `global_config_file`, the applications would first attempt to load the configuration file under the `dataset_segment_path` folder first. When specified, the global configuration file would be loaded, and the loaded global configurations would then override the existing configurations.
 
 ## Visualizer Application
 
@@ -67,7 +67,7 @@ To launch the visualizer application with a dataset path, do as follows:
 
 ```bash
 cd install/amd64/depth_clustering/release/bin
-./visualizer dataset_segment_path global_config_path
+./visualizer dataset_segment_path global_config_file
 ```
 
 Note: any resulting output JSON files would be stored under the provided `dataset_segment_path` folder. Two example datasets are provided under the `data` folder.

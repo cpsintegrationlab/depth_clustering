@@ -20,7 +20,7 @@ class ParameterFactory
 {
 public:
 
-	ParameterFactory(const std::string& path);
+	ParameterFactory(const std::string& file_path_name_config);
 
 	DepthClusteringParameter
 	getDepthClusteringParameter();
@@ -47,9 +47,6 @@ public:
 	setGlobalLoggerParameter(LoggerParameter& parameter_logger);
 
 private:
-
-	const std::string configuration_file_name_;
-	std::string path_;
 
 	boost::property_tree::ptree top_tree_;
 	boost::optional<boost::property_tree::ptree> depth_clustering_tree_;

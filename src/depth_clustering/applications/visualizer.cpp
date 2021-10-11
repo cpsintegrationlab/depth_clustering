@@ -11,7 +11,7 @@ main(int argc, char* argv[])
 		{
 			std::cout << std::endl << "Usage:\t" << argv[0] << std::endl;
 			std::cout << "\t" << argv[0] << " [dataset segment path]" << std::endl;
-			std::cout << "\t" << argv[0] << " [dataset segment path] [global config path]" << std::endl
+			std::cout << "\t" << argv[0] << " [dataset segment path] [global config file]" << std::endl
 					<< std::endl;
 			return 0;
 		}
