@@ -61,6 +61,14 @@ MatFromPNGRange(const std::string& path, std::shared_ptr<ProjectionParams> proje
 		nullptr);
 
 cv::Mat
+MatFromPNGIntensity(const std::string& path,
+		std::shared_ptr<ProjectionParams> projection_parameter = nullptr);
+
+cv::Mat
+MatFromPNGElongation(const std::string& path,
+		std::shared_ptr<ProjectionParams> projection_parameter = nullptr);
+
+cv::Mat
 MatFromTIFFRange(const std::string& path, std::shared_ptr<ProjectionParams> projection_parameter =
 		nullptr);
 

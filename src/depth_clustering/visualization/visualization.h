@@ -33,7 +33,8 @@ class Visualization;
 
 class Visualization: public QWidget,
 		public depth_clustering::AbstractClient<cv::Mat>,
-		public depth_clustering::AbstractClient<Cloud>
+		public depth_clustering::AbstractClient<Cloud>,
+		public depth_clustering::AbstractClient<std::unordered_map<uint16_t, Cloud>>
 {
 Q_OBJECT
 
@@ -47,6 +48,9 @@ public:
 
 	void
 	OnNewObjectReceived(const Cloud& cloud_no_ground, int client_id = 0) override;
+
+	void
+	OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int client_id = 0) override;
 
 	virtual
 	~Visualization();

@@ -186,15 +186,7 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	FromImage(const cv::Mat& image, const ProjectionParams& params);
 
 	static Cloud::Ptr
-	FromImageIntensity(const cv::Mat& image, const cv::Mat& image_intensity,
-			const ProjectionParams& params);
-
-	static Cloud::Ptr
-	FromImageElongation(const cv::Mat& image, const cv::Mat& image_elongation,
-			const ProjectionParams& params);
-
-	static Cloud::Ptr
-	FromImageConfidence(const cv::Mat& image, const cv::Mat& image_intensity,
+	FromImage(const cv::Mat& image_range, const cv::Mat& image_intensity,
 			const cv::Mat& image_elongation, const ProjectionParams& params);
 
 protected:

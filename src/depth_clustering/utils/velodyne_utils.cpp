@@ -124,47 +124,105 @@ FixKITTIDepth(const cv::Mat& original)
 cv::Mat
 MatFromPNGCamera(const string& path)
 {
+	if (path == "")
+	{
+		return cv::Mat();
+	}
+
 	cv::Mat image_camera = cv::imread(path, CV_LOAD_IMAGE_COLOR);
 	cv::cvtColor(image_camera, image_camera, cv::COLOR_BGR2RGB);
+
 	return image_camera;
 }
 
 cv::Mat
 MatFromPNGRange(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
 {
+	if (path == "")
+	{
+		return cv::Mat();
+	}
+
 	cv::Mat image_range = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_range.convertTo(image_range, CV_32F);
 	image_range /= 500.0;
+
 	return LimitHorizontalFieldOfView(FixKITTIDepth(image_range), projection_parameter);
+}
+
+cv::Mat
+MatFromPNGIntensity(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
+{
+	if (path == "")
+	{
+		return cv::Mat();
+	}
+
+	std::cout << "[WARN]: The processing of \".png\" type intensity images is not implemented."
+			<< std::endl;
+
+	return cv::Mat();
+}
+
+cv::Mat
+MatFromPNGElongation(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
+{
+	if (path == "")
+	{
+		return cv::Mat();
+	}
+
+	std::cout << "[WARN]: The processing of \".png\" type elongation images is not implemented."
+			<< std::endl;
+
+	return cv::Mat();
 }
 
 cv::Mat
 MatFromTIFFRange(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
 {
+	if (path == "")
+	{
+		return cv::Mat();
+	}
+
 	cv::Mat image_range = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_range.convertTo(image_range, CV_32F);
 	image_range /= 65535.0;
 	image_range *= 75.0;
+
 	return LimitHorizontalFieldOfView(image_range, projection_parameter);
 }
 
 cv::Mat
 MatFromTIFFIntensity(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
 {
+	if (path == "")
+	{
+		return cv::Mat();
+	}
+
 	cv::Mat image_intensity = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_intensity.convertTo(image_intensity, CV_32F);
 	image_intensity /= 65535.0;
 	image_intensity *= projection_parameter->getProjectionParamsRaw()->intensity_norm_factor;
+
 	return LimitHorizontalFieldOfView(image_intensity, projection_parameter);
 }
 
 cv::Mat
 MatFromTIFFElongation(const string& path, std::shared_ptr<ProjectionParams> projection_parameter)
 {
+	if (path == "")
+	{
+		return cv::Mat();
+	}
+
 	cv::Mat image_elongation = cv::imread(path, CV_LOAD_IMAGE_ANYDEPTH);
 	image_elongation.convertTo(image_elongation, CV_32F);
 	image_elongation /= 65535.0;
 	image_elongation *= projection_parameter->getProjectionParamsRaw()->elongation_norm_factor;
+
 	return LimitHorizontalFieldOfView(image_elongation, projection_parameter);
 }
 

@@ -185,6 +185,12 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		elongation_ = elongation;
 	}
 
+	inline void
+	setConfidence(const float& confidence)
+	{
+		confidence_ = confidence;
+	}
+
 	RichPoint&
 	operator=(const RichPoint& other);
 
@@ -201,9 +207,9 @@ private:
 
 	Eigen::Vector3f _point = Eigen::Vector3f::Zero();
 	uint16_t _ring = 0;
-	float intensity_ = 0;
-	float elongation_ = 0;
-	float confidence_ = 0;
+	float intensity_ = -1;
+	float elongation_ = -1;
+	float confidence_ = -1;
 };
 }  // namespace depth_clustering
 

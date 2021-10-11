@@ -47,27 +47,27 @@ DrawableCloud::Draw() const
 }
 
 DrawableCloud::Ptr
-DrawableCloud::FromCloudRange(const Cloud::ConstPtr& cloud, const Eigen::Vector3f& color)
+DrawableCloud::FromCloud(const Cloud::ConstPtr& cloud, const Eigen::Vector3f& color)
 {
 	return std::make_shared<DrawableCloud>(DrawableCloud(cloud, color));
 }
 
 DrawableCloud::Ptr
-DrawableCloud::FromCloudIntensity(const Cloud::ConstPtr& cloud)
+DrawableCloud::FromCloudWithIntensity(const Cloud::ConstPtr& cloud)
 {
 	return std::make_shared<DrawableCloud>(
 			DrawableCloud(cloud, Eigen::Vector3f::Ones(), true, false, false));
 }
 
 DrawableCloud::Ptr
-DrawableCloud::FromCloudElongation(const Cloud::ConstPtr& cloud)
+DrawableCloud::FromCloudWithElongation(const Cloud::ConstPtr& cloud)
 {
 	return std::make_shared<DrawableCloud>(
 			DrawableCloud(cloud, Eigen::Vector3f::Ones(), false, true, false));
 }
 
 DrawableCloud::Ptr
-DrawableCloud::FromCloudConfidence(const Cloud::ConstPtr& cloud)
+DrawableCloud::FromCloudWithConfidence(const Cloud::ConstPtr& cloud)
 {
 	return std::make_shared<DrawableCloud>(
 			DrawableCloud(cloud, Eigen::Vector3f::Ones(), false, false, true));

@@ -92,9 +92,11 @@ Cloud::Ptr
 Cloud::FromImage(const cv::Mat& image, const ProjectionParams& params)
 {
 	CloudProjection::Ptr proj = CloudProjection::Ptr(new RingProjection(params));
+	Cloud cloud;
+
 	proj->CheckImageAndStorage(image);
 	proj->CloneDepthImage(image);
-	Cloud cloud;
+
 	for (int r = 0; r < image.rows; ++r)
 	{
 		for (int c = 0; c < image.cols; ++c)
@@ -103,104 +105,69 @@ Cloud::FromImage(const cv::Mat& image, const ProjectionParams& params)
 			{
 				continue;
 			}
+
 			RichPoint point = proj->UnprojectPoint(image, r, c);
+
+			point.setIntensity(-1);
+			point.setElongation(-1);
+			point.setConfidence(-1);
+
 			cloud.push_back(point);
 			proj->at(r, c).points().push_back(cloud.points().size() - 1);
 		}
 	}
+
 	cloud.SetProjectionPtr(proj);
-	// we cannot share ownership of this cloud with others, so create a new one
+
 	return std::make_shared<Cloud>(cloud);
 }
 
 Cloud::Ptr
-Cloud::FromImageIntensity(const cv::Mat& image, const cv::Mat& image_intensity,
-		const ProjectionParams& params)
-{
-	CloudProjection::Ptr proj = CloudProjection::Ptr(new RingProjection(params));
-	proj->CheckImageAndStorage(image);
-	proj->CloneDepthImage(image);
-	Cloud cloud;
-	for (int r = 0; r < image.rows; ++r)
-	{
-		for (int c = 0; c < image.cols; ++c)
-		{
-			if (image.at<float>(r, c) < 0.0001f)
-			{
-				continue;
-			}
-			RichPoint point = proj->UnprojectPoint(image, r, c);
-			const float intensity_normalized = image_intensity.at<float>(r, c)
-					/ params.getProjectionParamsRaw()->intensity_norm_factor;
-			point.setIntensity(intensity_normalized);
-			cloud.push_back(point);
-			proj->at(r, c).points().push_back(cloud.points().size() - 1);
-		}
-	}
-	cloud.SetProjectionPtr(proj);
-	// we cannot share ownership of this cloud with others, so create a new one
-	return std::make_shared<Cloud>(cloud);
-}
-
-Cloud::Ptr
-Cloud::FromImageElongation(const cv::Mat& image, const cv::Mat& image_elongation,
-		const ProjectionParams& params)
-{
-	CloudProjection::Ptr proj = CloudProjection::Ptr(new RingProjection(params));
-	proj->CheckImageAndStorage(image);
-	proj->CloneDepthImage(image);
-	Cloud cloud;
-	for (int r = 0; r < image.rows; ++r)
-	{
-		for (int c = 0; c < image.cols; ++c)
-		{
-			if (image.at<float>(r, c) < 0.0001f)
-			{
-				continue;
-			}
-			RichPoint point = proj->UnprojectPoint(image, r, c);
-			const float elongation_normalized = image_elongation.at<float>(r, c)
-					/ params.getProjectionParamsRaw()->elongation_norm_factor;
-			point.setElongation(elongation_normalized);
-			cloud.push_back(point);
-			proj->at(r, c).points().push_back(cloud.points().size() - 1);
-		}
-	}
-	cloud.SetProjectionPtr(proj);
-	// we cannot share ownership of this cloud with others, so create a new one
-	return std::make_shared<Cloud>(cloud);
-}
-
-Cloud::Ptr
-Cloud::FromImageConfidence(const cv::Mat& image, const cv::Mat& image_intensity,
+Cloud::FromImage(const cv::Mat& image_range, const cv::Mat& image_intensity,
 		const cv::Mat& image_elongation, const ProjectionParams& params)
 {
 	CloudProjection::Ptr proj = CloudProjection::Ptr(new RingProjection(params));
-	proj->CheckImageAndStorage(image);
-	proj->CloneDepthImage(image);
 	Cloud cloud;
-	for (int r = 0; r < image.rows; ++r)
+
+	proj->CheckImageAndStorage(image_range);
+	proj->CloneDepthImage(image_range);
+
+	for (int r = 0; r < image_range.rows; ++r)
 	{
-		for (int c = 0; c < image.cols; ++c)
+		for (int c = 0; c < image_range.cols; ++c)
 		{
-			if (image.at<float>(r, c) < 0.0001f)
+			if (image_range.at<float>(r, c) < 0.0001f)
 			{
 				continue;
 			}
-			RichPoint point = proj->UnprojectPoint(image, r, c);
-			const float intensity_normalized = image_intensity.at<float>(r, c)
-					/ params.getProjectionParamsRaw()->intensity_norm_factor;
-			const float elongation_normalized = image_elongation.at<float>(r, c)
-					/ params.getProjectionParamsRaw()->elongation_norm_factor;
+
+			RichPoint point = proj->UnprojectPoint(image_range, r, c);\
+			float intensity_normalized = -1;
+			float elongation_normalized = -1;
+
+			if (image_intensity.rows >= image_range.rows && image_intensity.cols >= image_range.cols)
+			{
+				intensity_normalized = image_intensity.at<float>(r, c)
+						/ params.getProjectionParamsRaw()->intensity_norm_factor;
+			}
+
+			if (image_elongation.rows >= image_range.rows && image_elongation.cols >= image_range.cols)
+			{
+				elongation_normalized = image_elongation.at<float>(r, c)
+						/ params.getProjectionParamsRaw()->elongation_norm_factor;
+			}
+
 			point.setIntensity(intensity_normalized);
 			point.setElongation(elongation_normalized);
 			point.calculateConfidence();
+
 			cloud.push_back(point);
 			proj->at(r, c).points().push_back(cloud.points().size() - 1);
 		}
 	}
+
 	cloud.SetProjectionPtr(proj);
-	// we cannot share ownership of this cloud with others, so create a new one
+
 	return std::make_shared<Cloud>(cloud);
 }
 }  // namespace depth_clustering

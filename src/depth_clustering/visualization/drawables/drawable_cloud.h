@@ -33,17 +33,17 @@ public:
 	Draw() const override;
 
 	static DrawableCloud::Ptr
-	FromCloudRange(const Cloud::ConstPtr& cloud, const Eigen::Vector3f& color =
+	FromCloud(const Cloud::ConstPtr& cloud, const Eigen::Vector3f& color =
 			Eigen::Vector3f::Ones());
 
 	static DrawableCloud::Ptr
-	FromCloudIntensity(const Cloud::ConstPtr& cloud);
+	FromCloudWithIntensity(const Cloud::ConstPtr& cloud);
 
 	static DrawableCloud::Ptr
-	FromCloudElongation(const Cloud::ConstPtr& cloud);
+	FromCloudWithElongation(const Cloud::ConstPtr& cloud);
 
 	static DrawableCloud::Ptr
-	FromCloudConfidence(const Cloud::ConstPtr& cloud);
+	FromCloudWithConfidence(const Cloud::ConstPtr& cloud);
 
 private:
 

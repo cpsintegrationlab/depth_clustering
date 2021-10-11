@@ -50,16 +50,7 @@ public:
 	getDatasetPath() const;
 
 	Cloud::ConstPtr
-	getCloudRange() const;
-
-	Cloud::ConstPtr
-	getCloudIntensity() const;
-
-	Cloud::ConstPtr
-	getCloudElongation() const;
-
-	Cloud::ConstPtr
-	getCloudConfidence() const;
+	getCloud() const;
 
 	const cv::Mat
 	getImageCamera(const std::string& frame_path_name_camera) const;
@@ -114,17 +105,13 @@ public:
 			const std::string& global_config_path = "", const bool& second_return = false);
 
 	void
-	processOneRangeFrameForApollo(const std::string& frame_name,
+	processOneFrameForApollo(const std::string& frame_name,
 			const std::vector<Eigen::Vector3f>& point_cloud);
 
 	const std::string
-	processOneRangeFrameForDataset(const std::string& frame_path_name_range);
-
-	const std::string
-	processOneIntensityFrameForDataset(const std::string& frame_path_name_intensity);
-
-	const std::string
-	processOneElongationFrameForDataset(const std::string& frame_path_name_elongation);
+	processOneFrameForDataset(const std::string& frame_path_name_range,
+			const std::string& frame_path_name_intensity = "",
+			const std::string& frame_path_name_elongation = "");
 
 	void
 	writeLogForApollo();
@@ -151,7 +138,7 @@ private:
 	std::string dataset_path_;
 	int frame_counter_;
 
-	Cloud::Ptr cloud_range_;
+	Cloud::Ptr cloud_;
 	cv::Mat image_range_;
 	cv::Mat image_intensity_;
 	cv::Mat image_elongation_;

@@ -19,6 +19,8 @@
 using boost::property_tree::json_parser::read_json;
 using depth_clustering::DiffFactory;
 using depth_clustering::MatFromPNGCamera;
+using depth_clustering::MatFromPNGElongation;
+using depth_clustering::MatFromPNGIntensity;
 using depth_clustering::MatFromPNGRange;
 using depth_clustering::MatFromTIFFElongation;
 using depth_clustering::MatFromTIFFIntensity;
@@ -62,52 +64,14 @@ DepthClustering::getDatasetPath() const
 }
 
 Cloud::ConstPtr
-DepthClustering::getCloudRange() const
+DepthClustering::getCloud() const
 {
 	if (image_range_.rows == 0 || image_range_.cols == 0)
 	{
 		return nullptr;
 	}
 
-	return cloud_range_;
-}
-
-Cloud::ConstPtr
-DepthClustering::getCloudIntensity() const
-{
-	if (image_range_.rows == 0 || image_range_.cols == 0 || image_intensity_.rows == 0
-			|| image_intensity_.cols == 0)
-	{
-		return nullptr;
-	}
-
-	return Cloud::FromImageIntensity(image_range_, image_intensity_, *parameter_projection_lidar_);
-}
-
-Cloud::ConstPtr
-DepthClustering::getCloudElongation() const
-{
-	if (image_range_.rows == 0 || image_range_.cols == 0 || image_elongation_.rows == 0
-			|| image_elongation_.cols == 0)
-	{
-		return nullptr;
-	}
-
-	return Cloud::FromImageElongation(image_range_, image_elongation_, *parameter_projection_lidar_);
-}
-
-Cloud::ConstPtr
-DepthClustering::getCloudConfidence() const
-{
-	if (image_range_.rows == 0 || image_range_.cols == 0 || image_intensity_.rows == 0
-			|| image_intensity_.cols == 0 || image_elongation_.rows == 0
-			|| image_elongation_.cols == 0)
-	{
-		return nullptr;
-	}
-
-	return Cloud::FromImageConfidence(image_range_, image_intensity_, image_elongation_,
-			*parameter_projection_lidar_);
+	return cloud_;
 }
 
 const cv::Mat
@@ -629,13 +593,13 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 }
 
 void
-DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
+DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)
 {
 	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
 	Timer timer;
-	cloud_range_ = Cloud::Ptr(new Cloud);
+	cloud_ = Cloud::Ptr(new Cloud);
 
 	for (const auto &point_eigen : point_cloud)
 	{
@@ -645,15 +609,15 @@ DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 		point_rich.y() = point_eigen.y();
 		point_rich.z() = point_eigen.z();
 
-		cloud_range_->push_back(point_rich);
+		cloud_->push_back(point_rich);
 	}
 
-	cloud_range_->InitProjection(*parameter_projection_lidar_);
+	cloud_->InitProjection(*parameter_projection_lidar_);
 	bounding_box_->clearFrames();
 
 	std::cout << "[INFO]: Preprocessed: " << timer.measure() << " us." << std::endl;
 
-	depth_ground_remover_->OnNewObjectReceived(*cloud_range_, 0);
+	depth_ground_remover_->OnNewObjectReceived(*cloud_, 0);
 
 	std::cout << "[INFO]: Clustered: " << timer.measure() << " us." << std::endl;
 
@@ -663,25 +627,38 @@ DepthClustering::processOneRangeFrameForApollo(const std::string& frame_name,
 }
 
 const std::string
-DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_name_range)
+DepthClustering::processOneFrameForDataset(const std::string& frame_path_name_range,
+		const std::string& frame_path_name_intensity, const std::string& frame_path_name_elongation)
 {
 	if (frame_path_name_range == "")
 	{
-		std::cout << "[WARN]: Invalid range frame path and name." << std::endl;
+		std::cerr << "[ERROR]: Invalid range frame path and name." << std::endl;
 		return "";
 	}
 
 	Timer timer;
 	std::string frame_name_range = "";
-	std::stringstream ss(frame_path_name_range);
+	std::string frame_name_intensity = "";
+	std::string frame_name_elongation = "";
+	std::stringstream ss_range(frame_path_name_range);
+	std::stringstream ss_intensity(frame_path_name_intensity);
+	std::stringstream ss_elongation(frame_path_name_elongation);
 
-	while (std::getline(ss, frame_name_range, '/'))
+	while (std::getline(ss_range, frame_name_range, '/'))
+	{
+	}
+
+	while (std::getline(ss_intensity, frame_name_intensity, '/'))
+	{
+	}
+
+	while (std::getline(ss_elongation, frame_name_elongation, '/'))
 	{
 	}
 
 	if (frame_name_range == "")
 	{
-		std::cout << "[WARN]: Invalid range frame name." << std::endl;
+		std::cerr << "[ERROR]: Invalid range frame name." << std::endl;
 		return "";
 	}
 
@@ -690,23 +667,33 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 	if (parameter_.dataset_file_type == ".png")
 	{
 		image_range_ = MatFromPNGRange(frame_path_name_range, parameter_projection_lidar_);
+		image_intensity_ = MatFromPNGIntensity(frame_path_name_intensity,
+				parameter_projection_lidar_);
+		image_elongation_ = MatFromPNGElongation(frame_path_name_elongation,
+				parameter_projection_lidar_);
 	}
 	else if (parameter_.dataset_file_type == ".tiff")
 	{
 		image_range_ = MatFromTIFFRange(frame_path_name_range, parameter_projection_lidar_);
+		image_intensity_ = MatFromTIFFIntensity(frame_path_name_intensity,
+				parameter_projection_lidar_);
+		image_elongation_ = MatFromTIFFElongation(frame_path_name_elongation,
+				parameter_projection_lidar_);
 	}
 	else
 	{
-		std::cout << "[WARN]: Unknown dataset file type." << std::endl;
+		std::cerr << "[ERROR]: Unknown dataset file type." << std::endl;
 		return "";
 	}
 
-	cloud_range_ = Cloud::FromImage(image_range_, *parameter_projection_lidar_);
+	cloud_ = Cloud::FromImage(image_range_, image_intensity_, image_elongation_,
+			*parameter_projection_lidar_);
+
 	bounding_box_->clearFrames();
 
 	std::cout << "[INFO]: Preprocessed: " << timer.measure() << " us." << std::endl;
 
-	depth_ground_remover_->OnNewObjectReceived(*cloud_range_, 0);
+	depth_ground_remover_->OnNewObjectReceived(*cloud_, 0);
 
 	std::cout << "[INFO]: Clustered: " << timer.measure() << " us." << std::endl;
 
@@ -720,95 +707,6 @@ DepthClustering::processOneRangeFrameForDataset(const std::string& frame_path_na
 	std::cout << "[INFO]: Logged: " << timer.measure() << " us." << std::endl;
 
 	return frame_name_range;
-}
-
-const std::string
-DepthClustering::processOneIntensityFrameForDataset(const std::string& frame_path_name_intensity)
-{
-	if (frame_path_name_intensity == "")
-	{
-		std::cout << "[WARN]: Invalid intensity frame path and name." << std::endl;
-		return "";
-	}
-
-	std::string frame_name_intensity = "";
-	std::stringstream ss(frame_path_name_intensity);
-
-	while (std::getline(ss, frame_name_intensity, '/'))
-	{
-	}
-
-	if (frame_name_intensity == "")
-	{
-		std::cout << "[WARN]: Invalid intensity frame name." << std::endl;
-		return "";
-	}
-
-	std::cout << "[INFO]: Processing \"" << frame_name_intensity << "\"." << std::endl;
-
-	if (parameter_.dataset_file_type == ".png")
-	{
-		std::cerr << "[ERROR]: The processing of \".png\" type intensity images is not implemented."
-				<< std::endl;
-		return "";
-	}
-	else if (parameter_.dataset_file_type == ".tiff")
-	{
-		image_intensity_ = MatFromTIFFIntensity(frame_path_name_intensity,
-				parameter_projection_lidar_);
-	}
-	else
-	{
-		std::cout << "[WARN]: Unknown dataset file type." << std::endl;
-		return "";
-	}
-
-	return frame_name_intensity;
-}
-
-const std::string
-DepthClustering::processOneElongationFrameForDataset(const std::string& frame_path_name_elongation)
-{
-	if (frame_path_name_elongation == "")
-	{
-		std::cout << "[WARN]: Invalid elongation frame path and name." << std::endl;
-		return "";
-	}
-
-	std::string frame_name_elongation = "";
-	std::stringstream ss(frame_path_name_elongation);
-
-	while (std::getline(ss, frame_name_elongation, '/'))
-	{
-	}
-
-	if (frame_name_elongation == "")
-	{
-		std::cout << "[WARN]: Invalid elongation frame name." << std::endl;
-		return "";
-	}
-
-	std::cout << "[INFO]: Processing \"" << frame_name_elongation << "\"." << std::endl;
-
-	if (parameter_.dataset_file_type == ".png")
-	{
-		std::cerr
-				<< "[ERROR]: The processing of \".png\" type elongation images is not implemented."
-				<< std::endl;
-		return "";
-	}
-	else if (parameter_.dataset_file_type == ".tiff")
-	{
-		image_elongation_ = MatFromTIFFElongation(frame_path_name_elongation,
-				parameter_projection_lidar_);
-	}
-	else
-	{
-		std::cout << "[WARN]: Unknown dataset file type." << std::endl;
-		return "";
-	}
-
-	return frame_name_elongation;
 }
 
 void

@@ -17,9 +17,10 @@ main(int argc, char* argv[])
 	{
 		if (std::string(argv[1]) == "-h")
 		{
-			std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset segment path]" << std::endl;
-			std::cout << "\t" << argv[0] << " [dataset segment path] [global config path]" << std::endl
+			std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset segment path]"
 					<< std::endl;
+			std::cout << "\t" << argv[0] << " [dataset segment path] [global config path]"
+					<< std::endl << std::endl;
 			return 0;
 		}
 
@@ -60,7 +61,7 @@ main(int argc, char* argv[])
 	for (const auto &frame_path_name : depth_clustering.getFolderReaderRange()->GetAllFilePaths())
 	{
 		std::cout << std::endl;
-		depth_clustering.processOneRangeFrameForDataset(frame_path_name);
+		depth_clustering.processOneFrameForDataset(frame_path_name);
 	}
 
 	depth_clustering.writeLogForDataset();

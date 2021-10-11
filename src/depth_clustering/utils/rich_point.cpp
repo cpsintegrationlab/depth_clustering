@@ -50,6 +50,11 @@ RichPoint::operator==(const RichPoint& other) const
 void
 RichPoint::calculateConfidence()
 {
+	if (intensity_ < 0 || elongation_ < 0)
+	{
+		return;
+	}
+
 	float intensity_shifted = intensity_ + 1; // 1 - 2
 	float elongation_shifted = elongation_ + 1; // 1 - 2
 

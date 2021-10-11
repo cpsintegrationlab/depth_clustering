@@ -121,6 +121,12 @@ Visualization::OnNewObjectReceived(const Cloud& cloud_no_ground, int client_id)
 	image_range_no_ground_ = cloud_no_ground.projection_ptr()->depth_image();
 }
 
+void
+Visualization::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int client_id)
+{
+	// TODO make sure intensity/elongaton/confidence is set in clouds
+}
+
 Visualization::~Visualization()
 {
 }
@@ -275,21 +281,33 @@ Visualization::onStop()
 void
 Visualization::onSliderMovedTo(int frame_number)
 {
-	Timer timer;
 	auto folder_reader_range = depth_clustering_->getFolderReaderRange();
 	auto folder_reader_range_first_return = depth_clustering_first_return_->getFolderReaderRange();
+	auto folder_reader_intensity = depth_clustering_->getFolderReaderIntensity();
+	auto folder_reader_elongation = depth_clustering_->getFolderReaderElongation();
 	auto folder_reader_camera = depth_clustering_->getFolderReaderCamera();
 	const auto &frame_paths_names_range = folder_reader_range->GetAllFilePaths();
 	const auto &frame_paths_names_range_first_return =
 			folder_reader_range_first_return->GetAllFilePaths();
+	const auto &frame_paths_names_intensity = folder_reader_intensity->GetAllFilePaths();
+	const auto &frame_paths_names_elongation = folder_reader_elongation->GetAllFilePaths();
 	const auto &frame_paths_names_camera = folder_reader_camera->GetAllFilePaths();
+	std::string frame_path_name_range = "";
+	std::string frame_path_name_range_first_return = "";
+	std::string frame_path_name_intensity = "";
+	std::string frame_path_name_elongation = "";
 	std::string frame_path_name_camera = "";
+	Timer timer;
 
 	if (frame_paths_names_range.empty()
 			|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
 	{
 		std::cerr << "[WARN]: Range image missing in \"" << dataset_path_ << "\"." << std::endl;
 		return;
+	}
+	else
+	{
+		frame_path_name_range = frame_paths_names_range[frame_number];
 	}
 
 	if (frame_paths_names_range_first_return.empty()
@@ -298,6 +316,31 @@ Visualization::onSliderMovedTo(int frame_number)
 		std::cerr << "[WARN]: First return range image missing in \"" << dataset_path_ << "\"."
 				<< std::endl;
 		return;
+	}
+	else
+	{
+		frame_path_name_range_first_return = frame_paths_names_range_first_return[frame_number];
+	}
+
+	if (frame_paths_names_intensity.empty()
+			|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
+	{
+		std::cout << "[WARN]: Intensity image missing in \"" << dataset_path_ << "\"." << std::endl;
+	}
+	else
+	{
+		frame_path_name_intensity = frame_paths_names_intensity[frame_number];
+	}
+
+	if (frame_paths_names_elongation.empty()
+			|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
+	{
+		std::cout << "[WARN]: Elongation image missing in \"" << dataset_path_ << "\"."
+				<< std::endl;
+	}
+	else
+	{
+		frame_path_name_elongation = frame_paths_names_elongation[frame_number];
 	}
 
 	if (frame_paths_names_camera.empty()
@@ -313,47 +356,8 @@ Visualization::onSliderMovedTo(int frame_number)
 	}
 
 	std::cout << std::endl;
-	depth_clustering_->processOneRangeFrameForDataset(frame_paths_names_range[frame_number]);
-
-	if (viewer_point_cloud_layer_index_ == 1 || viewer_point_cloud_layer_index_ == 3
-			|| viewer_image_layer_index_left_ == 3 || viewer_image_layer_index_middle_ == 3
-			|| viewer_image_layer_index_right_ == 3)
-	{
-		auto folder_reader_intensity = depth_clustering_->getFolderReaderIntensity();
-		const auto &frame_paths_names_intensity = folder_reader_intensity->GetAllFilePaths();
-
-		if (frame_paths_names_intensity.empty()
-				|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
-		{
-			std::cout << "[WARN]: Intensity image missing in \"" << dataset_path_ << "\"."
-					<< std::endl;
-		}
-		else
-		{
-			depth_clustering_->processOneIntensityFrameForDataset(
-					frame_paths_names_intensity[frame_number]);
-		}
-	}
-
-	if (viewer_point_cloud_layer_index_ == 2 || viewer_point_cloud_layer_index_ == 3
-			|| viewer_image_layer_index_left_ == 4 || viewer_image_layer_index_middle_ == 4
-			|| viewer_image_layer_index_right_ == 4)
-	{
-		auto folder_reader_elongation = depth_clustering_->getFolderReaderElongation();
-		const auto &frame_paths_names_elongation = folder_reader_elongation->GetAllFilePaths();
-
-		if (frame_paths_names_elongation.empty()
-				|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
-		{
-			std::cout << "[WARN]: Elongation image missing in \"" << dataset_path_ << "\"."
-					<< std::endl;
-		}
-		else
-		{
-			depth_clustering_->processOneElongationFrameForDataset(
-					frame_paths_names_elongation[frame_number]);
-		}
-	}
+	depth_clustering_->processOneFrameForDataset(frame_path_name_range, frame_path_name_intensity,
+			frame_path_name_elongation);
 
 	if (viewer_point_cloud_layer_index_ == 4 && ui->combo_lidar_return->currentIndex() == 0)
 	{
@@ -370,7 +374,7 @@ Visualization::onSliderMovedTo(int frame_number)
 			return;
 		}
 
-		depth_clustering_second_return_->processOneRangeFrameForDataset(
+		depth_clustering_second_return_->processOneFrameForDataset(
 				frame_paths_names_range_second_return[frame_number]);
 	}
 
@@ -752,11 +756,10 @@ Visualization::getGroundPointCloudPair()
 		}
 	}
 
-	auto cloud_range_ground = Cloud::FromImage(image_range_ground, parameter_projection_lidar);
-	auto cloud_range_no_ground = Cloud::FromImage(image_range_no_ground,
-			parameter_projection_lidar);
+	auto cloud_ground = Cloud::FromImage(image_range_ground, parameter_projection_lidar);
+	auto cloud_no_ground = Cloud::FromImage(image_range_no_ground, parameter_projection_lidar);
 
-	return std::make_pair(cloud_range_ground, cloud_range_no_ground);
+	return std::make_pair(cloud_ground, cloud_no_ground);
 }
 
 void
@@ -768,141 +771,104 @@ Visualization::updateViewerPointCloud()
 	{
 	case 0:
 	{
-		const auto cloud_range_ground_pair = getGroundPointCloudPair();
-		const auto cloud_range_ground = cloud_range_ground_pair.first;
-		const auto cloud_range_no_ground = cloud_range_ground_pair.second;
+		const auto cloud_ground_pair = getGroundPointCloudPair();
+		const auto cloud_ground = cloud_ground_pair.first;
+		const auto cloud_no_ground = cloud_ground_pair.second;
 
-		if (!cloud_range_ground || !cloud_range_no_ground)
+		if (!cloud_ground || !cloud_no_ground)
 		{
 			std::cerr << "[WARN]: Ground cloud missing." << std::endl;
 
-			const auto cloud_range = depth_clustering_->getCloudRange();
+			const auto cloud = depth_clustering_->getCloud();
 
-			if (!cloud_range)
+			if (!cloud)
 			{
-				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+				std::cerr << "[ERROR]: Cloud missing." << std::endl;
 			}
 			else
 			{
-				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
+				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(cloud));
 			}
 		}
 		else
 		{
 			ui->viewer_point_cloud->AddDrawable(
-					DrawableCloud::FromCloudRange(cloud_range_ground, Eigen::Vector3f(1, 0, 0)));
-			ui->viewer_point_cloud->AddDrawable(
-					DrawableCloud::FromCloudRange(cloud_range_no_ground));
+					DrawableCloud::FromCloud(cloud_ground, Eigen::Vector3f(1, 0, 0)));
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(cloud_no_ground));
 		}
 
 		break;
 	}
 	case 1:
 	{
-		const auto cloud_intensity = depth_clustering_->getCloudIntensity();
+		const auto cloud = depth_clustering_->getCloud();
 
-		if (!cloud_intensity)
+		if (!cloud)
 		{
-			std::cerr << "[WARN]: Intensity cloud missing." << std::endl;
-
-			const auto cloud_range = depth_clustering_->getCloudRange();
-
-			if (!cloud_range)
-			{
-				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
-			}
-			else
-			{
-				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
-			}
+			std::cerr << "[ERROR]: Cloud missing." << std::endl;
 		}
 		else
 		{
-			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudIntensity(cloud_intensity));
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudWithIntensity(cloud));
 		}
 
 		break;
 	}
 	case 2:
 	{
-		const auto cloud_elongation = depth_clustering_->getCloudElongation();
+		const auto cloud = depth_clustering_->getCloud();
 
-		if (!cloud_elongation)
+		if (!cloud)
 		{
-			std::cerr << "[WARN]: Elongation cloud missing." << std::endl;
-
-			const auto cloud_range = depth_clustering_->getCloudRange();
-
-			if (!cloud_range)
-			{
-				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
-			}
-			else
-			{
-				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
-			}
+			std::cerr << "[ERROR]: Cloud missing." << std::endl;
 		}
 		else
 		{
-			ui->viewer_point_cloud->AddDrawable(
-					DrawableCloud::FromCloudElongation(cloud_elongation));
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudWithElongation(cloud));
 		}
 
 		break;
 	}
 	case 3:
 	{
-		const auto cloud_confidence = depth_clustering_->getCloudConfidence();
+		const auto cloud = depth_clustering_->getCloud();
 
-		if (!cloud_confidence)
+		if (!cloud)
 		{
-			std::cerr << "[WARN]: Confidence cloud missing." << std::endl;
-
-			const auto cloud_range = depth_clustering_->getCloudRange();
-
-			if (!cloud_range)
-			{
-				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
-			}
-			else
-			{
-				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
-			}
+			std::cerr << "[ERROR]: Cloud missing." << std::endl;
 		}
 		else
 		{
-			ui->viewer_point_cloud->AddDrawable(
-					DrawableCloud::FromCloudConfidence(cloud_confidence));
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudWithConfidence(cloud));
 		}
 
 		break;
 	}
 	case 4:
 	{
-		const auto cloud_range_second_return = depth_clustering_second_return_->getCloudRange();
+		const auto cloud_second_return = depth_clustering_second_return_->getCloud();
 
-		if (!cloud_range_second_return)
+		if (!cloud_second_return)
 		{
-			std::cerr << "[WARN]: Second return range cloud missing." << std::endl;
+			std::cerr << "[WARN]: Second return cloud missing." << std::endl;
 		}
 		else
 		{
 			ui->viewer_point_cloud->AddDrawable(
-					DrawableCloud::FromCloudRange(cloud_range_second_return,
-							Eigen::Vector3f(0, 1, 0)));
+					DrawableCloud::FromCloud(cloud_second_return, Eigen::Vector3f(0, 1, 0)));
 		}
 
 		if (ui->combo_lidar_return->currentIndex() == 0)
 		{
-			const auto cloud_range = depth_clustering_->getCloudRange();
+			const auto cloud = depth_clustering_->getCloud();
 
-			if (!cloud_range)
+			if (!cloud)
 			{
-				std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+				std::cerr << "[ERROR]: Cloud missing." << std::endl;
 			}
 			else
 			{
-				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
+				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(cloud));
 			}
 		}
 
@@ -910,15 +876,15 @@ Visualization::updateViewerPointCloud()
 	}
 	default:
 	{
-		const auto cloud_range = depth_clustering_->getCloudRange();
+		const auto cloud = depth_clustering_->getCloud();
 
-		if (!cloud_range)
+		if (!cloud)
 		{
-			std::cerr << "[ERROR]: Range cloud missing." << std::endl;
+			std::cerr << "[ERROR]: Cloud missing." << std::endl;
 		}
 		else
 		{
-			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudRange(cloud_range));
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(cloud));
 		}
 
 		break;
