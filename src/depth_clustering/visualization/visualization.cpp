@@ -14,11 +14,6 @@
 #include <QUuid>
 #include <vector>
 
-#include "api/parameter.h"
-#include "image_labelers/diff_helpers/diff_factory.h"
-#include "utils/folder_reader.h"
-#include "utils/timer.h"
-#include "utils/velodyne_utils.h"
 #include "visualization/drawables/drawable_cloud.h"
 #include "visualization/drawables/drawable_cube.h"
 #include "visualization/drawables/drawable_polygon3d.h"
@@ -31,8 +26,6 @@ using depth_clustering::DiffFactory;
 using depth_clustering::DrawableCube;
 using depth_clustering::DrawablePolygon3d;
 using depth_clustering::FolderReader;
-using depth_clustering::ReadKittiCloud;
-using depth_clustering::ReadKittiCloudTxt;
 using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :

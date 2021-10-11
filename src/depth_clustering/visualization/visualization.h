@@ -17,13 +17,6 @@
 #include <vector>
 
 #include "api/api.h"
-#include "clusterers/image_based_clusterer.h"
-#include "communication/abstract_client.h"
-#include "ground_removal/depth_ground_remover.h"
-#include "post_processing/bounding_box.h"
-#include "projections/cloud_projection.h"
-#include "projections/spherical_projection.h"
-#include "utils/cloud.h"
 #include "visualization/viewer/viewer.h"
 
 namespace Ui
