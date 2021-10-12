@@ -403,9 +403,9 @@
             </widget>
            </item>
            <item row="0" column="4">
-            <widget class="QGroupBox" name="group_global_configuration">
+            <widget class="QGroupBox" name="group_configuration_file">
              <property name="title">
-              <string>Global Configuration</string>
+              <string>Configuration File</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -414,7 +414,14 @@
               <item row="0" column="0">
                <widget class="QPushButton" name="button_global_configuration">
                 <property name="text">
-                 <string>Load From File</string>
+                 <string>Load Global</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QPushButton" name="button_layout_configuration">
+                <property name="text">
+                 <string>Load Layout</string>
                 </property>
                </widget>
               </item>
@@ -438,6 +445,11 @@
                <widget class="QComboBox" name="combo_layer_image_left">
                 <item>
                  <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>Clustering</string>
                  </property>
                 </item>
@@ -459,11 +471,6 @@
                 <item>
                  <property name="text">
                   <string>Elongation</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>None</string>
                  </property>
                 </item>
                </widget>
@@ -499,17 +506,17 @@
                 </property>
                 <item>
                  <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>Cube</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
                   <string>Polygon</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>None</string>
                  </property>
                 </item>
                </widget>
@@ -530,6 +537,11 @@
                <widget class="QComboBox" name="combo_layer_image_right">
                 <item>
                  <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>Clustering</string>
                  </property>
                 </item>
@@ -551,11 +563,6 @@
                 <item>
                  <property name="text">
                   <string>Elongation</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>None</string>
                  </property>
                 </item>
                </widget>
@@ -576,6 +583,11 @@
                <widget class="QComboBox" name="combo_layer_image_middle">
                 <item>
                  <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>Clustering</string>
                  </property>
                 </item>
@@ -597,11 +609,6 @@
                 <item>
                  <property name="text">
                   <string>Elongation</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>None</string>
                  </property>
                 </item>
                </widget>
@@ -663,6 +670,11 @@
                <widget class="QComboBox" name="combo_layer_point_cloud">
                 <item>
                  <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>Ground Removal</string>
                  </property>
                 </item>
@@ -684,11 +696,6 @@
                 <item>
                  <property name="text">
                   <string>Second Return</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>None</string>
                  </property>
                 </item>
                </widget>

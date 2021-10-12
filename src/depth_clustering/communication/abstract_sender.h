@@ -78,17 +78,20 @@ class AbstractSender : public virtual Identifiable {
       exit(EXIT_FAILURE);
     }
     _clients[client->id()] = client;
-    fprintf(stderr,
-            "\n"
-            " ===================== Setting Connection =====================\n"
-            "|| Sender: %s (id: %d)\n"
-            "|| Type:   %s\n"
-            "|| \t\t\t\t|\n"
-            "|| \t\t\t\tV\n"
-            "|| Client: %s (id: %d)\n"
-            " ==============================================================\n",
-            this->guess_class_name().c_str(), this->id(), this->type(),
-            client->guess_class_name().c_str(), client->id());
+    if (verbose_)
+    {
+		fprintf(stderr,
+				"\n"
+				" ===================== Setting Connection =====================\n"
+				"|| Sender: %s (id: %d)\n"
+				"|| Type:   %s\n"
+				"|| \t\t\t\t|\n"
+				"|| \t\t\t\tV\n"
+				"|| Client: %s (id: %d)\n"
+				" ==============================================================\n",
+				this->guess_class_name().c_str(), this->id(), this->type(),
+				client->guess_class_name().c_str(), client->id());
+    }
   }
 
   /**
@@ -102,17 +105,20 @@ class AbstractSender : public virtual Identifiable {
       return;
     }
     auto* client = _clients[id];
-    fprintf(
-        stderr,
-        "\n"
-        " xxxxxxxxxxxxxxxxxxxxxx Removing Connection xxxxxxxxxxxxxxxxxxxx\n"
-        "|| Sender: %s (id: %d)\n"
-        "|| \t\t\\/\n"
-        "|| \t\t/\\\n"
-        "|| Client: %s (id: %d)\n"
-        " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n",
-        this->guess_class_name().c_str(), this->id(),
-        client->guess_class_name().c_str(), client->id());
+    if (verbose_)
+	{
+		fprintf(
+			stderr,
+			"\n"
+			" xxxxxxxxxxxxxxxxxxxxxx Removing Connection xxxxxxxxxxxxxxxxxxxx\n"
+			"|| Sender: %s (id: %d)\n"
+			"|| \t\t\\/\n"
+			"|| \t\t/\\\n"
+			"|| Client: %s (id: %d)\n"
+			" xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n",
+			this->guess_class_name().c_str(), this->id(),
+			client->guess_class_name().c_str(), client->id());
+	}
     _clients.erase(id);
   }
 
@@ -145,6 +151,7 @@ class AbstractSender : public virtual Identifiable {
 
   IdClientMapping _clients;
   SenderType _type;
+  bool verbose_ = false;
 };
 
 }  // namespace depth_clustering

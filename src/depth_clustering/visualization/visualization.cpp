@@ -29,20 +29,13 @@ using depth_clustering::FolderReader;
 using depth_clustering::time_utils::Timer;
 
 Visualization::Visualization(QWidget* parent) :
-		QWidget(parent), ui(new Ui::Visualization), play_(false), shown_(false), show_bounding_box_(
-				true), viewer_point_cloud_layer_index_(5), viewer_image_layer_index_left_(0), viewer_image_layer_index_middle_(
-				1), viewer_image_layer_index_right_(2)
+		QWidget(parent), ui(new Ui::Visualization), play_(false), initialized_(false)
 {
 	ui->setupUi(this);
 
 	ui->frame_controls->setFixedHeight(ui->frame_controls->minimumHeight());
 	ui->frame_settings->setFixedHeight(ui->frame_settings->minimumHeight());
 	ui->frame_viewer_image->setFixedHeight(ui->frame_viewer_image->minimumHeight());
-
-	ui->combo_layer_point_cloud->setCurrentIndex(viewer_point_cloud_layer_index_);
-	ui->combo_layer_image_left->setCurrentIndex(viewer_image_layer_index_left_);
-	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
-	ui->combo_layer_image_right->setCurrentIndex(viewer_image_layer_index_right_);
 
 	ui->viewer_image_camera->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	ui->viewer_image_camera->setCacheMode(QGraphicsView::CacheBackground);
@@ -71,30 +64,39 @@ Visualization::Visualization(QWidget* parent) :
 	connect(ui->button_page_next, SIGNAL(released()), this, SLOT(onNextPage()));
 	connect(ui->button_page_last, SIGNAL(released()), this, SLOT(onLastPage()));
 
-	resetUI();
-
 	depth_clustering_first_return_ = std::make_shared<DepthClustering>();
 	depth_clustering_second_return_ = std::make_shared<DepthClustering>();
 	depth_clustering_ = depth_clustering_first_return_;
+	layout_ = VisualizationLayout();
 
 	const auto &arguments = QCoreApplication::arguments();
 
-	if (arguments.size() == 2)
-	{
-		openDataset(arguments.at(1).toStdString());
-	}
-
 	if (arguments.size() > 2)
 	{
-		openDataset(arguments.at(1).toStdString(), arguments.at(2).toStdString());
+		layout_.configure(arguments.at(2).toStdString());
+	}
+
+	resetUI();
+
+	if (arguments.size() > 3)
+	{
+		openDataset(arguments.at(1).toStdString(), arguments.at(3).toStdString());
+	}
+	else if (arguments.size() > 1)
+	{
+		openDataset(arguments.at(1).toStdString());
 	}
 }
 
 void
 Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client_id)
 {
-	if (viewer_image_layer_index_left_ == 1 || viewer_image_layer_index_middle_ == 1
-			|| viewer_image_layer_index_right_ == 1)
+	if (ui->combo_layer_image_left->currentIndex()
+			== static_cast<int>(ImageViewerLayer::Segmentation)
+			|| ui->combo_layer_image_middle->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Segmentation)
+			|| ui->combo_layer_image_right->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Segmentation))
 	{
 		QImage qimage_segmentation = MatToQImage(
 				AbstractImageLabeler::LabelsToColor(image_segmentation));
@@ -171,15 +173,13 @@ Visualization::showEvent(QShowEvent* event)
 {
 	QWidget::showEvent(event);
 
-	const auto &parameter = depth_clustering_->getParameter();
-
-	if (parameter.use_camera_fov)
+	if (ui->combo_field_of_view->currentIndex() == static_cast<int>(FieldOfView::Default))
+	{
+		ui->viewer_point_cloud->resetViewFOVDefault();
+	}
+	else if (ui->combo_field_of_view->currentIndex() == static_cast<int>(FieldOfView::Camera))
 	{
 		ui->viewer_point_cloud->resetViewFOVCamera();
-	}
-	else
-	{
-		ui->viewer_point_cloud->resetViewFOVFull();
 	}
 
 	resize(minimumWidth(), minimumHeight());
@@ -188,7 +188,7 @@ Visualization::showEvent(QShowEvent* event)
 
 	updateViewerImage();
 
-	shown_ = true;
+	initialized_ = true;
 }
 
 void
@@ -206,8 +206,13 @@ Visualization::resizeEvent(QResizeEvent* event)
 void
 Visualization::onOpen()
 {
-	openDataset(QFileDialog::getExistingDirectory(this).toStdString(),
-			file_path_name_config_global_);
+	const std::string dataset_path =
+			QFileDialog::getExistingDirectory(this, "Open Dataset").toStdString();
+
+	if (dataset_path != "")
+	{
+		openDataset(dataset_path, file_path_name_config_global_);
+	}
 }
 
 void
@@ -291,6 +296,7 @@ Visualization::onSliderMovedTo(int frame_number)
 	std::string frame_path_name_intensity = "";
 	std::string frame_path_name_elongation = "";
 	std::string frame_path_name_camera = "";
+	QList<int> splitter_viewer_sizes_collapsed;
 	Timer timer;
 
 	if (frame_paths_names_range.empty()
@@ -337,23 +343,36 @@ Visualization::onSliderMovedTo(int frame_number)
 		frame_path_name_elongation = frame_paths_names_elongation[frame_number];
 	}
 
+	splitter_viewer_sizes_collapsed.append(
+			ui->splitter_viewer->sizes().at(0) + ui->splitter_viewer->sizes().at(1));
+	splitter_viewer_sizes_collapsed.append(0);
+
 	if (frame_paths_names_camera.empty()
 			|| frame_number >= static_cast<int>(frame_paths_names_camera.size()))
 	{
 		std::cerr << "[WARN]: Camera image missing in \"" << dataset_path_ << "\"." << std::endl;
-		ui->viewer_image_camera->setVisible(false);
+
+		if (!initialized_)
+		{
+			ui->splitter_viewer->setSizes(splitter_viewer_sizes_collapsed);
+		}
+	}
+	else if (!initialized_ && !layout_.show_camera_frame)
+	{
+		ui->splitter_viewer->setSizes(splitter_viewer_sizes_collapsed);
 	}
 	else
 	{
 		frame_path_name_camera = frame_paths_names_camera[frame_number];
-		ui->viewer_image_camera->setVisible(true);
 	}
 
 	std::cout << std::endl;
 	depth_clustering_->processOneFrameForDataset(frame_path_name_range, frame_path_name_intensity,
 			frame_path_name_elongation);
 
-	if (viewer_point_cloud_layer_index_ == 4 && ui->combo_lidar_return->currentIndex() == 0)
+	if (ui->combo_layer_point_cloud->currentIndex()
+			== static_cast<int>(PointCloudViewerLayer::Second_Return)
+			&& ui->combo_lidar_return->currentIndex() == static_cast<int>(LidarReturn::First))
 	{
 		auto folder_reader_range_second_return =
 				depth_clustering_second_return_->getFolderReaderRange();
@@ -393,14 +412,14 @@ Visualization::onSliderMovedTo(int frame_number)
 void
 Visualization::onParameterUpdated()
 {
-	switch (ui->combo_lidar_return->currentIndex())
+	switch (static_cast<LidarReturn>(ui->combo_lidar_return->currentIndex()))
 	{
-	case 0:
+	case LidarReturn::First:
 	{
 		depth_clustering_ = depth_clustering_first_return_;
 		break;
 	}
-	case 1:
+	case LidarReturn::Second:
 	{
 		depth_clustering_ = depth_clustering_second_return_;
 		break;
@@ -415,45 +434,7 @@ Visualization::onParameterUpdated()
 	DepthClusteringParameter parameter = depth_clustering_->getParameter();
 
 	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
-	parameter.size_cluster_min = ui->spin_size_cluster_min->value();
-	parameter.size_cluster_max = ui->spin_size_cluster_max->value();
 	parameter.size_smooth_window = ui->combo_size_smooth_window->currentIndex() * 2 + 5;
-
-	BoundingBox::Type bounding_box_type = BoundingBox::Type::Cube;
-
-	switch (ui->combo_bounding_box_type->currentIndex())
-	{
-	case 0:
-	{
-		std::cout << "[INFO]: Bounding box type: cube." << std::endl;
-		bounding_box_type = BoundingBox::Type::Cube;
-		show_bounding_box_ = true;
-		break;
-	}
-	case 1:
-	{
-		std::cout << "[INFO]: Bounding box type: polygon." << std::endl;
-		bounding_box_type = BoundingBox::Type::Polygon;
-		show_bounding_box_ = true;
-		break;
-	}
-	case 2:
-	{
-		std::cout << "[INFO]: Bounding box type: none." << std::endl;
-		bounding_box_type = parameter.bounding_box_type;
-		show_bounding_box_ = false;
-		break;
-	}
-	default:
-	{
-		std::cout << "[INFO]: Bounding box type: cube." << std::endl;
-		bounding_box_type = BoundingBox::Type::Cube;
-		show_bounding_box_ = true;
-		break;
-	}
-	}
-
-	parameter.bounding_box_type = bounding_box_type;
 
 	switch (ui->combo_difference_type->currentIndex())
 	{
@@ -489,6 +470,57 @@ Visualization::onParameterUpdated()
 	}
 	}
 
+	parameter.size_cluster_min = ui->spin_size_cluster_min->value();
+	parameter.size_cluster_max = ui->spin_size_cluster_max->value();
+
+	BoundingBox::Type bounding_box_type = BoundingBox::Type::Cube;
+
+	switch (static_cast<BoundingBoxType>(ui->combo_bounding_box_type->currentIndex()))
+	{
+	case BoundingBoxType::Cube:
+	{
+		bounding_box_type = BoundingBox::Type::Cube;
+		break;
+	}
+	case BoundingBoxType::Polygon:
+	{
+		bounding_box_type = BoundingBox::Type::Polygon;
+		break;
+	}
+	case BoundingBoxType::None:
+	{
+		bounding_box_type = parameter.bounding_box_type;
+		break;
+	}
+	default:
+	{
+		bounding_box_type = BoundingBox::Type::Polygon;
+		break;
+	}
+	}
+
+	parameter.bounding_box_type = bounding_box_type;
+	parameter.use_camera_fov = static_cast<bool>(ui->combo_field_of_view->currentIndex());
+
+	switch (static_cast<FieldOfView>(ui->combo_field_of_view->currentIndex()))
+	{
+	case FieldOfView::Default:
+	{
+		ui->viewer_point_cloud->resetViewFOVDefault();
+		break;
+	}
+	case FieldOfView::Camera:
+	{
+		ui->viewer_point_cloud->resetViewFOVCamera();
+		break;
+	}
+	default:
+	{
+		ui->viewer_point_cloud->resetViewFOVDefault();
+		break;
+	}
+	}
+
 	depth_clustering_first_return_->setParameter(parameter);
 	depth_clustering_first_return_->getDepthGroundRemover()->AddClient(this);
 	depth_clustering_first_return_->getClusterer()->SetLabelImageClient(this);
@@ -506,8 +538,26 @@ Visualization::onParameterUpdated()
 void
 Visualization::onLoadGlobalConfiguration()
 {
-	openDataset(dataset_path_,
-			QFileDialog::getOpenFileName(this, QString(), QString(), tr("JSON Files (*.json)")).toStdString());
+	const std::string file_path_name_config_global = QFileDialog::getOpenFileName(this,
+			"Load Global Configuration File", QString(), tr("JSON Files (*.json)")).toStdString();
+
+	if (file_path_name_config_global != "")
+	{
+		openDataset(dataset_path_, file_path_name_config_global);
+	}
+}
+
+void
+Visualization::onLoadLayoutConfiguration()
+{
+	const std::string file_path_name_config_layout = QFileDialog::getOpenFileName(this,
+			"Load Layout Configuration File", QString(), tr("JSON Files (*.json)")).toStdString();
+
+	if (file_path_name_config_layout != "")
+	{
+		layout_.configure(file_path_name_config_layout);
+		initializeUI();
+	}
 }
 
 void
@@ -534,19 +584,26 @@ Visualization::onSplitterViewerMoved()
 void
 Visualization::onLayerPointCloudUpdated()
 {
-	viewer_point_cloud_layer_index_ = ui->combo_layer_point_cloud->currentIndex();
+	Timer timer;
 
-	onSliderMovedTo(ui->slider_frame->value());
+	timer.start();
+
+	updateViewerPointCloud();
+
+	std::cout << "[INFO]: Point cloud viewer updated: " << timer.measure() << " us." << std::endl;
 }
 
 void
 Visualization::onLayerImageUpdated()
 {
-	viewer_image_layer_index_left_ = ui->combo_layer_image_left->currentIndex();
-	viewer_image_layer_index_middle_ = ui->combo_layer_image_middle->currentIndex();
-	viewer_image_layer_index_right_ = ui->combo_layer_image_right->currentIndex();
+	Timer timer;
 
-	onSliderMovedTo(ui->slider_frame->value());
+	timer.start();
+
+	updateViewerImageScene();
+	updateViewerImage();
+
+	std::cout << "[INFO]: Image viewers updated: " << timer.measure() << " us." << std::endl;
 }
 
 void
@@ -560,42 +617,36 @@ Visualization::onDifferenceTypeUpdated()
 	{
 	case 0:
 	{
-		std::cout << "[INFO]: Difference type: angles." << std::endl;
 		difference_type = DiffFactory::DiffType::ANGLES;
 		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	case 1:
 	{
-		std::cout << "[INFO]: Difference type: precomputed angles." << std::endl;
 		difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	case 2:
 	{
-		std::cout << "[INFO]: Difference type: line distance." << std::endl;
 		difference_type = DiffFactory::DiffType::LINE_DIST;
 		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	case 3:
 	{
-		std::cout << "[INFO]: Difference type: precomputed line distance." << std::endl;
 		difference_type = DiffFactory::DiffType::LINE_DIST_PRECOMPUTED;
 		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	case 4:
 	{
-		std::cout << "[INFO]: Difference type: simple distance." << std::endl;
 		difference_type = DiffFactory::DiffType::SIMPLE;
 		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	default:
 	{
-		std::cout << "[INFO]: Difference type: precomputed angles." << std::endl;
 		difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
@@ -616,46 +667,6 @@ Visualization::onDifferenceTypeUpdated()
 	onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Updated difference type." << std::endl;
-}
-
-void
-Visualization::onFieldOfViewUpdated()
-{
-	DepthClusteringParameter parameter = depth_clustering_->getParameter();
-
-	parameter.use_camera_fov = static_cast<bool>(ui->combo_field_of_view->currentIndex());
-
-	switch (ui->combo_field_of_view->currentIndex())
-	{
-	case 0:
-	{
-		ui->viewer_point_cloud->resetViewFOVFull();
-		break;
-	}
-	case 1:
-	{
-		ui->viewer_point_cloud->resetViewFOVCamera();
-		break;
-	}
-	default:
-	{
-		ui->viewer_point_cloud->resetViewFOVFull();
-		break;
-	}
-	}
-
-	depth_clustering_first_return_->setParameter(parameter);
-	depth_clustering_first_return_->getDepthGroundRemover()->AddClient(this);
-	depth_clustering_first_return_->getClusterer()->SetLabelImageClient(this);
-
-	depth_clustering_second_return_->setParameter(parameter);
-	depth_clustering_second_return_->getDepthGroundRemover()->AddClient(this);
-	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
-
-	resetViewer();
-	onSliderMovedTo(ui->slider_frame->value());
-
-	std::cout << "[INFO]: Updated field of view." << std::endl;
 }
 
 void
@@ -685,10 +696,6 @@ Visualization::openDataset(const std::string& dataset_path,
 	dataset_path_ = dataset_path;
 	file_path_name_config_global_ = file_path_name_config_global;
 	play_ = false;
-	viewer_point_cloud_layer_index_ = 5;
-	viewer_image_layer_index_left_ = 0;
-	viewer_image_layer_index_middle_ = 1;
-	viewer_image_layer_index_right_ = 2;
 
 	if (!depth_clustering_first_return_ || !depth_clustering_second_return_)
 	{
@@ -763,9 +770,9 @@ Visualization::updateViewerPointCloud()
 {
 	ui->viewer_point_cloud->Clear();
 
-	switch (viewer_point_cloud_layer_index_)
+	switch (static_cast<PointCloudViewerLayer>(ui->combo_layer_point_cloud->currentIndex()))
 	{
-	case 0:
+	case PointCloudViewerLayer::Ground_Removal:
 	{
 		const auto cloud_ground_pair = getGroundPointCloudPair();
 		const auto cloud_ground = cloud_ground_pair.first;
@@ -795,7 +802,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case 1:
+	case PointCloudViewerLayer::Intensity:
 	{
 		const auto cloud = depth_clustering_->getCloud();
 
@@ -810,7 +817,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case 2:
+	case PointCloudViewerLayer::Elongation:
 	{
 		const auto cloud = depth_clustering_->getCloud();
 
@@ -825,7 +832,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case 3:
+	case PointCloudViewerLayer::Confidence:
 	{
 		const auto cloud = depth_clustering_->getCloud();
 
@@ -840,7 +847,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case 4:
+	case PointCloudViewerLayer::Second_Return:
 	{
 		const auto cloud_second_return = depth_clustering_second_return_->getCloud();
 
@@ -887,7 +894,7 @@ Visualization::updateViewerPointCloud()
 	}
 	}
 
-	if (show_bounding_box_)
+	if (static_cast<bool>(ui->combo_bounding_box_type->currentIndex()))
 	{
 		if (ground_truth_frame_cube_)
 		{
@@ -994,14 +1001,14 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 {
 	if (frame_path_name_camera != "")
 	{
-		if (!shown_ || !ui->viewer_image_camera->visibleRegion().isEmpty())
+		if (!initialized_ || !ui->viewer_image_camera->visibleRegion().isEmpty())
 		{
 			auto image_camera = depth_clustering_->getImageCamera(frame_path_name_camera);
 			auto bounding_box_frame_flat = depth_clustering_->getBoundingBoxFrameFlat();
 
 			QImage qimage_camera = MatToQImage(image_camera);
 
-			if (show_bounding_box_)
+			if (static_cast<bool>(ui->combo_bounding_box_type->currentIndex()))
 			{
 				QFont font;
 				QPen pen_bounding_box;
@@ -1080,8 +1087,11 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		}
 	}
 
-	if (viewer_image_layer_index_left_ == 0 || viewer_image_layer_index_middle_ == 0
-			|| viewer_image_layer_index_right_ == 0)
+	if (ui->combo_layer_image_left->currentIndex() == static_cast<int>(ImageViewerLayer::Clustering)
+			|| ui->combo_layer_image_middle->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Clustering)
+			|| ui->combo_layer_image_right->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Clustering))
 	{
 		auto image_range = depth_clustering_->getImageRange();
 		auto difference_type = depth_clustering_->getParameter().difference_type;
@@ -1094,8 +1104,11 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		scene_difference_->addPixmap(QPixmap::fromImage(qimage_difference));
 	}
 
-	if (viewer_image_layer_index_left_ == 2 || viewer_image_layer_index_middle_ == 2
-			|| viewer_image_layer_index_right_ == 2)
+	if (ui->combo_layer_image_left->currentIndex() == static_cast<int>(ImageViewerLayer::Range)
+			|| ui->combo_layer_image_middle->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Range)
+			|| ui->combo_layer_image_right->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Range))
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_range = depth_clustering_->getImageRange();
@@ -1118,8 +1131,11 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		scene_range_->addPixmap(QPixmap::fromImage(qimage_range));
 	}
 
-	if (viewer_image_layer_index_left_ == 3 || viewer_image_layer_index_middle_ == 3
-			|| viewer_image_layer_index_right_ == 3)
+	if (ui->combo_layer_image_left->currentIndex() == static_cast<int>(ImageViewerLayer::Intensity)
+			|| ui->combo_layer_image_middle->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Intensity)
+			|| ui->combo_layer_image_right->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Intensity))
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_intensity = depth_clustering_->getImageIntensity();
@@ -1146,8 +1162,11 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		scene_intensity_->addPixmap(QPixmap::fromImage(qimage_intensity));
 	}
 
-	if (viewer_image_layer_index_left_ == 4 || viewer_image_layer_index_middle_ == 4
-			|| viewer_image_layer_index_right_ == 4)
+	if (ui->combo_layer_image_left->currentIndex() == static_cast<int>(ImageViewerLayer::Elongation)
+			|| ui->combo_layer_image_middle->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Elongation)
+			|| ui->combo_layer_image_right->currentIndex()
+					== static_cast<int>(ImageViewerLayer::Elongation))
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_elongation = depth_clustering_->getImageElongation();
@@ -1178,39 +1197,39 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 void
 Visualization::updateViewerImage()
 {
-	if (!shown_ || !ui->viewer_image_camera->visibleRegion().isEmpty())
+	if (!initialized_ || !ui->viewer_image_camera->visibleRegion().isEmpty())
 	{
 		ui->viewer_image_camera->setScene(scene_camera_.get());
 		ui->viewer_image_camera->fitInView(scene_camera_->itemsBoundingRect());
 	}
 
-	switch (viewer_image_layer_index_left_)
+	switch (static_cast<ImageViewerLayer>(ui->combo_layer_image_left->currentIndex()))
 	{
-	case 0:
+	case ImageViewerLayer::Clustering:
 	{
 		ui->viewer_image_left->setScene(scene_difference_.get());
 		ui->viewer_image_left->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
-	case 1:
+	case ImageViewerLayer::Segmentation:
 	{
 		ui->viewer_image_left->setScene(scene_segmentation_.get());
 		ui->viewer_image_left->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
-	case 2:
+	case ImageViewerLayer::Range:
 	{
 		ui->viewer_image_left->setScene(scene_range_.get());
 		ui->viewer_image_left->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
-	case 3:
+	case ImageViewerLayer::Intensity:
 	{
 		ui->viewer_image_left->setScene(scene_intensity_.get());
 		ui->viewer_image_left->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
-	case 4:
+	case ImageViewerLayer::Elongation:
 	{
 		ui->viewer_image_left->setScene(scene_elongation_.get());
 		ui->viewer_image_left->fitInView(scene_elongation_->itemsBoundingRect());
@@ -1224,33 +1243,33 @@ Visualization::updateViewerImage()
 	}
 	}
 
-	switch (viewer_image_layer_index_middle_)
+	switch (static_cast<ImageViewerLayer>(ui->combo_layer_image_middle->currentIndex()))
 	{
-	case 0:
+	case ImageViewerLayer::Clustering:
 	{
 		ui->viewer_image_middle->setScene(scene_difference_.get());
 		ui->viewer_image_middle->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
-	case 1:
+	case ImageViewerLayer::Segmentation:
 	{
 		ui->viewer_image_middle->setScene(scene_segmentation_.get());
 		ui->viewer_image_middle->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
-	case 2:
+	case ImageViewerLayer::Range:
 	{
 		ui->viewer_image_middle->setScene(scene_range_.get());
 		ui->viewer_image_middle->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
-	case 3:
+	case ImageViewerLayer::Intensity:
 	{
 		ui->viewer_image_middle->setScene(scene_intensity_.get());
 		ui->viewer_image_middle->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
-	case 4:
+	case ImageViewerLayer::Elongation:
 	{
 		ui->viewer_image_middle->setScene(scene_elongation_.get());
 		ui->viewer_image_middle->fitInView(scene_elongation_->itemsBoundingRect());
@@ -1264,33 +1283,33 @@ Visualization::updateViewerImage()
 	}
 	}
 
-	switch (viewer_image_layer_index_right_)
+	switch (static_cast<ImageViewerLayer>(ui->combo_layer_image_right->currentIndex()))
 	{
-	case 0:
+	case ImageViewerLayer::Clustering:
 	{
 		ui->viewer_image_right->setScene(scene_difference_.get());
 		ui->viewer_image_right->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
-	case 1:
+	case ImageViewerLayer::Segmentation:
 	{
 		ui->viewer_image_right->setScene(scene_segmentation_.get());
 		ui->viewer_image_right->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
-	case 2:
+	case ImageViewerLayer::Range:
 	{
 		ui->viewer_image_right->setScene(scene_range_.get());
 		ui->viewer_image_right->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
-	case 3:
+	case ImageViewerLayer::Intensity:
 	{
 		ui->viewer_image_right->setScene(scene_intensity_.get());
 		ui->viewer_image_right->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
-	case 4:
+	case ImageViewerLayer::Elongation:
 	{
 		ui->viewer_image_right->setScene(scene_elongation_.get());
 		ui->viewer_image_right->fitInView(scene_elongation_->itemsBoundingRect());
@@ -1346,51 +1365,35 @@ Visualization::resetUI()
 	ui->spin_size_cluster_min->setEnabled(false);
 	ui->spin_size_cluster_max->setEnabled(false);
 	ui->button_global_configuration->setEnabled(false);
-	ui->combo_field_of_view->setEnabled(false);
+	ui->button_layout_configuration->setEnabled(false);
 	ui->combo_layer_point_cloud->setEnabled(false);
 	ui->combo_layer_image_left->setEnabled(false);
 	ui->combo_layer_image_middle->setEnabled(false);
 	ui->combo_layer_image_right->setEnabled(false);
 	ui->combo_lidar_return->setEnabled(false);
 	ui->combo_bounding_box_type->setEnabled(false);
+	ui->combo_field_of_view->setEnabled(false);
 
-	disconnect(ui->button_play, SIGNAL(released()), this, SLOT(onPlay()));
-	disconnect(ui->button_pause, SIGNAL(released()), this, SLOT(onPause()));
-	disconnect(ui->button_stop, SIGNAL(released()), this, SLOT(onStop()));
-	disconnect(ui->slider_frame, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
-	disconnect(ui->spin_angle_ground_removal, SIGNAL(valueChanged(double)), this,
-			SLOT(onParameterUpdated()));
-	disconnect(ui->combo_size_smooth_window, SIGNAL(activated(int)), this,
-			SLOT(onParameterUpdated()));
-	disconnect(ui->spin_clustering_threshold, SIGNAL(valueChanged(double)), this,
-			SLOT(onParameterUpdated()));
-	disconnect(ui->combo_difference_type, SIGNAL(activated(int)), this,
-			SLOT(onDifferenceTypeUpdated()));
-	disconnect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this,
-			SLOT(onParameterUpdated()));
-	disconnect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this,
-			SLOT(onParameterUpdated()));
-	disconnect(ui->button_global_configuration, SIGNAL(released()), this,
-			SLOT(onLoadGlobalConfiguration()));
-	disconnect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onFieldOfViewUpdated()));
-	disconnect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
-			SLOT(onLayerPointCloudUpdated()));
-	disconnect(ui->combo_layer_image_left, SIGNAL(activated(int)), this,
-			SLOT(onLayerImageUpdated()));
-	disconnect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,
-			SLOT(onLayerImageUpdated()));
-	disconnect(ui->combo_layer_image_right, SIGNAL(activated(int)), this,
-			SLOT(onLayerImageUpdated()));
-	disconnect(ui->combo_lidar_return, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
-	disconnect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this,
-			SLOT(onParameterUpdated()));
-	disconnect(ui->splitter_viewer, SIGNAL(splitterMoved(int, int)), this,
-			SLOT(onSplitterViewerMoved()));
+	ui->combo_layer_point_cloud->setCurrentIndex(
+			static_cast<int>(layout_.point_cloud_viewer_layer));
+	ui->combo_layer_image_left->setCurrentIndex(static_cast<int>(layout_.image_viewer_layer_left));
+	ui->combo_layer_image_middle->setCurrentIndex(
+			static_cast<int>(layout_.image_viewer_layer_middle));
+	ui->combo_layer_image_right->setCurrentIndex(
+			static_cast<int>(layout_.image_viewer_layer_right));
+	ui->combo_lidar_return->setCurrentIndex(static_cast<int>(layout_.lidar_return));
+	ui->combo_bounding_box_type->setCurrentIndex(static_cast<int>(layout_.bounding_box_type));
+	ui->combo_field_of_view->setCurrentIndex(static_cast<int>(layout_.field_of_view));
+
+	disconnectSignals();
 }
 
 void
 Visualization::initializeUI()
 {
+	initialized_ = false;
+
+	const auto &parameter = depth_clustering_->getParameter();
 	auto folder_reader_range = depth_clustering_->getFolderReaderRange();
 
 	if (!folder_reader_range)
@@ -1399,7 +1402,6 @@ Visualization::initializeUI()
 		return;
 	}
 
-	const auto &parameter = depth_clustering_->getParameter();
 	const auto &frame_paths_names_range = folder_reader_range->GetAllFilePaths();
 
 	if (frame_paths_names_range.empty())
@@ -1408,32 +1410,13 @@ Visualization::initializeUI()
 		return;
 	}
 
-	depth_clustering_->getDepthGroundRemover()->AddClient(this);
-	depth_clustering_->getClusterer()->SetLabelImageClient(this);
-
 	ui->slider_frame->setMaximum(frame_paths_names_range.size() - 1);
 	ui->spin_frame->setMaximum(frame_paths_names_range.size() - 1);
+
 	ui->slider_frame->setValue(ui->slider_frame->minimum());
-	ui->combo_size_smooth_window->setCurrentIndex((parameter.size_smooth_window - 5) / 2);
+	ui->spin_frame->setValue(ui->slider_frame->minimum());
 	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
-	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
-	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
-	ui->combo_field_of_view->setCurrentIndex(static_cast<int>(parameter.use_camera_fov));
-
-	if (parameter.use_camera_fov)
-	{
-		ui->viewer_point_cloud->resetViewFOVCamera();
-	}
-	else
-	{
-		ui->viewer_point_cloud->resetViewFOVFull();
-	}
-
-	ui->combo_layer_point_cloud->setCurrentIndex(viewer_point_cloud_layer_index_);
-	ui->combo_layer_image_left->setCurrentIndex(viewer_image_layer_index_left_);
-	ui->combo_layer_image_middle->setCurrentIndex(viewer_image_layer_index_middle_);
-	ui->combo_layer_image_right->setCurrentIndex(viewer_image_layer_index_right_);
-	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
+	ui->combo_size_smooth_window->setCurrentIndex((parameter.size_smooth_window - 5) / 2);
 
 	switch (parameter.difference_type)
 	{
@@ -1469,11 +1452,63 @@ Visualization::initializeUI()
 	}
 	}
 
-	ui->combo_bounding_box_type->setCurrentIndex(static_cast<int>(parameter.bounding_box_type));
+	ui->combo_difference_type->setCurrentIndex(static_cast<int>(parameter.difference_type));
+	ui->spin_size_cluster_min->setValue(parameter.size_cluster_min);
+	ui->spin_size_cluster_max->setValue(parameter.size_cluster_max);
+
+	ui->combo_layer_point_cloud->setCurrentIndex(
+			static_cast<int>(layout_.point_cloud_viewer_layer));
+	ui->combo_layer_image_left->setCurrentIndex(static_cast<int>(layout_.image_viewer_layer_left));
+	ui->combo_layer_image_middle->setCurrentIndex(
+			static_cast<int>(layout_.image_viewer_layer_middle));
+	ui->combo_layer_image_right->setCurrentIndex(
+			static_cast<int>(layout_.image_viewer_layer_right));
+	ui->combo_lidar_return->setCurrentIndex(static_cast<int>(layout_.lidar_return));
+	ui->combo_bounding_box_type->setCurrentIndex(static_cast<int>(layout_.bounding_box_type));
+	ui->combo_field_of_view->setCurrentIndex(static_cast<int>(layout_.field_of_view));
+
+	if (ui->combo_field_of_view->currentIndex() == static_cast<int>(FieldOfView::Default))
+	{
+		ui->viewer_point_cloud->resetViewFOVDefault();
+	}
+	else if (ui->combo_field_of_view->currentIndex() == static_cast<int>(FieldOfView::Camera))
+	{
+		ui->viewer_point_cloud->resetViewFOVCamera();
+	}
 
 	setWindowTitle(QString::fromStdString(dataset_path_));
 
-	onSliderMovedTo(ui->slider_frame->value());
+	onParameterUpdated();
+	connectSignals();
+
+	ui->button_play->setEnabled(true);
+	ui->button_pause->setEnabled(false);
+	ui->button_stop->setEnabled(true);
+	ui->slider_frame->setEnabled(true);
+	ui->spin_frame->setEnabled(true);
+	ui->spin_angle_ground_removal->setEnabled(true);
+	ui->combo_size_smooth_window->setEnabled(true);
+	ui->spin_clustering_threshold->setEnabled(true);
+	ui->combo_difference_type->setEnabled(true);
+	ui->spin_size_cluster_min->setEnabled(true);
+	ui->spin_size_cluster_max->setEnabled(true);
+	ui->button_global_configuration->setEnabled(true);
+	ui->button_layout_configuration->setEnabled(true);
+	ui->combo_layer_point_cloud->setEnabled(true);
+	ui->combo_layer_image_left->setEnabled(true);
+	ui->combo_layer_image_middle->setEnabled(true);
+	ui->combo_layer_image_right->setEnabled(true);
+	ui->combo_lidar_return->setEnabled(true);
+	ui->combo_bounding_box_type->setEnabled(true);
+	ui->combo_field_of_view->setEnabled(true);
+
+	initialized_ = true;
+}
+
+void
+Visualization::connectSignals()
+{
+	disconnectSignals();
 
 	connect(ui->button_play, SIGNAL(released()), this, SLOT(onPlay()));
 	connect(ui->button_pause, SIGNAL(released()), this, SLOT(onPause()));
@@ -1490,7 +1525,9 @@ Visualization::initializeUI()
 	connect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->button_global_configuration, SIGNAL(released()), this,
 			SLOT(onLoadGlobalConfiguration()));
-	connect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onFieldOfViewUpdated()));
+	connect(ui->button_layout_configuration, SIGNAL(released()), this,
+			SLOT(onLoadLayoutConfiguration()));
+	connect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
 	connect(ui->combo_layer_image_left, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
@@ -1501,24 +1538,43 @@ Visualization::initializeUI()
 	connect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->splitter_viewer, SIGNAL(splitterMoved(int, int)), this,
 			SLOT(onSplitterViewerMoved()));
+}
 
-	ui->button_play->setEnabled(true);
-	ui->button_pause->setEnabled(false);
-	ui->button_stop->setEnabled(true);
-	ui->slider_frame->setEnabled(true);
-	ui->spin_frame->setEnabled(true);
-	ui->spin_angle_ground_removal->setEnabled(true);
-	ui->combo_size_smooth_window->setEnabled(true);
-	ui->spin_clustering_threshold->setEnabled(true);
-	ui->combo_difference_type->setEnabled(true);
-	ui->spin_size_cluster_min->setEnabled(true);
-	ui->spin_size_cluster_max->setEnabled(true);
-	ui->button_global_configuration->setEnabled(true);
-	ui->combo_field_of_view->setEnabled(true);
-	ui->combo_layer_point_cloud->setEnabled(true);
-	ui->combo_layer_image_left->setEnabled(true);
-	ui->combo_layer_image_middle->setEnabled(true);
-	ui->combo_layer_image_right->setEnabled(true);
-	ui->combo_lidar_return->setEnabled(true);
-	ui->combo_bounding_box_type->setEnabled(true);
+void
+Visualization::disconnectSignals()
+{
+	disconnect(ui->button_play, SIGNAL(released()), this, SLOT(onPlay()));
+	disconnect(ui->button_pause, SIGNAL(released()), this, SLOT(onPause()));
+	disconnect(ui->button_stop, SIGNAL(released()), this, SLOT(onStop()));
+	disconnect(ui->slider_frame, SIGNAL(valueChanged(int)), this, SLOT(onSliderMovedTo(int)));
+	disconnect(ui->spin_angle_ground_removal, SIGNAL(valueChanged(double)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->combo_size_smooth_window, SIGNAL(activated(int)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->spin_clustering_threshold, SIGNAL(valueChanged(double)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->combo_difference_type, SIGNAL(activated(int)), this,
+			SLOT(onDifferenceTypeUpdated()));
+	disconnect(ui->spin_size_cluster_min, SIGNAL(valueChanged(int)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->spin_size_cluster_max, SIGNAL(valueChanged(int)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->button_global_configuration, SIGNAL(released()), this,
+			SLOT(onLoadGlobalConfiguration()));
+	disconnect(ui->button_layout_configuration, SIGNAL(released()), this,
+			SLOT(onLoadLayoutConfiguration()));
+	disconnect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	disconnect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
+			SLOT(onLayerPointCloudUpdated()));
+	disconnect(ui->combo_layer_image_left, SIGNAL(activated(int)), this,
+			SLOT(onLayerImageUpdated()));
+	disconnect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,
+			SLOT(onLayerImageUpdated()));
+	disconnect(ui->combo_layer_image_right, SIGNAL(activated(int)), this,
+			SLOT(onLayerImageUpdated()));
+	disconnect(ui->combo_lidar_return, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	disconnect(ui->combo_bounding_box_type, SIGNAL(activated(int)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->splitter_viewer, SIGNAL(splitterMoved(int, int)), this,
+			SLOT(onSplitterViewerMoved()));
 }

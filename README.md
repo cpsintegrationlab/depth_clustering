@@ -67,10 +67,13 @@ To launch the visualizer application with a dataset path, do as follows:
 
 ```bash
 cd install/amd64/depth_clustering/release/bin
-./visualizer dataset_segment_path global_config_file
+./visualizer dataset_segment_path layout_config_file global_config_file
 ```
 
-Note: any resulting output JSON files would be stored under the provided `dataset_segment_path` folder. Two example datasets are provided under the `data` folder.
+Note:
+1. The `global_config_file` is as explained [above](#command-line-application).
+2. The `layout_config_file` is an optional parameter that specifies the path to a layout configuration file. The visualizer application takes the layout configuration file and applies the corresponding layout configurations. If any entries in `layout_config_file` conflicts with those in `global_config_file`, entries in `layout_config_file` supersede.
+3. Any resulting output JSON files would be stored under the provided `dataset_segment_path` folder. Two example datasets are provided under the `data` folder.
 
 ## Cross-Compilation
 

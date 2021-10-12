@@ -1,0 +1,10 @@
+{
+	"point_cloud_viewer_layer": "confidence",
+	"image_viewer_layer_left": "range",
+	"image_viewer_layer_middle": "intensity",
+	"image_viewer_layer_right": "elongation",
+	"lidar_return": "first",
+	"bounding_box_type": "none",
+	"field_of_view": "default",
+	"show_camera_frame": false
+}

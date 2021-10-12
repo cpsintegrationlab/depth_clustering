@@ -24,7 +24,7 @@ Viewer::Clear()
 }
 
 void
-Viewer::resetViewFOVFull()
+Viewer::resetViewFOVDefault()
 {
 	setSceneCenter(qglviewer::Vec(0, 0, 0));
 	setSceneRadius(range_lidar_);
@@ -57,6 +57,6 @@ void
 Viewer::init()
 {
 	setBackgroundColor(QColor(0, 0, 0));
-	resetViewFOVFull();
+	resetViewFOVDefault();
 	glDisable(GL_LIGHTING);
 }

@@ -32,7 +32,7 @@ public:
 	Clear();
 
 	void
-	resetViewFOVFull();
+	resetViewFOVDefault();
 
 	void
 	resetViewFOVCamera();

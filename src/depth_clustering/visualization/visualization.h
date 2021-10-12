@@ -18,6 +18,7 @@
 
 #include "api/api.h"
 #include "visualization/viewer/viewer.h"
+#include "visualization/visualization_layout.h"
 
 namespace Ui
 {
@@ -87,6 +88,9 @@ private slots:
 	onLoadGlobalConfiguration();
 
 	void
+	onLoadLayoutConfiguration();
+
+	void
 	onSplitterViewerMoved();
 
 	void
@@ -97,9 +101,6 @@ private slots:
 
 	void
 	onDifferenceTypeUpdated();
-
-	void
-	onFieldOfViewUpdated();
 
 	void
 	onNextPage();
@@ -120,7 +121,7 @@ private:
 	updateViewerPointCloud();
 
 	void
-	updateViewerImageScene(const std::string& frame_path_name_camera);
+	updateViewerImageScene(const std::string& frame_path_name_camera = "");
 
 	void
 	updateViewerImage();
@@ -133,6 +134,12 @@ private:
 
 	void
 	initializeUI();
+
+	void
+	connectSignals();
+
+	void
+	disconnectSignals();
 
 	std::unique_ptr<Ui::Visualization> ui;
 
@@ -149,16 +156,11 @@ private:
 	std::unique_ptr<QGraphicsScene> scene_intensity_ = nullptr;
 	std::unique_ptr<QGraphicsScene> scene_elongation_ = nullptr;
 
+	VisualizationLayout layout_;
 	std::string dataset_path_;
 	std::string file_path_name_config_global_;
 	volatile bool play_;
-	bool shown_;
-	bool viewer_image_camera_visible_;
-	bool show_bounding_box_;
-	int viewer_point_cloud_layer_index_;
-	int viewer_image_layer_index_left_;
-	int viewer_image_layer_index_middle_;
-	int viewer_image_layer_index_right_;
+	bool initialized_;
 
 	cv::Mat image_range_;
 	cv::Mat image_range_no_ground_;
