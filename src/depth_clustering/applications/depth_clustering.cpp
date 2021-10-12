@@ -7,20 +7,28 @@
 
 #include "api/api.h"
 
+void
+printUsage(int argc, char* argv[])
+{
+	std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset segment path]" << std::endl;
+	std::cout << "\t" << argv[0] << " [dataset segment path] [global config file]" << std::endl;
+	std::cout << "\t" << argv[0]
+			<< " [dataset segment path] [global config file] [use second return]" << std::endl
+			<< std::endl;
+}
+
 int
 main(int argc, char* argv[])
 {
-	std::string dataset_path;
-	std::string file_path_name_config_global;
+	std::string dataset_path = "";
+	std::string file_path_name_config_global = "";
+	bool second_return = false;
 
 	if (argc > 1)
 	{
 		if (std::string(argv[1]) == "-h")
 		{
-			std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset segment path]"
-					<< std::endl;
-			std::cout << "\t" << argv[0] << " [dataset segment path] [global config file]"
-					<< std::endl << std::endl;
+			printUsage(argc, argv);
 			return 0;
 		}
 
@@ -35,18 +43,29 @@ main(int argc, char* argv[])
 		{
 			file_path_name_config_global = argv[2];
 		}
+
+		if (argc > 3)
+		{
+			try
+			{
+				second_return = static_cast<bool>(std::stoi(argv[3]));
+			} catch (const std::exception &e)
+			{
+				printUsage(argc, argv);
+				return 0;
+			}
+		}
 	}
 	else
 	{
-		std::cout << std::endl << "Usage:\t" << argv[0] << " [dataset segment path]" << std::endl;
-		std::cout << "\t" << argv[0] << " [dataset segment path] [global config file]" << std::endl
-				<< std::endl;
+		printUsage(argc, argv);
 		return 0;
 	}
 
 	DepthClustering depth_clustering;
 
-	if (!depth_clustering.initializeForDataset(dataset_path, file_path_name_config_global))
+	if (!depth_clustering.initializeForDataset(dataset_path, file_path_name_config_global,
+			second_return))
 	{
 		std::cout << "[ERROR]: Failed to initialize for dataset. Quit." << std::endl;
 		return -1;

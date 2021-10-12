@@ -71,16 +71,16 @@ Visualization::Visualization(QWidget* parent) :
 
 	const auto &arguments = QCoreApplication::arguments();
 
-	if (arguments.size() > 2)
+	if (arguments.size() > 3)
 	{
-		layout_.configure(arguments.at(2).toStdString());
+		layout_.configure(arguments.at(3).toStdString());
 	}
 
 	resetUI();
 
-	if (arguments.size() > 3)
+	if (arguments.size() > 2)
 	{
-		openDataset(arguments.at(1).toStdString(), arguments.at(3).toStdString());
+		openDataset(arguments.at(1).toStdString(), arguments.at(2).toStdString());
 	}
 	else if (arguments.size() > 1)
 	{

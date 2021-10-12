@@ -461,7 +461,8 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 
 	if (file_path_name_config_global != "")
 	{
-		parameter_factory_global_ = std::make_shared<ParameterFactory>(file_path_name_config_global);
+		parameter_factory_global_ = std::make_shared<ParameterFactory>(
+				file_path_name_config_global);
 		parameter_factory_global_->setGlobalDepthClusteringParameter(parameter_);
 		parameter_factory_global_->setGlobalLidarProjectionParameter(parameter_projection_lidar_);
 		parameter_factory_global_->setGlobalCameraProjectionParameter(parameter_projection_camera_);
@@ -500,7 +501,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 		parameter_projection_camera_.extrinsic[11] = 0;
 	}
 
-	logger_parameter.log_path = dataset_path_;
+	logger_parameter.log_path = dataset_path_ + "frames_lidar/" + dataset_path_lidar_return;
 
 	std::string dataset_path_range = dataset_path_ + "frames_lidar/" + dataset_path_lidar_return
 			+ "/range/";
