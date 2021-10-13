@@ -37,9 +37,10 @@ public:
 
 	template<typename Type>
 	using Frame = std::vector<Type>;
-	using Cube = std::tuple<Eigen::Vector3f, Eigen::Vector3f, float, std::string>; // <center, extent, rotation, id>
-	using Polygon = std::tuple<AlignedEigenVectors, float, std::string>; // <hull, diff_z, id>
-	using Flat = std::tuple<Eigen::Vector2i, Eigen::Vector2i, float, std::string>; // <upper_left, lower_right, depth, id>
+	using Cluster = std::tuple<Cloud, float, std::string>; // <cloud, score, id>
+	using Cube = std::tuple<Eigen::Vector3f, Eigen::Vector3f, float, float, std::string>; // <center, extent, rotation, score, id>
+	using Polygon = std::tuple<AlignedEigenVectors, float, float, std::string>; // <hull, height, score, id>
+	using Flat = std::tuple<Eigen::Vector2i, Eigen::Vector2i, float, float, std::string>; // <upper_left, lower_right, depth, score, id>
 
 	enum class Type
 	{
@@ -51,6 +52,9 @@ public:
 	BoundingBox(const Type& type);
 
 	BoundingBox(const Type& type, const CameraProjectionParameter& camera_projection_parameter);
+
+	std::shared_ptr<Frame<Cluster>>
+	getFrameCluster() const;
 
 	std::shared_ptr<Frame<Cube>>
 	getFrameCube() const;
@@ -81,15 +85,19 @@ public:
 
 private:
 
-	void
-	CreateCubes(const Cloud& cloud);
+	float
+	calculateClusterScore(const Cloud& cloud);
 
 	void
-	CreatePolygons(const Cloud& cloud);
+	CreateCubes(const Cluster& cluster);
+
+	void
+	CreatePolygons(const Cluster& cluster);
 
 	Type type_;
 	int id_;
 
+	std::shared_ptr<Frame<Cluster>> frame_cluster_;
 	std::shared_ptr<Frame<Cube>> frame_cube_;
 	std::shared_ptr<Frame<Polygon>> frame_polygon_;
 	std::shared_ptr<Frame<Flat>> frame_flat_;

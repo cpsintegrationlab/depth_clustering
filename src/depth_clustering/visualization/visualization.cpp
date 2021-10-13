@@ -115,12 +115,6 @@ Visualization::OnNewObjectReceived(const std::pair<cv::Mat, cv::Mat>& images, in
 	image_range_no_ground_ = images.second;
 }
 
-void
-Visualization::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int client_id)
-{
-	// TODO make sure intensity/elongaton/confidence is set in clouds
-}
-
 Visualization::~Visualization()
 {
 }

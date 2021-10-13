@@ -71,10 +71,46 @@ main(int argc, char* argv[])
 		return -1;
 	}
 
-	for (const auto &frame_path_name : depth_clustering.getFolderReaderRange()->GetAllFilePaths())
+	const auto &frame_paths_names_range =
+			depth_clustering.getFolderReaderRange()->GetAllFilePaths();
+	const auto &frame_paths_names_intensity =
+			depth_clustering.getFolderReaderIntensity()->GetAllFilePaths();
+	const auto &frame_paths_names_elongation =
+			depth_clustering.getFolderReaderElongation()->GetAllFilePaths();
+
+	for (int frame_number = 0; frame_number < static_cast<int>(frame_paths_names_range.size());
+			frame_number++)
 	{
 		std::cout << std::endl;
-		depth_clustering.processOneFrameForDataset(frame_path_name);
+		std::string frame_path_name_range = "";
+		std::string frame_path_name_intensity = "";
+		std::string frame_path_name_elongation = "";
+
+		if (frame_paths_names_range.empty()
+				|| frame_number >= static_cast<int>(frame_paths_names_range.size()))
+		{
+			std::cerr << "[WARN]: Range image missing in \"" << dataset_path << "\"." << std::endl;
+			continue;
+		}
+		else
+		{
+			frame_path_name_range = frame_paths_names_range[frame_number];
+		}
+
+		if (!frame_paths_names_intensity.empty()
+				&& frame_number < static_cast<int>(frame_paths_names_range.size()))
+		{
+			frame_path_name_intensity = frame_paths_names_intensity[frame_number];
+		}
+
+		if (!frame_paths_names_elongation.empty()
+				&& frame_number < static_cast<int>(frame_paths_names_range.size()))
+		{
+			frame_path_name_elongation = frame_paths_names_elongation[frame_number];
+		}
+
+		depth_clustering.processOneFrameForDataset(frame_path_name_range, frame_path_name_intensity,
+				frame_path_name_elongation);
 	}
 
 	depth_clustering.writeLogForDataset();

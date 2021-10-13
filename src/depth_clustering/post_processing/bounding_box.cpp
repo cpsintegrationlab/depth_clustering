@@ -20,6 +20,7 @@ BoundingBox::BoundingBox(const Type& type) :
 		type_(type)
 {
 	id_ = 0;
+	frame_cluster_ = std::make_shared<Frame<Cluster>>();
 	frame_cube_ = std::make_shared<Frame<Cube>>();
 	frame_polygon_ = std::make_shared<Frame<Polygon>>();
 	frame_flat_ = std::make_shared<Frame<Flat>>();
@@ -31,6 +32,12 @@ BoundingBox::BoundingBox(const Type& type,
 {
 	camera_projection_ = std::make_shared<CameraProjection>(camera_projection_parameter);
 	camera_projection_->setFrames(frame_cube_, frame_polygon_, frame_flat_);
+}
+
+std::shared_ptr<BoundingBox::Frame<BoundingBox::Cluster>>
+BoundingBox::getFrameCluster() const
+{
+	return frame_cluster_;
 }
 
 std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>>
@@ -75,6 +82,7 @@ BoundingBox::setFrameFlat(std::shared_ptr<Frame<Flat>> frame_flat)
 void
 BoundingBox::clearFrames()
 {
+	frame_cluster_->clear();
 	frame_cube_->clear();
 	frame_polygon_->clear();
 	frame_flat_->clear();
@@ -97,7 +105,10 @@ BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clou
 {
 	for (const auto &kv : clouds)
 	{
-		const auto &cluster = kv.second;
+		BoundingBox::Cluster cluster = std::make_tuple(kv.second, calculateClusterScore(kv.second),
+				std::to_string(id_));
+
+		frame_cluster_->push_back(cluster);
 
 		switch (type_)
 		{
@@ -117,11 +128,42 @@ BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clou
 			break;
 		}
 		}
+
+		id_++;
 	}
 }
 
+float
+BoundingBox::calculateClusterScore(const Cloud& cloud)
+{
+	int point_counter = 0;
+	int point_counter_invalid = 0;
+	float point_score_total = 0;
+	float cluster_score = -1;
+
+	for (const auto &point : cloud.points())
+	{
+		if (point.confidence() < 0 || point.confidence() > 1)
+		{
+			point_counter_invalid++;
+			point_counter++;
+			continue;
+		}
+
+		point_score_total += point.confidence();
+		point_counter++;
+	}
+
+	if (point_counter_invalid < point_counter)
+	{
+		cluster_score = point_score_total / point_counter;
+	}
+
+	return cluster_score;
+}
+
 void
-BoundingBox::CreateCubes(const Cloud& cloud)
+BoundingBox::CreateCubes(const Cluster& cluster)
 {
 	if (!frame_cube_)
 	{
@@ -129,6 +171,8 @@ BoundingBox::CreateCubes(const Cloud& cloud)
 		return;
 	}
 
+	const Cloud &cloud = std::get<0>(cluster);
+	const float &score = std::get<1>(cluster);
 	Eigen::Vector3f center = Eigen::Vector3f::Zero();
 	Eigen::Vector3f extent = Eigen::Vector3f::Zero();
 	Eigen::Vector3f max_point(std::numeric_limits<float>::lowest(),
@@ -149,11 +193,11 @@ BoundingBox::CreateCubes(const Cloud& cloud)
 		extent = max_point - min_point;
 	}
 
-	frame_cube_->push_back(std::make_tuple(center, extent, 0, std::to_string(id_++)));
+	frame_cube_->push_back(std::make_tuple(center, extent, 0, score, std::to_string(id_)));
 }
 
 void
-BoundingBox::CreatePolygons(const Cloud& cloud)
+BoundingBox::CreatePolygons(const Cluster& cluster)
 {
 	if (!frame_polygon_)
 	{
@@ -161,6 +205,8 @@ BoundingBox::CreatePolygons(const Cloud& cloud)
 		return;
 	}
 
+	const Cloud &cloud = std::get<0>(cluster);
+	const float &score = std::get<1>(cluster);
 	float min_z
 	{ std::numeric_limits<float>::max() };
 	float max_z
@@ -183,9 +229,9 @@ BoundingBox::CreatePolygons(const Cloud& cloud)
 		const auto &cv_point = cv_points[index];
 		hull.emplace_back(cv_point.x, cv_point.y, min_z);
 	}
-	const float diff_z = max_z - min_z;
+	const float height = max_z - min_z;
 
-	frame_polygon_->push_back(std::make_tuple(hull, diff_z, std::to_string(id_++)));
+	frame_polygon_->push_back(std::make_tuple(hull, height, score, std::to_string(id_)));
 }
 
 } // namespace depth_clustering

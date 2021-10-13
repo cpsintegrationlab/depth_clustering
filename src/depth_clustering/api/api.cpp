@@ -179,7 +179,7 @@ DepthClustering::getGroundTruthFrameCube(const std::string& frame_path_name_rang
 		rotation = std::stof(ground_truth_cube_values[6]);
 		id = ground_truth_cube_values[7];
 
-		ground_truth_frame_cube->push_back(std::make_tuple(center, extent, rotation, id));
+		ground_truth_frame_cube->push_back(std::make_tuple(center, extent, rotation, -1, id));
 	}
 
 	return ground_truth_frame_cube;
@@ -244,7 +244,7 @@ DepthClustering::getGroundTruthFrameFlat(const std::string& frame_path_name_rang
 		id = ground_truth_flat_values[5];
 
 		ground_truth_frame_flat->push_back(
-				std::make_tuple(corner_upper_left, corner_lower_right, depth, id));
+				std::make_tuple(corner_upper_left, corner_lower_right, depth, -1, id));
 	}
 
 	return ground_truth_frame_flat;

@@ -302,7 +302,7 @@ CameraProjection::getBoundingBoxFlat(
 
 	return std::make_shared<BoundingBox::Flat>(
 			std::make_tuple(bounding_box_flat_corner_upper_left,
-					bounding_box_flat_corner_lower_right, 0, ""));
+					bounding_box_flat_corner_lower_right, 0, -1, ""));
 }
 
 void
@@ -463,6 +463,7 @@ CameraProjection::projectFromBoundingBoxFrameCube()
 
 		std::get<2>(*bounding_box_flat) = bounding_box_depth;
 		std::get<3>(*bounding_box_flat) = std::get<3>(bounding_box);
+		std::get<4>(*bounding_box_flat) = std::get<4>(bounding_box);
 
 		// Store 2D flat bounding box
 		bounding_box_frame_flat_->push_back(*bounding_box_flat);
@@ -574,6 +575,7 @@ CameraProjection::projectFromBoundingBoxFramePolygon()
 
 		std::get<2>(*bounding_box_flat) = bounding_box_depth;
 		std::get<3>(*bounding_box_flat) = std::get<2>(bounding_box);
+		std::get<4>(*bounding_box_flat) = std::get<3>(bounding_box);
 
 		// Store 2D flat bounding box
 		bounding_box_frame_flat_->push_back(*bounding_box_flat);
