@@ -62,10 +62,12 @@ DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int sender_id)
 		smoothed_image = ApplySavitskyGolaySmoothing(angle_image, _window_size);
 	}
 
-	auto no_ground_image = ZeroOutGroundBFS(depth_image, smoothed_image, _ground_remove_angle,
+	auto images = ZeroOutGroundBFS(depth_image, smoothed_image, _ground_remove_angle,
 			_window_size);
+	auto no_ground_image = images.second;
 	cloud_copy.projection_ptr()->depth_image() = no_ground_image;
 	this->ShareDataWithAllClients(cloud_copy);
+	this->ShareDataWithAllClients(images);
 	_counter++;
 }
 
@@ -90,11 +92,12 @@ DepthGroundRemover::ZeroOutGround(const cv::Mat& image, const cv::Mat& angle_ima
 	return res;
 }
 
-Mat
+std::pair<cv::Mat, cv::Mat>
 DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_image,
 		const Radians& threshold, int kernel_size) const
 {
-	Mat res = cv::Mat::zeros(image.size(), CV_32F);
+	Mat image_ground = cv::Mat::zeros(image.size(), CV_32F);
+	Mat image_no_ground = cv::Mat::zeros(image.size(), CV_32F);
 	LinearImageLabeler<> image_labeler(image, _params, threshold);
 	SimpleDiff simple_diff_helper(&angle_image);
 	Radians start_thresh = 30_deg;
@@ -121,10 +124,10 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 		image_labeler.LabelOneComponent(1, current_coord, &simple_diff_helper);
 	}
 	auto label_image_ptr = image_labeler.GetLabelImage();
-	if (label_image_ptr->rows != res.rows || label_image_ptr->cols != res.cols)
+	if (label_image_ptr->rows != image.rows || label_image_ptr->cols != image.cols)
 	{
-		fprintf(stderr, "ERROR: label image and res do not correspond.\n");
-		return res;
+		fprintf(stderr, "ERROR: label image and image do not correspond.\n");
+		return std::make_pair(image_ground, image_no_ground);
 	}
 	kernel_size = std::max(kernel_size - 2, 3);
 	Mat kernel = GetUniformKernel(kernel_size, CV_8U);
@@ -137,11 +140,15 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 			if (dilated.at<uint16_t>(r, c) == 0)
 			{
 				// all unlabeled points are non-ground
-				res.at<float>(r, c) = image.at<float>(r, c);
+				image_no_ground.at<float>(r, c) = image.at<float>(r, c);
+			}
+			else
+			{
+				image_ground.at<float>(r, c) = image.at<float>(r, c);
 			}
 		}
 	}
-	return res;
+	return std::make_pair(image_ground, image_no_ground);
 }
 
 Mat

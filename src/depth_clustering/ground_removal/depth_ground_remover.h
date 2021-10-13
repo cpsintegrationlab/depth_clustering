@@ -37,17 +37,24 @@ namespace depth_clustering
  *
  * @param      params  projection params
  */
-class DepthGroundRemover: public AbstractClient<Cloud>, public AbstractSender<Cloud>
+class DepthGroundRemover: public AbstractClient<Cloud>,
+		public AbstractSender<Cloud>,
+		public AbstractSender<std::pair<cv::Mat, cv::Mat>>
 {
-	using ClientT = AbstractClient<Cloud>;
-	using SenderT = AbstractSender<Cloud>;
-
 public:
+
+	using ClientT = AbstractClient<Cloud>;
+	using SenderTCloud = AbstractSender<Cloud>;
+	using SenderTImage = AbstractSender<std::pair<cv::Mat, cv::Mat>>;
+	using SenderTCloud::ShareDataWithAllClients;
+	using SenderTImage::ShareDataWithAllClients;
+
 	explicit
 	DepthGroundRemover(const ProjectionParams& params, const Radians& ground_remove_angle,
 			int window_size = 5) :
 			ClientT
-			{ }, SenderT
+			{ }, SenderTCloud
+			{ SenderType::STREAMER }, SenderTImage
 			{ SenderType::STREAMER }, _params
 			{ params }, _window_size
 			{ window_size }, _ground_remove_angle
@@ -83,7 +90,7 @@ protected:
 	cv::Mat
 	ZeroOutGround(const cv::Mat& image, const cv::Mat& angle_image, const Radians& threshold) const;
 
-	cv::Mat
+	std::pair<cv::Mat, cv::Mat>
 	ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_image, const Radians& threshold,
 			int kernel_size) const;
 

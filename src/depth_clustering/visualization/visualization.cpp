@@ -109,11 +109,10 @@ Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client
 }
 
 void
-Visualization::OnNewObjectReceived(const Cloud& cloud_no_ground, int client_id)
+Visualization::OnNewObjectReceived(const std::pair<cv::Mat, cv::Mat>& images, int client_id)
 {
-	std::lock_guard<std::mutex> lock_guard(image_range_mutex_);
-	image_range_ = depth_clustering_->getImageRange();
-	image_range_no_ground_ = cloud_no_ground.projection_ptr()->depth_image();
+	image_range_ground_ = images.first;
+	image_range_no_ground_ = images.second;
 }
 
 void
@@ -522,11 +521,13 @@ Visualization::onParameterUpdated()
 	}
 
 	depth_clustering_first_return_->setParameter(parameter);
-	depth_clustering_first_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_first_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
+			this);
 	depth_clustering_first_return_->getClusterer()->SetLabelImageClient(this);
 
 	depth_clustering_second_return_->setParameter(parameter);
-	depth_clustering_second_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_second_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
+			this);
 	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
 
 	resetViewer();
@@ -656,11 +657,13 @@ Visualization::onDifferenceTypeUpdated()
 	parameter.difference_type = difference_type;
 
 	depth_clustering_first_return_->setParameter(parameter);
-	depth_clustering_first_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_first_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
+			this);
 	depth_clustering_first_return_->getClusterer()->SetLabelImageClient(this);
 
 	depth_clustering_second_return_->setParameter(parameter);
-	depth_clustering_second_return_->getDepthGroundRemover()->AddClient(this);
+	depth_clustering_second_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
+			this);
 	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
 
 	resetViewer();
@@ -721,50 +724,6 @@ Visualization::openDataset(const std::string& dataset_path,
 	initializeUI();
 }
 
-std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
-Visualization::getGroundPointCloudPair()
-{
-	cv::Mat image_range;
-	cv::Mat image_range_no_ground;
-	const ProjectionParams parameter_projection_lidar =
-			*depth_clustering_->getLidarProjectionParameter();
-
-	{
-		std::lock_guard<std::mutex> lock_guard(image_range_mutex_);
-		image_range = image_range_;
-		image_range_no_ground = image_range_no_ground_;
-	}
-
-	if (image_range.rows == 0 || image_range.cols == 0 || image_range_no_ground.rows == 0
-			|| image_range_no_ground.cols == 0)
-	{
-		std::cerr << "[ERROR]: Range cloud missing." << std::endl;
-		return std::make_pair(nullptr, nullptr);
-	}
-
-	auto image_range_ground = image_range;
-
-	for (int row = 0; row < image_range.rows; row++)
-	{
-		for (int col = 0; col < image_range.cols; col++)
-		{
-			if (image_range.at<float>(row, col) != image_range_no_ground.at<float>(row, col))
-			{
-				image_range_ground.at<float>(row, col) = image_range.at<float>(row, col);
-			}
-			else
-			{
-				image_range_ground.at<float>(row, col) = 0.0;
-			}
-		}
-	}
-
-	auto cloud_ground = Cloud::FromImage(image_range_ground, parameter_projection_lidar);
-	auto cloud_no_ground = Cloud::FromImage(image_range_no_ground, parameter_projection_lidar);
-
-	return std::make_pair(cloud_ground, cloud_no_ground);
-}
-
 void
 Visualization::updateViewerPointCloud()
 {
@@ -774,9 +733,11 @@ Visualization::updateViewerPointCloud()
 	{
 	case PointCloudViewerLayer::Ground_Removal:
 	{
-		const auto cloud_ground_pair = getGroundPointCloudPair();
-		const auto cloud_ground = cloud_ground_pair.first;
-		const auto cloud_no_ground = cloud_ground_pair.second;
+		const ProjectionParams parameter_projection_lidar =
+				*depth_clustering_->getLidarProjectionParameter();
+		const auto cloud_ground = Cloud::FromImage(image_range_ground_, parameter_projection_lidar);
+		const auto cloud_no_ground = Cloud::FromImage(image_range_no_ground_,
+				parameter_projection_lidar);
 
 		if (!cloud_ground || !cloud_no_ground)
 		{

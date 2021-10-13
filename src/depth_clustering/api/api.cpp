@@ -373,7 +373,7 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 	clusterer_->SetDiffType(parameter_.difference_type);
 	logger_->setBoundingBox(bounding_box_);
 
-	depth_ground_remover_->AddClient(clusterer_.get());
+	depth_ground_remover_->DepthGroundRemover::SenderTCloud::AddClient(clusterer_.get()); // @suppress("Method cannot be resolved")
 	clusterer_->AddClient(bounding_box_.get());
 }
 
@@ -428,7 +428,7 @@ DepthClustering::initializeForApollo()
 	clusterer_->SetDiffType(parameter_.difference_type);
 	logger_->setBoundingBox(bounding_box_);
 
-	depth_ground_remover_->AddClient(clusterer_.get());
+	depth_ground_remover_->DepthGroundRemover::SenderTCloud::AddClient(clusterer_.get()); // @suppress("Method cannot be resolved")
 	clusterer_->AddClient(bounding_box_.get());
 
 	return true;
@@ -568,7 +568,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 	clusterer_->SetDiffType(parameter_.difference_type);
 	logger_->setBoundingBox(bounding_box_);
 
-	depth_ground_remover_->AddClient(clusterer_.get());
+	depth_ground_remover_->DepthGroundRemover::SenderTCloud::AddClient(clusterer_.get()); // @suppress("Method cannot be resolved")
 	clusterer_->AddClient(bounding_box_.get());
 
 	try

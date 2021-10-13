@@ -27,7 +27,7 @@ class Visualization;
 
 class Visualization: public QWidget,
 		public depth_clustering::AbstractClient<cv::Mat>,
-		public depth_clustering::AbstractClient<Cloud>,
+		public depth_clustering::AbstractClient<std::pair<cv::Mat, cv::Mat>>,
 		public depth_clustering::AbstractClient<std::unordered_map<uint16_t, Cloud>>
 {
 Q_OBJECT
@@ -41,7 +41,7 @@ public:
 	OnNewObjectReceived(const cv::Mat& image_segmentation, int client_id = 0) override;
 
 	void
-	OnNewObjectReceived(const Cloud& cloud_no_ground, int client_id = 0) override;
+	OnNewObjectReceived(const std::pair<cv::Mat, cv::Mat>& images, int client_id = 0) override;
 
 	void
 	OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int client_id = 0)
@@ -114,9 +114,6 @@ private:
 	openDataset(const std::string& dataset_path, const std::string& file_path_name_config_global =
 			"");
 
-	std::pair<Cloud::ConstPtr, Cloud::ConstPtr>
-	getGroundPointCloudPair();
-
 	void
 	updateViewerPointCloud();
 
@@ -162,9 +159,8 @@ private:
 	volatile bool play_;
 	bool initialized_;
 
-	cv::Mat image_range_;
+	cv::Mat image_range_ground_;
 	cv::Mat image_range_no_ground_;
-	mutable std::mutex image_range_mutex_;
 };
 
 #endif  // SRC_VISUALIZATION_VISUALIZATION_H_
