@@ -156,6 +156,369 @@
          <widget class="QWidget" name="page_settings_1">
           <layout class="QGridLayout" name="gridLayout_8">
            <item row="0" column="0">
+            <widget class="QGroupBox" name="group_layer_point_cloud">
+             <property name="title">
+              <string>Point Cloud Viewer</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_10">
+              <item row="0" column="0">
+               <widget class="QComboBox" name="combo_layer_point_cloud">
+                <item>
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Ground Removal</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Second Return</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Elongation</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Point Score</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Cluster Score</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QGroupBox" name="group_layer_image_left">
+             <property name="title">
+              <string>Left Image Viewer</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_11">
+              <item row="0" column="0">
+               <widget class="QComboBox" name="combo_layer_image_left">
+                <item>
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Clustering</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Segmentation</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Range</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Elongation</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QGroupBox" name="group_layer_image_middle">
+             <property name="title">
+              <string>Middle Image Viewer</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_14">
+              <item row="0" column="0">
+               <widget class="QComboBox" name="combo_layer_image_middle">
+                <item>
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Clustering</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Segmentation</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Range</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Elongation</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QGroupBox" name="group_layer_image_right">
+             <property name="title">
+              <string>Right Image Viewer</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_15">
+              <item row="0" column="0">
+               <widget class="QComboBox" name="combo_layer_image_right">
+                <item>
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Clustering</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Segmentation</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Range</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Elongation</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QGroupBox" name="group_lidar_return">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>70</height>
+              </size>
+             </property>
+             <property name="title">
+              <string>Lidar Return</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_12">
+              <item row="0" column="0">
+               <widget class="QComboBox" name="combo_lidar_return">
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>First</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Second</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="5">
+            <widget class="QGroupBox" name="group_bounding_box_type">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>70</height>
+              </size>
+             </property>
+             <property name="title">
+              <string>Bounding Box Type</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_5">
+              <item row="0" column="0">
+               <widget class="QComboBox" name="combo_bounding_box_type">
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Cube</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Polygon</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="6">
+            <widget class="QGroupBox" name="group_field_of_view">
+             <property name="title">
+              <string>Field of View</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_19">
+              <item row="0" column="0">
+               <widget class="QComboBox" name="combo_field_of_view">
+                <item>
+                 <property name="text">
+                  <string>Default</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Camera</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="7">
+            <widget class="QGroupBox" name="group_page_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title">
+              <string>Go To</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_16">
+              <item row="0" column="0">
+               <widget class="QPushButton" name="button_page_next">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Next Page</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_settings_2">
+          <layout class="QGridLayout" name="gridLayout_13">
+           <item row="0" column="0">
+            <widget class="QGroupBox" name="group_configuration_file">
+             <property name="title">
+              <string>Configuration File</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_18">
+              <item row="0" column="0">
+               <widget class="QPushButton" name="button_global_configuration">
+                <property name="text">
+                 <string>Load Global</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QPushButton" name="button_layout_configuration">
+                <property name="text">
+                 <string>Load Layout</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="1">
             <widget class="QGroupBox" name="group_angle_ground_removal">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -195,8 +558,8 @@
              </layout>
             </widget>
            </item>
-           <item row="0" column="3">
-            <widget class="QGroupBox" name="group_size_cluster">
+           <item row="0" column="2">
+            <widget class="QGroupBox" name="group_size_smooth_window">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -210,43 +573,45 @@
               </size>
              </property>
              <property name="title">
-              <string>Cluster Size Threshold Range</string>
+              <string>Ground Removal Filter</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
-             <layout class="QGridLayout" name="gridLayout_4">
+             <layout class="QGridLayout" name="gridLayout_2">
               <item row="0" column="0">
-               <widget class="QSpinBox" name="spin_size_cluster_min">
-                <property name="maximum">
-                 <number>100000</number>
-                </property>
-                <property name="value">
-                 <number>10</number>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLabel" name="label_size_cluster_range">
-                <property name="text">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;-&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QSpinBox" name="spin_size_cluster_max">
-                <property name="maximum">
-                 <number>1000000</number>
-                </property>
-                <property name="value">
-                 <number>20000</number>
-                </property>
+               <widget class="QComboBox" name="combo_size_smooth_window">
+                <item>
+                 <property name="text">
+                  <string>Window Size 5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Window Size 7</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Window Size 9</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Window Size 11</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>
             </widget>
            </item>
-           <item row="0" column="2">
+           <item row="0" column="3">
             <widget class="QGroupBox" name="group_clustering_threshold">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -318,8 +683,8 @@
              </layout>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QGroupBox" name="group_size_smooth_window">
+           <item row="0" column="4">
+            <widget class="QGroupBox" name="group_size_cluster">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -333,377 +698,43 @@
               </size>
              </property>
              <property name="title">
-              <string>Ground Removal Filter</string>
+              <string>Cluster Size Threshold Range</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
-             <layout class="QGridLayout" name="gridLayout_2">
+             <layout class="QGridLayout" name="gridLayout_4">
               <item row="0" column="0">
-               <widget class="QComboBox" name="combo_size_smooth_window">
-                <item>
-                 <property name="text">
-                  <string>Window Size 5</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Window Size 7</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Window Size 9</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Window Size 11</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="5">
-            <widget class="QGroupBox" name="group_page_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="title">
-              <string>Go To</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_16">
-              <item row="0" column="0">
-               <widget class="QPushButton" name="button_page_next">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <widget class="QSpinBox" name="spin_size_cluster_min">
+                <property name="maximum">
+                 <number>100000</number>
                 </property>
-                <property name="text">
-                 <string>Next Page</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="4">
-            <widget class="QGroupBox" name="group_configuration_file">
-             <property name="title">
-              <string>Configuration File</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_18">
-              <item row="0" column="0">
-               <widget class="QPushButton" name="button_global_configuration">
-                <property name="text">
-                 <string>Load Global</string>
+                <property name="value">
+                 <number>10</number>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QPushButton" name="button_layout_configuration">
+               <widget class="QLabel" name="label_size_cluster_range">
                 <property name="text">
-                 <string>Load Layout</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;-&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="page_settings_2">
-          <layout class="QGridLayout" name="gridLayout_13">
-           <item row="0" column="2">
-            <widget class="QGroupBox" name="group_layer_image_left">
-             <property name="title">
-              <string>Left Image Viewer</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_11">
-              <item row="0" column="0">
-               <widget class="QComboBox" name="combo_layer_image_left">
-                <item>
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Clustering</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Segmentation</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Range</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Intensity</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Elongation</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="6">
-            <widget class="QGroupBox" name="group_bounding_box_type">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>70</height>
-              </size>
-             </property>
-             <property name="title">
-              <string>Bounding Box Type</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_5">
-              <item row="0" column="0">
-               <widget class="QComboBox" name="combo_bounding_box_type">
-                <property name="currentIndex">
-                 <number>0</number>
+              <item row="0" column="2">
+               <widget class="QSpinBox" name="spin_size_cluster_max">
+                <property name="maximum">
+                 <number>1000000</number>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Cube</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Polygon</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="4">
-            <widget class="QGroupBox" name="group_layer_image_right">
-             <property name="title">
-              <string>Right Image Viewer</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_15">
-              <item row="0" column="0">
-               <widget class="QComboBox" name="combo_layer_image_right">
-                <item>
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Clustering</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Segmentation</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Range</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Intensity</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Elongation</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QGroupBox" name="group_layer_image_middle">
-             <property name="title">
-              <string>Middle Image Viewer</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_14">
-              <item row="0" column="0">
-               <widget class="QComboBox" name="combo_layer_image_middle">
-                <item>
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Clustering</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Segmentation</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Range</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Intensity</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Elongation</string>
-                 </property>
-                </item>
+                <property name="value">
+                 <number>20000</number>
+                </property>
                </widget>
               </item>
              </layout>
             </widget>
            </item>
            <item row="0" column="5">
-            <widget class="QGroupBox" name="group_lidar_return">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>70</height>
-              </size>
-             </property>
-             <property name="title">
-              <string>Lidar Return</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_12">
-              <item row="0" column="0">
-               <widget class="QComboBox" name="combo_lidar_return">
-                <property name="currentIndex">
-                 <number>0</number>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>First</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Second</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QGroupBox" name="group_layer_point_cloud">
-             <property name="title">
-              <string>Point Cloud Viewer</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_10">
-              <item row="0" column="0">
-               <widget class="QComboBox" name="combo_layer_point_cloud">
-                <item>
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Ground Removal</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Intensity</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Elongation</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Confidence</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Second Return</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="8">
             <widget class="QGroupBox" name="group_page_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -729,32 +760,6 @@
                 <property name="text">
                  <string>Last Page</string>
                 </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="7">
-            <widget class="QGroupBox" name="group_field_of_view">
-             <property name="title">
-              <string>Field of View</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_19">
-              <item row="0" column="0">
-               <widget class="QComboBox" name="combo_field_of_view">
-                <item>
-                 <property name="text">
-                  <string>Default</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Camera</string>
-                 </property>
-                </item>
                </widget>
               </item>
              </layout>

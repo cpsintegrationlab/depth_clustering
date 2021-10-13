@@ -15,7 +15,7 @@ using boost::property_tree::json_parser::read_json;
 
 enum class PointCloudViewerLayer : int
 {
-	None = 0, Ground_Removal, Intensity, Elongation, Confidence, Second_Return
+	None = 0, Ground_Removal, Second_Return, Intensity, Elongation, Point_Score, Cluster_Score
 };
 
 enum class ImageViewerLayer : int
@@ -99,6 +99,10 @@ struct VisualizationLayout
 			{
 				point_cloud_viewer_layer = PointCloudViewerLayer::Ground_Removal;
 			}
+			else if (point_cloud_viewer_layer_string == "second_return")
+			{
+				point_cloud_viewer_layer = PointCloudViewerLayer::Second_Return;
+			}
 			else if (point_cloud_viewer_layer_string == "intensity")
 			{
 				point_cloud_viewer_layer = PointCloudViewerLayer::Intensity;
@@ -107,13 +111,9 @@ struct VisualizationLayout
 			{
 				point_cloud_viewer_layer = PointCloudViewerLayer::Elongation;
 			}
-			else if (point_cloud_viewer_layer_string == "confidence")
+			else if (point_cloud_viewer_layer_string == "point_score")
 			{
-				point_cloud_viewer_layer = PointCloudViewerLayer::Confidence;
-			}
-			else if (point_cloud_viewer_layer_string == "second_return")
-			{
-				point_cloud_viewer_layer = PointCloudViewerLayer::Second_Return;
+				point_cloud_viewer_layer = PointCloudViewerLayer::Point_Score;
 			}
 			else
 			{

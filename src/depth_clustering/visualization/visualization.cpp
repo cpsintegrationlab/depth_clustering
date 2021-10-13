@@ -111,6 +111,13 @@ Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client
 void
 Visualization::OnNewObjectReceived(const std::pair<cv::Mat, cv::Mat>& images, int client_id)
 {
+	if (!initialized_
+			&& ui->combo_lidar_return->currentIndex() == static_cast<int>(LidarReturn::First)
+			&& client_id == depth_clustering_second_return_->getDepthGroundRemover()->id())
+	{
+		return;
+	}
+
 	image_range_ground_ = images.first;
 	image_range_no_ground_ = images.second;
 }
@@ -363,9 +370,11 @@ Visualization::onSliderMovedTo(int frame_number)
 	depth_clustering_->processOneFrameForDataset(frame_path_name_range, frame_path_name_intensity,
 			frame_path_name_elongation);
 
-	if (ui->combo_layer_point_cloud->currentIndex()
-			== static_cast<int>(PointCloudViewerLayer::Second_Return)
-			&& ui->combo_lidar_return->currentIndex() == static_cast<int>(LidarReturn::First))
+	if (!initialized_
+			|| (ui->combo_layer_point_cloud->currentIndex()
+					== static_cast<int>(PointCloudViewerLayer::Second_Return)
+					&& ui->combo_lidar_return->currentIndex()
+							== static_cast<int>(LidarReturn::First)))
 	{
 		auto folder_reader_range_second_return =
 				depth_clustering_second_return_->getFolderReaderRange();
@@ -787,7 +796,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case PointCloudViewerLayer::Confidence:
+	case PointCloudViewerLayer::Point_Score:
 	{
 		const auto cloud = depth_clustering_->getCloud();
 
@@ -816,7 +825,7 @@ Visualization::updateViewerPointCloud()
 					DrawableCloud::FromCloud(cloud_second_return, Eigen::Vector3f(0, 1, 0)));
 		}
 
-		if (ui->combo_lidar_return->currentIndex() == 0)
+		if (ui->combo_lidar_return->currentIndex() == static_cast<int>(LidarReturn::First))
 		{
 			const auto cloud = depth_clustering_->getCloud();
 
