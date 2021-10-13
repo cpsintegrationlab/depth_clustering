@@ -110,7 +110,7 @@ Cloud::FromImage(const cv::Mat& image, const ProjectionParams& params)
 
 			point.setIntensity(-1);
 			point.setElongation(-1);
-			point.setConfidence(-1);
+			point.setScore(-1);
 
 			cloud.push_back(point);
 			proj->at(r, c).points().push_back(cloud.points().size() - 1);
@@ -159,7 +159,7 @@ Cloud::FromImage(const cv::Mat& image_range, const cv::Mat& image_intensity,
 
 			point.setIntensity(intensity_normalized);
 			point.setElongation(elongation_normalized);
-			point.calculateConfidence();
+			point.calculateScore();
 
 			cloud.push_back(point);
 			proj->at(r, c).points().push_back(cloud.points().size() - 1);

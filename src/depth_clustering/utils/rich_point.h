@@ -102,9 +102,9 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	}
 
 	inline float
-	confidence() const
+	score() const
 	{
-		return confidence_;
+		return score_;
 	}
 
 	inline float&
@@ -144,9 +144,9 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	}
 
 	inline float&
-	confidence()
+	score()
 	{
-		return confidence_;
+		return score_;
 	}
 
 	inline const Eigen::Vector3f&
@@ -186,9 +186,9 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	}
 
 	inline void
-	setConfidence(const float& confidence)
+	setScore(const float& score)
 	{
-		confidence_ = confidence;
+		score_ = score;
 	}
 
 	RichPoint&
@@ -201,7 +201,7 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	operator==(const RichPoint& other) const;
 
 	void
-	calculateConfidence();
+	calculateScore();
 
 private:
 
@@ -209,7 +209,7 @@ private:
 	uint16_t _ring = 0;
 	float intensity_ = -1;
 	float elongation_ = -1;
-	float confidence_ = -1;
+	float score_ = -1;
 };
 }  // namespace depth_clustering
 

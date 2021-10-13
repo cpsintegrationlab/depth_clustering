@@ -806,7 +806,7 @@ Visualization::updateViewerPointCloud()
 		}
 		else
 		{
-			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudWithConfidence(cloud));
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudWithScore(cloud));
 		}
 
 		break;

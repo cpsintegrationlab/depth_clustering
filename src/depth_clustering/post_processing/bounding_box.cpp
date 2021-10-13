@@ -143,14 +143,14 @@ BoundingBox::calculateClusterScore(const Cloud& cloud)
 
 	for (const auto &point : cloud.points())
 	{
-		if (point.confidence() < 0 || point.confidence() > 1)
+		if (point.score() < 0 || point.score() > 1)
 		{
 			point_counter_invalid++;
 			point_counter++;
 			continue;
 		}
 
-		point_score_total += point.confidence();
+		point_score_total += point.score();
 		point_counter++;
 	}
 

@@ -26,7 +26,7 @@ RichPoint::operator=(const RichPoint& other)
 		_ring = other.ring();
 		intensity_ = other.intensity();
 		elongation_ = other.elongation();
-		confidence_ = other.confidence();
+		score_ = other.score();
 	}
 
 	return *this;
@@ -44,11 +44,11 @@ RichPoint::operator==(const RichPoint& other) const
 {
 	return this->x() == other.x() && this->y() == other.y() && this->z() == other.z()
 			&& this->ring() == other.ring() && this->intensity() == other.intensity()
-			&& this->elongation() == other.elongation() && this->confidence() == other.confidence();
+			&& this->elongation() == other.elongation() && this->score() == other.score();
 }
 
 void
-RichPoint::calculateConfidence()
+RichPoint::calculateScore()
 {
 	if (intensity_ < 0 || elongation_ < 0)
 	{
@@ -58,7 +58,7 @@ RichPoint::calculateConfidence()
 	float intensity_shifted = intensity_ + 1; // 1 - 2
 	float elongation_shifted = elongation_ + 1; // 1 - 2
 
-	confidence_ = intensity_shifted / elongation_shifted; // 0.5 - 2
-	confidence_ = fabs((confidence_ - 0.5) / 1.5); // 0 - 1
+	score_ = intensity_shifted / elongation_shifted; // 0.5 - 2
+	score_ = fabs((score_ - 0.5) / 1.5); // 0 - 1
 }
 }  // namespace depth_clustering

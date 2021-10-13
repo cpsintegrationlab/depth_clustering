@@ -29,9 +29,9 @@ DrawableCloud::Draw() const
 		{
 			setRGBColorWithValue(point.elongation());
 		}
-		else if (color_from_confidence_)
+		else if (color_from_score_)
 		{
-			setRGBColorWithValue(point.confidence());
+			setRGBColorWithValue(point.score());
 		}
 		else
 		{
@@ -67,7 +67,7 @@ DrawableCloud::FromCloudWithElongation(const Cloud::ConstPtr& cloud)
 }
 
 DrawableCloud::Ptr
-DrawableCloud::FromCloudWithConfidence(const Cloud::ConstPtr& cloud)
+DrawableCloud::FromCloudWithScore(const Cloud::ConstPtr& cloud)
 {
 	return std::make_shared<DrawableCloud>(
 			DrawableCloud(cloud, Eigen::Vector3f::Ones(), false, false, true));
