@@ -33,6 +33,10 @@ DrawableCloud::Draw() const
 		{
 			setRGBColorWithValue(point.score());
 		}
+		else if (color_from_value_)
+		{
+			setRGBColorWithValue(value_);
+		}
 		else
 		{
 			glColor3f(_color[0], _color[1], _color[2]);
@@ -56,21 +60,28 @@ DrawableCloud::Ptr
 DrawableCloud::FromCloudWithIntensity(const Cloud::ConstPtr& cloud)
 {
 	return std::make_shared<DrawableCloud>(
-			DrawableCloud(cloud, Eigen::Vector3f::Ones(), true, false, false));
+			DrawableCloud(cloud, Eigen::Vector3f::Ones(), -1, true, false, false, false));
 }
 
 DrawableCloud::Ptr
 DrawableCloud::FromCloudWithElongation(const Cloud::ConstPtr& cloud)
 {
 	return std::make_shared<DrawableCloud>(
-			DrawableCloud(cloud, Eigen::Vector3f::Ones(), false, true, false));
+			DrawableCloud(cloud, Eigen::Vector3f::Ones(), -1, false, true, false, false));
 }
 
 DrawableCloud::Ptr
 DrawableCloud::FromCloudWithScore(const Cloud::ConstPtr& cloud)
 {
 	return std::make_shared<DrawableCloud>(
-			DrawableCloud(cloud, Eigen::Vector3f::Ones(), false, false, true));
+			DrawableCloud(cloud, Eigen::Vector3f::Ones(), -1, false, false, true, false));
+}
+
+DrawableCloud::Ptr
+DrawableCloud::FromCloudWithValue(const Cloud::ConstPtr& cloud, const float& value)
+{
+	return std::make_shared<DrawableCloud>(
+			DrawableCloud(cloud, Eigen::Vector3f::Ones(), value, false, false, false, true));
 }
 
 void

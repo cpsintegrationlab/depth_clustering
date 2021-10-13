@@ -89,7 +89,7 @@ Visualization::Visualization(QWidget* parent) :
 }
 
 void
-Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client_id)
+Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int id)
 {
 	if (ui->combo_layer_image_left->currentIndex()
 			== static_cast<int>(ImageViewerLayer::Segmentation)
@@ -109,11 +109,11 @@ Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int client
 }
 
 void
-Visualization::OnNewObjectReceived(const std::pair<cv::Mat, cv::Mat>& images, int client_id)
+Visualization::OnNewObjectReceived(const std::pair<cv::Mat, cv::Mat>& images, int id)
 {
 	if (!initialized_
 			&& ui->combo_lidar_return->currentIndex() == static_cast<int>(LidarReturn::First)
-			&& client_id == depth_clustering_second_return_->getDepthGroundRemover()->id())
+			&& id == depth_clustering_second_return_->getDepthGroundRemover()->id())
 	{
 		return;
 	}
@@ -766,6 +766,36 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
+	case PointCloudViewerLayer::Second_Return:
+	{
+		const auto cloud_second_return = depth_clustering_second_return_->getCloud();
+
+		if (!cloud_second_return)
+		{
+			std::cerr << "[WARN]: Second return cloud missing." << std::endl;
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(
+					DrawableCloud::FromCloud(cloud_second_return, Eigen::Vector3f(0, 1, 0)));
+		}
+
+		if (ui->combo_lidar_return->currentIndex() == static_cast<int>(LidarReturn::First))
+		{
+			const auto cloud = depth_clustering_->getCloud();
+
+			if (!cloud)
+			{
+				std::cerr << "[ERROR]: Cloud missing." << std::endl;
+			}
+			else
+			{
+				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(cloud));
+			}
+		}
+
+		break;
+	}
 	case PointCloudViewerLayer::Intensity:
 	{
 		const auto cloud = depth_clustering_->getCloud();
@@ -811,32 +841,34 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case PointCloudViewerLayer::Second_Return:
+	case PointCloudViewerLayer::Cluster_Score:
 	{
-		const auto cloud_second_return = depth_clustering_second_return_->getCloud();
+		const auto frame_cluster = depth_clustering_->getBoundingBox()->getFrameCluster();
 
-		if (!cloud_second_return)
+		if (frame_cluster)
 		{
-			std::cerr << "[WARN]: Second return cloud missing." << std::endl;
+			for (const auto &cluster : *frame_cluster)
+			{
+				const auto cloud = Cloud::Ptr(new Cloud(std::get<0>(cluster)));
+				const auto &score = std::get<1>(cluster);
+				ui->viewer_point_cloud->AddDrawable(
+						DrawableCloud::FromCloudWithValue(cloud, score));
+			}
 		}
 		else
 		{
-			ui->viewer_point_cloud->AddDrawable(
-					DrawableCloud::FromCloud(cloud_second_return, Eigen::Vector3f(0, 1, 0)));
+			std::cout << "[WARN]: Cluster frame missing." << std::endl;
 		}
 
-		if (ui->combo_lidar_return->currentIndex() == static_cast<int>(LidarReturn::First))
-		{
-			const auto cloud = depth_clustering_->getCloud();
+		const auto cloud = depth_clustering_->getCloud();
 
-			if (!cloud)
-			{
-				std::cerr << "[ERROR]: Cloud missing." << std::endl;
-			}
-			else
-			{
-				ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(cloud));
-			}
+		if (!cloud)
+		{
+			std::cerr << "[ERROR]: Cloud missing." << std::endl;
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(cloud));
 		}
 
 		break;

@@ -37,10 +37,10 @@ public:
 	Visualization(QWidget* parent = 0);
 
 	void
-	OnNewObjectReceived(const cv::Mat& image_segmentation, int client_id = 0) override;
+	OnNewObjectReceived(const cv::Mat& image_segmentation, int id = 0) override;
 
 	void
-	OnNewObjectReceived(const std::pair<cv::Mat, cv::Mat>& images, int client_id = 0) override;
+	OnNewObjectReceived(const std::pair<cv::Mat, cv::Mat>& images, int id = 0) override;
 
 	virtual
 	~Visualization();

@@ -86,7 +86,7 @@ public:
 private:
 
 	float
-	calculateClusterScore(const Cloud& cloud);
+	calculateScore(const Cloud& cloud);
 
 	void
 	CreateCubes(const Cluster& cluster);

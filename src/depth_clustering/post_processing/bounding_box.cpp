@@ -101,11 +101,11 @@ BoundingBox::produceFrameFlat()
 }
 
 void
-BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int)
+BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int id)
 {
 	for (const auto &kv : clouds)
 	{
-		BoundingBox::Cluster cluster = std::make_tuple(kv.second, calculateClusterScore(kv.second),
+		BoundingBox::Cluster cluster = std::make_tuple(kv.second, calculateScore(kv.second),
 				std::to_string(id_));
 
 		frame_cluster_->push_back(cluster);
@@ -134,7 +134,7 @@ BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clou
 }
 
 float
-BoundingBox::calculateClusterScore(const Cloud& cloud)
+BoundingBox::calculateScore(const Cloud& cloud)
 {
 	int point_counter = 0;
 	int point_counter_invalid = 0;
