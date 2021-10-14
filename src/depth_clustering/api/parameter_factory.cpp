@@ -20,8 +20,9 @@ ParameterFactory::ParameterFactory(const std::string& file_path_name_config)
 	try
 	{
 		boost::property_tree::read_json(file_path_name_config, top_tree_);
-	} catch (boost::exception const &e)
+	} catch (const std::exception &e)
 	{
+		std::cout << "[ERROR]: \"" << e.what() << "\"." << std::endl;
 		std::cout << "[ERROR]: Failed to load configuration file: \"" << file_path_name_config
 				<< "\"." << std::endl;
 		return;

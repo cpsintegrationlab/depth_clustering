@@ -395,11 +395,12 @@ Visualization::onSliderMovedTo(int frame_number)
 		{
 			std::cerr << "[WARN]: Second return range image missing in \"" << dataset_path_ << "\"."
 					<< std::endl;
-			return;
 		}
-
-		depth_clustering_second_return_->processOneFrameForDataset(
-				frame_paths_names_range_second_return[frame_number]);
+		else
+		{
+			depth_clustering_second_return_->processOneFrameForDataset(
+					frame_paths_names_range_second_return[frame_number]);
+		}
 	}
 
 	ground_truth_frame_cube_ = depth_clustering_->getGroundTruthFrameCube(
