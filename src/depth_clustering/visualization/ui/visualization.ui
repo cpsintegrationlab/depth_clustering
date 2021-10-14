@@ -201,6 +201,11 @@
                   <string>Cluster Score</string>
                  </property>
                 </item>
+                <item>
+                 <property name="text">
+                  <string>Frame Score</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>

@@ -4,6 +4,7 @@ add_library(
 	bounding_box.cpp
 	camera_projection.cpp
 	logger.cpp
+	score.cpp
 )
 
 # Set library link targets

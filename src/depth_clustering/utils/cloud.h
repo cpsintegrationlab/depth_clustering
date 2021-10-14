@@ -30,6 +30,8 @@
 
 namespace depth_clustering
 {
+class Score;
+
 /**
  * @brief      A class that stores a vector of RichPoints
  * @details    A utility class  for storing points. If PCL is available has ways
@@ -187,7 +189,8 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 	static Cloud::Ptr
 	FromImage(const cv::Mat& image_range, const cv::Mat& image_intensity,
-			const cv::Mat& image_elongation, const ProjectionParams& params);
+			const cv::Mat& image_elongation, const std::shared_ptr<Score> score,
+			const ProjectionParams& params);
 
 protected:
 

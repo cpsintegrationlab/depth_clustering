@@ -7,28 +7,29 @@
 
 #include "post_processing/bounding_box.h"
 #include "post_processing/camera_projection.h"
+#include "post_processing/score.h"
 
 namespace depth_clustering
 {
-
 BoundingBox::BoundingBox() :
-		BoundingBox(Type::Cube)
+		BoundingBox(Type::Cube, nullptr)
 {
 }
 
-BoundingBox::BoundingBox(const Type& type) :
-		type_(type)
+BoundingBox::BoundingBox(const Type& type, const std::shared_ptr<Score> score) :
+		type_(type), frame_score_(-1)
 {
 	id_ = 0;
 	frame_cluster_ = std::make_shared<Frame<Cluster>>();
 	frame_cube_ = std::make_shared<Frame<Cube>>();
 	frame_polygon_ = std::make_shared<Frame<Polygon>>();
 	frame_flat_ = std::make_shared<Frame<Flat>>();
+	score_ = score;
 }
 
-BoundingBox::BoundingBox(const Type& type,
+BoundingBox::BoundingBox(const Type& type, const std::shared_ptr<Score> score,
 		const CameraProjectionParameter& camera_projection_parameter) :
-		BoundingBox(type)
+		BoundingBox(type, score)
 {
 	camera_projection_ = std::make_shared<CameraProjection>(camera_projection_parameter);
 	camera_projection_->setFrames(frame_cube_, frame_polygon_, frame_flat_);
@@ -56,6 +57,12 @@ std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>>
 BoundingBox::getFrameFlat() const
 {
 	return frame_flat_;
+}
+
+float
+BoundingBox::getFrameScore() const
+{
+	return frame_score_;
 }
 
 void
@@ -86,6 +93,7 @@ BoundingBox::clearFrames()
 	frame_cube_->clear();
 	frame_polygon_->clear();
 	frame_flat_->clear();
+	frame_score_ = -1;
 }
 
 void
@@ -103,9 +111,21 @@ BoundingBox::produceFrameFlat()
 void
 BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clouds, int id)
 {
+	if (!score_)
+	{
+		std::cout << "[WARN]: Score missing." << std::endl;
+	}
+
 	for (const auto &cloud : clouds)
 	{
-		BoundingBox::Cluster cluster = std::make_tuple(cloud.second, calculateScore(cloud.second),
+		float cluster_score = -1;
+
+		if (score_)
+		{
+			cluster_score = score_->calculateClusterScore(cloud.second);
+		}
+
+		BoundingBox::Cluster cluster = std::make_tuple(cloud.second, cluster_score,
 				std::to_string(id_));
 
 		frame_cluster_->push_back(cluster);
@@ -131,35 +151,11 @@ BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clou
 
 		id_++;
 	}
-}
 
-float
-BoundingBox::calculateScore(const Cloud& cloud)
-{
-	int point_counter = 0;
-	int point_counter_invalid = 0;
-	float point_score_total = 0;
-	float cluster_score = -1;
-
-	for (const auto &point : cloud.points())
+	if (score_)
 	{
-		if (point.score() < 0 || point.score() > 1)
-		{
-			point_counter_invalid++;
-			point_counter++;
-			continue;
-		}
-
-		point_score_total += point.score();
-		point_counter++;
+		frame_score_ = score_->calculateFrameScore(frame_cluster_);
 	}
-
-	if (point_counter_invalid < point_counter)
-	{
-		cluster_score = point_score_total / point_counter;
-	}
-
-	return cluster_score;
 }
 
 void
@@ -233,5 +229,4 @@ BoundingBox::CreatePolygons(const Cluster& cluster)
 
 	frame_polygon_->push_back(std::make_tuple(hull, height, score, std::to_string(id_)));
 }
-
 } // namespace depth_clustering

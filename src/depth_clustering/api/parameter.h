@@ -10,12 +10,11 @@
 
 #include "image_labelers/diff_helpers/diff_factory.h"
 #include "post_processing/bounding_box.h"
+#include "post_processing/score.h"
 #include "utils/radians.h"
 
-using depth_clustering::BoundingBox;
-using depth_clustering::DiffFactory;
-using depth_clustering::Radians;
-
+namespace depth_clustering
+{
 struct DepthClusteringParameter
 {
 	double distance_clustering;
@@ -25,6 +24,9 @@ struct DepthClusteringParameter
 	int size_cluster_max;
 	int size_smooth_window;
 	bool use_camera_fov;
+	Score::TypePoint score_type_point;
+	Score::TypeCluster score_type_cluster;
+	Score::TypeFrame score_type_frame;
 	BoundingBox::Type bounding_box_type;
 	DiffFactory::DiffType difference_type;
 	std::string dataset_file_type;
@@ -34,13 +36,15 @@ struct DepthClusteringParameter
 
 	DepthClusteringParameter() :
 			distance_clustering(0.17), angle_clustering(10_deg), angle_ground_removal(9_deg), size_cluster_min(
-					10), size_cluster_max(20000), size_smooth_window(5), use_camera_fov(true), bounding_box_type(
-					BoundingBox::Type::Cube), difference_type(
+					10), size_cluster_max(20000), size_smooth_window(5), use_camera_fov(true), score_type_point(
+					Score::TypePoint::Type_1), score_type_cluster(Score::TypeCluster::Type_1), score_type_frame(
+					Score::TypeFrame::Type_1), bounding_box_type(BoundingBox::Type::Cube), difference_type(
 					DiffFactory::DiffType::ANGLES_PRECOMPUTED), dataset_file_type(".tiff"), dataset_name(
 					""), ground_truth_cube_file_name("waymo_ground_truth_cube.json"), ground_truth_flat_file_name(
 					"depth_clustering_ground_truth_flat.json")
 	{
 	}
 };
+} // namespace depth_clustering
 
 #endif /* SRC_API_PARAMETER_H_ */

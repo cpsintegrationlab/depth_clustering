@@ -7,6 +7,8 @@
 
 #include "api/api.h"
 
+using depth_clustering::DepthClustering;
+
 void
 printUsage(int argc, char* argv[])
 {

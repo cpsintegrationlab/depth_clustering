@@ -21,10 +21,10 @@
 #include "utils/cloud.h"
 #include "utils/timer.h"
 
-class CameraProjection;
-
 namespace depth_clustering
 {
+class CameraProjection;
+class Score;
 
 class BoundingBox: public depth_clustering::AbstractClient<std::unordered_map<uint16_t, Cloud>>
 {
@@ -49,9 +49,10 @@ public:
 
 	BoundingBox();
 
-	BoundingBox(const Type& type);
+	BoundingBox(const Type& type, const std::shared_ptr<Score> score);
 
-	BoundingBox(const Type& type, const CameraProjectionParameter& camera_projection_parameter);
+	BoundingBox(const Type& type, const std::shared_ptr<Score> score,
+			const CameraProjectionParameter& camera_projection_parameter);
 
 	std::shared_ptr<Frame<Cluster>>
 	getFrameCluster() const;
@@ -64,6 +65,9 @@ public:
 
 	std::shared_ptr<Frame<Flat>>
 	getFrameFlat() const;
+
+	float
+	getFrameScore() const;
 
 	void
 	setFrameCube(std::shared_ptr<Frame<Cube>> frame_cube);
@@ -85,9 +89,6 @@ public:
 
 private:
 
-	float
-	calculateScore(const Cloud& cloud);
-
 	void
 	CreateCubes(const Cluster& cluster);
 
@@ -95,15 +96,16 @@ private:
 	CreatePolygons(const Cluster& cluster);
 
 	Type type_;
+	float frame_score_;
 	int id_;
 
 	std::shared_ptr<Frame<Cluster>> frame_cluster_;
-	std::shared_ptr<Frame<Cube>> frame_cube_;
+	std::shared_ptr<Frame<Cube>> frame_cube_ ;
 	std::shared_ptr<Frame<Polygon>> frame_polygon_;
 	std::shared_ptr<Frame<Flat>> frame_flat_;
 	std::shared_ptr<CameraProjection> camera_projection_;
+	std::shared_ptr<Score> score_;
 };
-
 } // namespace depth_clustering
 
 #endif /* SRC_POST_PROCESSING_BOUNDING_BOX_H_ */

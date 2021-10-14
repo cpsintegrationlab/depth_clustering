@@ -2,6 +2,8 @@
 
 #include "visualization/visualization.h"
 
+using visualization::Visualization;
+
 void
 printUsage(int argc, char* argv[])
 {

@@ -51,6 +51,7 @@ Logger::logBoundingBoxFrame(const std::string& frame_name,
 	}
 	default:
 	{
+		std::cout << "[WARN]: Unknown bounding box type." << std::endl;
 		logBoundingBoxFrameCube(frame_name);
 		break;
 	}
@@ -71,12 +72,24 @@ Logger::logBoundingBoxFrameCube(const std::string& frame_name)
 		return;
 	}
 
+	boost::property_tree::ptree bounding_box_cube_frame_array_value;
 	auto bounding_box_frame_cube = bounding_box_->getFrameCube();
+	const auto bounding_box_frame_cube_score = bounding_box_->getFrameScore();
 
 	if (!bounding_box_frame_cube)
 	{
 		std::cout << "[ERROR]: Cube bounding box frame missing." << std::endl;
 		return;
+	}
+
+	auto bounding_box_cube_frame_array_optional = bounding_box_log_tree_cube_.get_child_optional(
+			boost::property_tree::ptree::path_type(frame_name, '/'));
+
+	if (!bounding_box_cube_frame_array_optional)
+	{
+		bounding_box_log_tree_cube_.add_child(
+				boost::property_tree::ptree::path_type(frame_name, '/'),
+				boost::property_tree::ptree());
 	}
 
 	for (const auto &bounding_box_cube : *bounding_box_frame_cube)
@@ -89,6 +102,8 @@ Logger::logBoundingBoxFrameCube(const std::string& frame_name)
 		auto rotation = std::get<2>(bounding_box_cube);
 		auto score = std::get<3>(bounding_box_cube);
 		auto id = std::get<4>(bounding_box_cube);
+		auto &bounding_box_cube_frame_array = bounding_box_log_tree_cube_.get_child(
+				boost::property_tree::ptree::path_type(frame_name, '/'));
 
 		bounding_box_cube_array_value.put_value(center.x());
 		bounding_box_cube_array.push_back(std::make_pair("", bounding_box_cube_array_value));
@@ -117,27 +132,15 @@ Logger::logBoundingBoxFrameCube(const std::string& frame_name)
 		bounding_box_cube_array_value.put_value(id);
 		bounding_box_cube_array.push_back(std::make_pair("", bounding_box_cube_array_value));
 
-		auto bounding_box_cube_frame_array_optional =
-				bounding_box_log_tree_cube_.get_child_optional(
-						boost::property_tree::ptree::path_type(frame_name, '/'));
-
-		if (!bounding_box_cube_frame_array_optional)
-		{
-			bounding_box_log_tree_cube_.add_child(
-					boost::property_tree::ptree::path_type(frame_name, '/'),
-					boost::property_tree::ptree());
-			auto &bounding_box_cube_frame_array = bounding_box_log_tree_cube_.get_child(
-					boost::property_tree::ptree::path_type(frame_name, '/'));
-
-			bounding_box_cube_frame_array.push_back(std::make_pair("", bounding_box_cube_array));
-		}
-		else
-		{
-			auto &bounding_box_cube_frame_array = *bounding_box_cube_frame_array_optional;
-
-			bounding_box_cube_frame_array.push_back(std::make_pair("", bounding_box_cube_array));
-		}
+		bounding_box_cube_frame_array.push_back(std::make_pair("", bounding_box_cube_array));
 	}
+
+	auto &bounding_box_cube_frame_array = bounding_box_log_tree_cube_.get_child(
+			boost::property_tree::ptree::path_type(frame_name, '/'));
+
+	bounding_box_cube_frame_array_value.put_value(bounding_box_frame_cube_score);
+	bounding_box_cube_frame_array.push_back(
+			std::make_pair("", bounding_box_cube_frame_array_value));
 }
 
 void
@@ -154,12 +157,25 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 		return;
 	}
 
+	boost::property_tree::ptree bounding_box_polygon_frame_array_value;
 	auto bounding_box_frame_polygon = bounding_box_->getFramePolygon();
+	const auto bounding_box_frame_polygon_score = bounding_box_->getFrameScore();
 
 	if (!bounding_box_frame_polygon)
 	{
 		std::cout << "[ERROR]: Polygon bounding box frame missing." << std::endl;
 		return;
+	}
+
+	auto bounding_box_polygon_frame_array_optional =
+			bounding_box_log_tree_polygon_.get_child_optional(
+					boost::property_tree::ptree::path_type(frame_name, '/'));
+
+	if (!bounding_box_polygon_frame_array_optional)
+	{
+		bounding_box_log_tree_polygon_.add_child(
+				boost::property_tree::ptree::path_type(frame_name, '/'),
+				boost::property_tree::ptree());
 	}
 
 	for (const auto &bounding_box_polygon : *bounding_box_frame_polygon)
@@ -174,6 +190,8 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 		auto height = std::get<1>(bounding_box_polygon);
 		auto score = std::get<2>(bounding_box_polygon);
 		auto id = std::get<3>(bounding_box_polygon);
+		auto &bounding_box_polygon_frame_array = bounding_box_log_tree_polygon_.get_child(
+				boost::property_tree::ptree::path_type(frame_name, '/'));
 
 		for (const auto &hull_vector : hull)
 		{
@@ -206,29 +224,15 @@ Logger::logBoundingBoxFramePolygon(const std::string& frame_name)
 		bounding_box_polygon_array_value.put_value(id);
 		bounding_box_polygon_array.push_back(std::make_pair("", bounding_box_polygon_array_value));
 
-		auto bounding_box_polygon_frame_array_optional =
-				bounding_box_log_tree_polygon_.get_child_optional(
-						boost::property_tree::ptree::path_type(frame_name, '/'));
-
-		if (!bounding_box_polygon_frame_array_optional)
-		{
-			bounding_box_log_tree_polygon_.add_child(
-					boost::property_tree::ptree::path_type(frame_name, '/'),
-					boost::property_tree::ptree());
-			auto &bounding_box_polygon_frame_array = bounding_box_log_tree_polygon_.get_child(
-					boost::property_tree::ptree::path_type(frame_name, '/'));
-
-			bounding_box_polygon_frame_array.push_back(
-					std::make_pair("", bounding_box_polygon_array));
-		}
-		else
-		{
-			auto &bounding_box_polygon_frame_array = *bounding_box_polygon_frame_array_optional;
-
-			bounding_box_polygon_frame_array.push_back(
-					std::make_pair("", bounding_box_polygon_array));
-		}
+		bounding_box_polygon_frame_array.push_back(std::make_pair("", bounding_box_polygon_array));
 	}
+
+	auto &bounding_box_polygon_frame_array = bounding_box_log_tree_polygon_.get_child(
+			boost::property_tree::ptree::path_type(frame_name, '/'));
+
+	bounding_box_polygon_frame_array_value.put_value(bounding_box_frame_polygon_score);
+	bounding_box_polygon_frame_array.push_back(
+			std::make_pair("", bounding_box_polygon_frame_array_value));
 }
 
 void
@@ -245,12 +249,24 @@ Logger::logBoundingBoxFrameFlat(const std::string& frame_name)
 		return;
 	}
 
+	boost::property_tree::ptree bounding_box_flat_frame_array_value;
 	auto bounding_box_frame_flat = bounding_box_->getFrameFlat();
+	const auto bounding_box_frame_flat_score = bounding_box_->getFrameScore();
 
 	if (!bounding_box_frame_flat)
 	{
 		std::cout << "[ERROR]: Flat bounding box frame missing." << std::endl;
 		return;
+	}
+
+	auto bounding_box_flat_frame_array_optional = bounding_box_log_tree_flat_.get_child_optional(
+			boost::property_tree::ptree::path_type(frame_name, '/'));
+
+	if (!bounding_box_flat_frame_array_optional)
+	{
+		bounding_box_log_tree_flat_.add_child(
+				boost::property_tree::ptree::path_type(frame_name, '/'),
+				boost::property_tree::ptree());
 	}
 
 	for (const auto &bounding_box_flat : *bounding_box_frame_flat)
@@ -263,6 +279,8 @@ Logger::logBoundingBoxFrameFlat(const std::string& frame_name)
 		auto depth = std::get<2>(bounding_box_flat);
 		auto score = std::get<3>(bounding_box_flat);
 		auto id = std::get<4>(bounding_box_flat);
+		auto &bounding_box_flat_frame_array = bounding_box_log_tree_flat_.get_child(
+				boost::property_tree::ptree::path_type(frame_name, '/'));
 
 		bounding_box_flat_array_value.put_value(corner_upper_left.x());
 		bounding_box_flat_array.push_back(std::make_pair("", bounding_box_flat_array_value));
@@ -285,27 +303,15 @@ Logger::logBoundingBoxFrameFlat(const std::string& frame_name)
 		bounding_box_flat_array_value.put_value(id);
 		bounding_box_flat_array.push_back(std::make_pair("", bounding_box_flat_array_value));
 
-		auto bounding_box_flat_frame_array_optional =
-				bounding_box_log_tree_flat_.get_child_optional(
-						boost::property_tree::ptree::path_type(frame_name, '/'));
-
-		if (!bounding_box_flat_frame_array_optional)
-		{
-			bounding_box_log_tree_flat_.add_child(
-					boost::property_tree::ptree::path_type(frame_name, '/'),
-					boost::property_tree::ptree());
-			auto &bounding_box_flat_frame_array = bounding_box_log_tree_flat_.get_child(
-					boost::property_tree::ptree::path_type(frame_name, '/'));
-
-			bounding_box_flat_frame_array.push_back(std::make_pair("", bounding_box_flat_array));
-		}
-		else
-		{
-			auto &bounding_box_flat_frame_array = *bounding_box_flat_frame_array_optional;
-
-			bounding_box_flat_frame_array.push_back(std::make_pair("", bounding_box_flat_array));
-		}
+		bounding_box_flat_frame_array.push_back(std::make_pair("", bounding_box_flat_array));
 	}
+
+	auto &bounding_box_flat_frame_array = bounding_box_log_tree_flat_.get_child(
+			boost::property_tree::ptree::path_type(frame_name, '/'));
+
+	bounding_box_flat_frame_array_value.put_value(bounding_box_frame_flat_score);
+	bounding_box_flat_frame_array.push_back(
+			std::make_pair("", bounding_box_flat_frame_array_value));
 }
 
 void
@@ -365,6 +371,8 @@ Logger::writeBoundingBoxLog(const BoundingBox::Type& bounding_box_type)
 	}
 	default:
 	{
+		std::cout << "[WARN]: Unknown bounding box type." << std::endl;
+
 		bounding_box_log_file.open(parameter_.log_path + parameter_.log_file_name_cube,
 				std::fstream::out | std::fstream::trunc);
 

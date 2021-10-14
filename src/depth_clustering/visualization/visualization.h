@@ -20,14 +20,19 @@
 #include "visualization/viewer/viewer.h"
 #include "visualization/visualization_layout.h"
 
+using depth_clustering::BoundingBox;
+using depth_clustering::DepthClustering;
+using depth_clustering::AbstractClient;
+
 namespace Ui
 {
 class Visualization;
 }
 
-class Visualization: public QWidget,
-		public depth_clustering::AbstractClient<cv::Mat>,
-		public depth_clustering::AbstractClient<std::pair<cv::Mat, cv::Mat>>
+namespace visualization
+{
+class Visualization: public QWidget, public AbstractClient<cv::Mat>, public AbstractClient<
+		std::pair<cv::Mat, cv::Mat>>
 {
 Q_OBJECT
 
@@ -157,5 +162,6 @@ private:
 	cv::Mat image_range_ground_;
 	cv::Mat image_range_no_ground_;
 };
+} // namespace visualization
 
 #endif  // SRC_VISUALIZATION_VISUALIZATION_H_

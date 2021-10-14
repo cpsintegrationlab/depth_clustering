@@ -13,33 +13,42 @@
 
 using boost::property_tree::json_parser::read_json;
 
-enum class PointCloudViewerLayer : int
+namespace visualization
 {
-	None = 0, Ground_Removal, Second_Return, Intensity, Elongation, Point_Score, Cluster_Score
-};
-
-enum class ImageViewerLayer : int
-{
-	None = 0, Clustering, Segmentation, Range, Intensity, Elongation
-};
-
-enum class LidarReturn : int
-{
-	First = 0, Second
-};
-
-enum class BoundingBoxType : int
-{
-	None = 0, Cube, Polygon
-};
-
-enum class FieldOfView : int
-{
-	Default = 0, Camera
-};
-
 struct VisualizationLayout
 {
+	enum class PointCloudViewerLayer : int
+	{
+		None = 0,
+		Ground_Removal,
+		Second_Return,
+		Intensity,
+		Elongation,
+		Point_Score,
+		Cluster_Score,
+		Frame_Score
+	};
+
+	enum class ImageViewerLayer : int
+	{
+		None = 0, Clustering, Segmentation, Range, Intensity, Elongation
+	};
+
+	enum class LidarReturn : int
+	{
+		First = 0, Second
+	};
+
+	enum class BoundingBoxType : int
+	{
+		None = 0, Cube, Polygon
+	};
+
+	enum class FieldOfView : int
+	{
+		Default = 0, Camera
+	};
+
 	PointCloudViewerLayer point_cloud_viewer_layer;
 	ImageViewerLayer image_viewer_layer_left;
 	ImageViewerLayer image_viewer_layer_middle;
@@ -326,5 +335,6 @@ struct VisualizationLayout
 		}
 	}
 };
+} // namespace visualization
 
 #endif /* DEPTH_CLUSTERING_VISUALIZATION_VISUALIZATION_LAYOUT_H_ */

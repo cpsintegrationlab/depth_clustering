@@ -11,24 +11,18 @@
 #include <memory>
 #include <string>
 
+#include "api/parameter_factory.h"
 #include "api/parameter.h"
 #include "clusterers/image_based_clusterer.h"
 #include "ground_removal/depth_ground_remover.h"
 #include "image_labelers/linear_image_labeler.h"
 #include "post_processing/logger.h"
+#include "post_processing/score.h"
 #include "projections/projection_params.h"
 #include "utils/folder_reader.h"
 
-using depth_clustering::Cloud;
-using depth_clustering::DepthGroundRemover;
-using depth_clustering::FolderReader;
-using depth_clustering::ImageBasedClusterer;
-using depth_clustering::LinearImageLabeler;
-using depth_clustering::Logger;
-using depth_clustering::ProjectionParams;
-
-class ParameterFactory;
-
+namespace depth_clustering
+{
 class DepthClustering
 {
 public:
@@ -63,6 +57,9 @@ public:
 
 	const cv::Mat&
 	getImageElongation() const;
+
+	std::shared_ptr<Score>
+	getScore() const;
 
 	std::shared_ptr<BoundingBox>
 	getBoundingBox() const;
@@ -131,6 +128,7 @@ private:
 	std::shared_ptr<FolderReader> folder_reader_elongation_;
 	std::shared_ptr<DepthGroundRemover> depth_ground_remover_;
 	std::shared_ptr<ImageBasedClusterer<LinearImageLabeler<>>> clusterer_;
+	std::shared_ptr<Score> score_;
 	std::shared_ptr<BoundingBox> bounding_box_;
 	std::shared_ptr<Logger> logger_;
 
@@ -147,5 +145,6 @@ private:
 	boost::property_tree::ptree ground_truth_cube_tree_;
 	boost::property_tree::ptree ground_truth_flat_tree_;
 };
+} // namespace depth_clustering
 
 #endif /* SRC_API_DEPTH_CLUSTERING_H_ */

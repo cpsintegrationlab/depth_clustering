@@ -46,19 +46,4 @@ RichPoint::operator==(const RichPoint& other) const
 			&& this->ring() == other.ring() && this->intensity() == other.intensity()
 			&& this->elongation() == other.elongation() && this->score() == other.score();
 }
-
-void
-RichPoint::calculateScore()
-{
-	if (intensity_ < 0 || elongation_ < 0)
-	{
-		return;
-	}
-
-	float intensity_shifted = intensity_ + 1; // 1 - 2
-	float elongation_shifted = elongation_ + 1; // 1 - 2
-
-	score_ = intensity_shifted / elongation_shifted; // 0.5 - 2
-	score_ = fabs((score_ - 0.5) / 1.5); // 0 - 1
-}
 }  // namespace depth_clustering

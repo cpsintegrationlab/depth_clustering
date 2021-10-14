@@ -22,12 +22,18 @@
 #include "visualization/visualization.h"
 
 using depth_clustering::AbstractImageLabeler;
+using depth_clustering::Cloud;
+using depth_clustering::DepthClusteringParameter;
 using depth_clustering::DiffFactory;
 using depth_clustering::DrawableCube;
 using depth_clustering::DrawablePolygon3d;
 using depth_clustering::FolderReader;
+using depth_clustering::ProjectionParams;
+using depth_clustering::Radians;
 using depth_clustering::time_utils::Timer;
 
+namespace visualization
+{
 Visualization::Visualization(QWidget* parent) :
 		QWidget(parent), ui(new Ui::Visualization), play_(false), initialized_(false)
 {
@@ -92,11 +98,11 @@ void
 Visualization::OnNewObjectReceived(const cv::Mat& image_segmentation, int id)
 {
 	if (ui->combo_layer_image_left->currentIndex()
-			== static_cast<int>(ImageViewerLayer::Segmentation)
+			== static_cast<int>(VisualizationLayout::ImageViewerLayer::Segmentation)
 			|| ui->combo_layer_image_middle->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Segmentation)
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Segmentation)
 			|| ui->combo_layer_image_right->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Segmentation))
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Segmentation))
 	{
 		QImage qimage_segmentation = MatToQImage(
 				AbstractImageLabeler::LabelsToColor(image_segmentation));
@@ -112,7 +118,8 @@ void
 Visualization::OnNewObjectReceived(const std::pair<cv::Mat, cv::Mat>& images, int id)
 {
 	if (!initialized_
-			&& ui->combo_lidar_return->currentIndex() == static_cast<int>(LidarReturn::First)
+			&& ui->combo_lidar_return->currentIndex()
+					== static_cast<int>(VisualizationLayout::LidarReturn::First)
 			&& id == depth_clustering_second_return_->getDepthGroundRemover()->id())
 	{
 		return;
@@ -173,11 +180,13 @@ Visualization::showEvent(QShowEvent* event)
 {
 	QWidget::showEvent(event);
 
-	if (ui->combo_field_of_view->currentIndex() == static_cast<int>(FieldOfView::Default))
+	if (ui->combo_field_of_view->currentIndex()
+			== static_cast<int>(VisualizationLayout::FieldOfView::Default))
 	{
 		ui->viewer_point_cloud->resetViewFOVDefault();
 	}
-	else if (ui->combo_field_of_view->currentIndex() == static_cast<int>(FieldOfView::Camera))
+	else if (ui->combo_field_of_view->currentIndex()
+			== static_cast<int>(VisualizationLayout::FieldOfView::Camera))
 	{
 		ui->viewer_point_cloud->resetViewFOVCamera();
 	}
@@ -372,9 +381,9 @@ Visualization::onSliderMovedTo(int frame_number)
 
 	if (!initialized_
 			|| (ui->combo_layer_point_cloud->currentIndex()
-					== static_cast<int>(PointCloudViewerLayer::Second_Return)
+					== static_cast<int>(VisualizationLayout::PointCloudViewerLayer::Second_Return)
 					&& ui->combo_lidar_return->currentIndex()
-							== static_cast<int>(LidarReturn::First)))
+							== static_cast<int>(VisualizationLayout::LidarReturn::First)))
 	{
 		auto folder_reader_range_second_return =
 				depth_clustering_second_return_->getFolderReaderRange();
@@ -414,14 +423,14 @@ Visualization::onSliderMovedTo(int frame_number)
 void
 Visualization::onParameterUpdated()
 {
-	switch (static_cast<LidarReturn>(ui->combo_lidar_return->currentIndex()))
+	switch (static_cast<VisualizationLayout::LidarReturn>(ui->combo_lidar_return->currentIndex()))
 	{
-	case LidarReturn::First:
+	case VisualizationLayout::LidarReturn::First:
 	{
 		depth_clustering_ = depth_clustering_first_return_;
 		break;
 	}
-	case LidarReturn::Second:
+	case VisualizationLayout::LidarReturn::Second:
 	{
 		depth_clustering_ = depth_clustering_second_return_;
 		break;
@@ -477,19 +486,19 @@ Visualization::onParameterUpdated()
 
 	BoundingBox::Type bounding_box_type = BoundingBox::Type::Cube;
 
-	switch (static_cast<BoundingBoxType>(ui->combo_bounding_box_type->currentIndex()))
+	switch (static_cast<VisualizationLayout::BoundingBoxType>(ui->combo_bounding_box_type->currentIndex()))
 	{
-	case BoundingBoxType::Cube:
+	case VisualizationLayout::BoundingBoxType::Cube:
 	{
 		bounding_box_type = BoundingBox::Type::Cube;
 		break;
 	}
-	case BoundingBoxType::Polygon:
+	case VisualizationLayout::BoundingBoxType::Polygon:
 	{
 		bounding_box_type = BoundingBox::Type::Polygon;
 		break;
 	}
-	case BoundingBoxType::None:
+	case VisualizationLayout::BoundingBoxType::None:
 	{
 		bounding_box_type = parameter.bounding_box_type;
 		break;
@@ -504,14 +513,14 @@ Visualization::onParameterUpdated()
 	parameter.bounding_box_type = bounding_box_type;
 	parameter.use_camera_fov = static_cast<bool>(ui->combo_field_of_view->currentIndex());
 
-	switch (static_cast<FieldOfView>(ui->combo_field_of_view->currentIndex()))
+	switch (static_cast<VisualizationLayout::FieldOfView>(ui->combo_field_of_view->currentIndex()))
 	{
-	case FieldOfView::Default:
+	case VisualizationLayout::FieldOfView::Default:
 	{
 		ui->viewer_point_cloud->resetViewFOVDefault();
 		break;
 	}
-	case FieldOfView::Camera:
+	case VisualizationLayout::FieldOfView::Camera:
 	{
 		ui->viewer_point_cloud->resetViewFOVCamera();
 		break;
@@ -732,9 +741,9 @@ Visualization::updateViewerPointCloud()
 {
 	ui->viewer_point_cloud->Clear();
 
-	switch (static_cast<PointCloudViewerLayer>(ui->combo_layer_point_cloud->currentIndex()))
+	switch (static_cast<VisualizationLayout::PointCloudViewerLayer>(ui->combo_layer_point_cloud->currentIndex()))
 	{
-	case PointCloudViewerLayer::Ground_Removal:
+	case VisualizationLayout::PointCloudViewerLayer::Ground_Removal:
 	{
 		const ProjectionParams parameter_projection_lidar =
 				*depth_clustering_->getLidarProjectionParameter();
@@ -766,7 +775,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case PointCloudViewerLayer::Second_Return:
+	case VisualizationLayout::PointCloudViewerLayer::Second_Return:
 	{
 		const auto cloud_second_return = depth_clustering_second_return_->getCloud();
 
@@ -780,7 +789,8 @@ Visualization::updateViewerPointCloud()
 					DrawableCloud::FromCloud(cloud_second_return, Eigen::Vector3f(0, 1, 0)));
 		}
 
-		if (ui->combo_lidar_return->currentIndex() == static_cast<int>(LidarReturn::First))
+		if (ui->combo_lidar_return->currentIndex()
+				== static_cast<int>(VisualizationLayout::LidarReturn::First))
 		{
 			const auto cloud = depth_clustering_->getCloud();
 
@@ -796,7 +806,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case PointCloudViewerLayer::Intensity:
+	case VisualizationLayout::PointCloudViewerLayer::Intensity:
 	{
 		const auto cloud = depth_clustering_->getCloud();
 
@@ -811,7 +821,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case PointCloudViewerLayer::Elongation:
+	case VisualizationLayout::PointCloudViewerLayer::Elongation:
 	{
 		const auto cloud = depth_clustering_->getCloud();
 
@@ -826,7 +836,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case PointCloudViewerLayer::Point_Score:
+	case VisualizationLayout::PointCloudViewerLayer::Point_Score:
 	{
 		const auto cloud = depth_clustering_->getCloud();
 
@@ -841,7 +851,7 @@ Visualization::updateViewerPointCloud()
 
 		break;
 	}
-	case PointCloudViewerLayer::Cluster_Score:
+	case VisualizationLayout::PointCloudViewerLayer::Cluster_Score:
 	{
 		const auto frame_cluster = depth_clustering_->getBoundingBox()->getFrameCluster();
 
@@ -869,6 +879,23 @@ Visualization::updateViewerPointCloud()
 		else
 		{
 			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloud(cloud));
+		}
+
+		break;
+	}
+	case VisualizationLayout::PointCloudViewerLayer::Frame_Score:
+	{
+		const auto score = depth_clustering_->getBoundingBox()->getFrameScore();
+
+		const auto cloud = depth_clustering_->getCloud();
+
+		if (!cloud)
+		{
+			std::cerr << "[ERROR]: Cloud missing." << std::endl;
+		}
+		else
+		{
+			ui->viewer_point_cloud->AddDrawable(DrawableCloud::FromCloudWithValue(cloud, score));
 		}
 
 		break;
@@ -1083,11 +1110,12 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		}
 	}
 
-	if (ui->combo_layer_image_left->currentIndex() == static_cast<int>(ImageViewerLayer::Clustering)
+	if (ui->combo_layer_image_left->currentIndex()
+			== static_cast<int>(VisualizationLayout::ImageViewerLayer::Clustering)
 			|| ui->combo_layer_image_middle->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Clustering)
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Clustering)
 			|| ui->combo_layer_image_right->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Clustering))
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Clustering))
 	{
 		auto image_range = depth_clustering_->getImageRange();
 		auto difference_type = depth_clustering_->getParameter().difference_type;
@@ -1100,11 +1128,12 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		scene_difference_->addPixmap(QPixmap::fromImage(qimage_difference));
 	}
 
-	if (ui->combo_layer_image_left->currentIndex() == static_cast<int>(ImageViewerLayer::Range)
+	if (ui->combo_layer_image_left->currentIndex()
+			== static_cast<int>(VisualizationLayout::ImageViewerLayer::Range)
 			|| ui->combo_layer_image_middle->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Range)
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Range)
 			|| ui->combo_layer_image_right->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Range))
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Range))
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_range = depth_clustering_->getImageRange();
@@ -1127,11 +1156,12 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		scene_range_->addPixmap(QPixmap::fromImage(qimage_range));
 	}
 
-	if (ui->combo_layer_image_left->currentIndex() == static_cast<int>(ImageViewerLayer::Intensity)
+	if (ui->combo_layer_image_left->currentIndex()
+			== static_cast<int>(VisualizationLayout::ImageViewerLayer::Intensity)
 			|| ui->combo_layer_image_middle->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Intensity)
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Intensity)
 			|| ui->combo_layer_image_right->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Intensity))
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Intensity))
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_intensity = depth_clustering_->getImageIntensity();
@@ -1158,11 +1188,12 @@ Visualization::updateViewerImageScene(const std::string& frame_path_name_camera)
 		scene_intensity_->addPixmap(QPixmap::fromImage(qimage_intensity));
 	}
 
-	if (ui->combo_layer_image_left->currentIndex() == static_cast<int>(ImageViewerLayer::Elongation)
+	if (ui->combo_layer_image_left->currentIndex()
+			== static_cast<int>(VisualizationLayout::ImageViewerLayer::Elongation)
 			|| ui->combo_layer_image_middle->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Elongation)
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Elongation)
 			|| ui->combo_layer_image_right->currentIndex()
-					== static_cast<int>(ImageViewerLayer::Elongation))
+					== static_cast<int>(VisualizationLayout::ImageViewerLayer::Elongation))
 	{
 		auto parameter = depth_clustering_->getParameter();
 		auto image_elongation = depth_clustering_->getImageElongation();
@@ -1199,33 +1230,33 @@ Visualization::updateViewerImage()
 		ui->viewer_image_camera->fitInView(scene_camera_->itemsBoundingRect());
 	}
 
-	switch (static_cast<ImageViewerLayer>(ui->combo_layer_image_left->currentIndex()))
+	switch (static_cast<VisualizationLayout::ImageViewerLayer>(ui->combo_layer_image_left->currentIndex()))
 	{
-	case ImageViewerLayer::Clustering:
+	case VisualizationLayout::ImageViewerLayer::Clustering:
 	{
 		ui->viewer_image_left->setScene(scene_difference_.get());
 		ui->viewer_image_left->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Segmentation:
+	case VisualizationLayout::ImageViewerLayer::Segmentation:
 	{
 		ui->viewer_image_left->setScene(scene_segmentation_.get());
 		ui->viewer_image_left->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Range:
+	case VisualizationLayout::ImageViewerLayer::Range:
 	{
 		ui->viewer_image_left->setScene(scene_range_.get());
 		ui->viewer_image_left->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Intensity:
+	case VisualizationLayout::ImageViewerLayer::Intensity:
 	{
 		ui->viewer_image_left->setScene(scene_intensity_.get());
 		ui->viewer_image_left->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Elongation:
+	case VisualizationLayout::ImageViewerLayer::Elongation:
 	{
 		ui->viewer_image_left->setScene(scene_elongation_.get());
 		ui->viewer_image_left->fitInView(scene_elongation_->itemsBoundingRect());
@@ -1239,33 +1270,33 @@ Visualization::updateViewerImage()
 	}
 	}
 
-	switch (static_cast<ImageViewerLayer>(ui->combo_layer_image_middle->currentIndex()))
+	switch (static_cast<VisualizationLayout::ImageViewerLayer>(ui->combo_layer_image_middle->currentIndex()))
 	{
-	case ImageViewerLayer::Clustering:
+	case VisualizationLayout::ImageViewerLayer::Clustering:
 	{
 		ui->viewer_image_middle->setScene(scene_difference_.get());
 		ui->viewer_image_middle->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Segmentation:
+	case VisualizationLayout::ImageViewerLayer::Segmentation:
 	{
 		ui->viewer_image_middle->setScene(scene_segmentation_.get());
 		ui->viewer_image_middle->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Range:
+	case VisualizationLayout::ImageViewerLayer::Range:
 	{
 		ui->viewer_image_middle->setScene(scene_range_.get());
 		ui->viewer_image_middle->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Intensity:
+	case VisualizationLayout::ImageViewerLayer::Intensity:
 	{
 		ui->viewer_image_middle->setScene(scene_intensity_.get());
 		ui->viewer_image_middle->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Elongation:
+	case VisualizationLayout::ImageViewerLayer::Elongation:
 	{
 		ui->viewer_image_middle->setScene(scene_elongation_.get());
 		ui->viewer_image_middle->fitInView(scene_elongation_->itemsBoundingRect());
@@ -1279,33 +1310,33 @@ Visualization::updateViewerImage()
 	}
 	}
 
-	switch (static_cast<ImageViewerLayer>(ui->combo_layer_image_right->currentIndex()))
+	switch (static_cast<VisualizationLayout::ImageViewerLayer>(ui->combo_layer_image_right->currentIndex()))
 	{
-	case ImageViewerLayer::Clustering:
+	case VisualizationLayout::ImageViewerLayer::Clustering:
 	{
 		ui->viewer_image_right->setScene(scene_difference_.get());
 		ui->viewer_image_right->fitInView(scene_difference_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Segmentation:
+	case VisualizationLayout::ImageViewerLayer::Segmentation:
 	{
 		ui->viewer_image_right->setScene(scene_segmentation_.get());
 		ui->viewer_image_right->fitInView(scene_segmentation_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Range:
+	case VisualizationLayout::ImageViewerLayer::Range:
 	{
 		ui->viewer_image_right->setScene(scene_range_.get());
 		ui->viewer_image_right->fitInView(scene_range_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Intensity:
+	case VisualizationLayout::ImageViewerLayer::Intensity:
 	{
 		ui->viewer_image_right->setScene(scene_intensity_.get());
 		ui->viewer_image_right->fitInView(scene_intensity_->itemsBoundingRect());
 		break;
 	}
-	case ImageViewerLayer::Elongation:
+	case VisualizationLayout::ImageViewerLayer::Elongation:
 	{
 		ui->viewer_image_right->setScene(scene_elongation_.get());
 		ui->viewer_image_right->fitInView(scene_elongation_->itemsBoundingRect());
@@ -1463,11 +1494,13 @@ Visualization::initializeUI()
 	ui->combo_bounding_box_type->setCurrentIndex(static_cast<int>(layout_.bounding_box_type));
 	ui->combo_field_of_view->setCurrentIndex(static_cast<int>(layout_.field_of_view));
 
-	if (ui->combo_field_of_view->currentIndex() == static_cast<int>(FieldOfView::Default))
+	if (ui->combo_field_of_view->currentIndex()
+			== static_cast<int>(VisualizationLayout::FieldOfView::Default))
 	{
 		ui->viewer_point_cloud->resetViewFOVDefault();
 	}
-	else if (ui->combo_field_of_view->currentIndex() == static_cast<int>(FieldOfView::Camera))
+	else if (ui->combo_field_of_view->currentIndex()
+			== static_cast<int>(VisualizationLayout::FieldOfView::Camera))
 	{
 		ui->viewer_point_cloud->resetViewFOVCamera();
 	}
@@ -1574,3 +1607,4 @@ Visualization::disconnectSignals()
 	disconnect(ui->splitter_viewer, SIGNAL(splitterMoved(int, int)), this,
 			SLOT(onSplitterViewerMoved()));
 }
+} // namespace visualization

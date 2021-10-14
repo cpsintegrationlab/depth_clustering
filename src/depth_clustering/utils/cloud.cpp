@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License along
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "post_processing/score.h"
 #include "utils/cloud.h"
 
 namespace depth_clustering
@@ -124,7 +125,8 @@ Cloud::FromImage(const cv::Mat& image, const ProjectionParams& params)
 
 Cloud::Ptr
 Cloud::FromImage(const cv::Mat& image_range, const cv::Mat& image_intensity,
-		const cv::Mat& image_elongation, const ProjectionParams& params)
+		const cv::Mat& image_elongation, const std::shared_ptr<Score> score,
+		const ProjectionParams& params)
 {
 	CloudProjection::Ptr proj = CloudProjection::Ptr(new RingProjection(params));
 	Cloud cloud;
@@ -145,13 +147,15 @@ Cloud::FromImage(const cv::Mat& image_range, const cv::Mat& image_intensity,
 			float intensity_normalized = -1;
 			float elongation_normalized = -1;
 
-			if (image_intensity.rows >= image_range.rows && image_intensity.cols >= image_range.cols)
+			if (image_intensity.rows >= image_range.rows
+					&& image_intensity.cols >= image_range.cols)
 			{
 				intensity_normalized = image_intensity.at<float>(r, c)
 						/ params.getProjectionParamsRaw()->intensity_norm_factor;
 			}
 
-			if (image_elongation.rows >= image_range.rows && image_elongation.cols >= image_range.cols)
+			if (image_elongation.rows >= image_range.rows
+					&& image_elongation.cols >= image_range.cols)
 			{
 				elongation_normalized = image_elongation.at<float>(r, c)
 						/ params.getProjectionParamsRaw()->elongation_norm_factor;
@@ -159,7 +163,7 @@ Cloud::FromImage(const cv::Mat& image_range, const cv::Mat& image_intensity,
 
 			point.setIntensity(intensity_normalized);
 			point.setElongation(elongation_normalized);
-			point.calculateScore();
+			point.setScore(score->calculatePointScore(point));
 
 			cloud.push_back(point);
 			proj->at(r, c).points().push_back(cloud.points().size() - 1);

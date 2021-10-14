@@ -11,8 +11,8 @@
 #include "post_processing/camera_projection_parameter.h"
 #include "post_processing/bounding_box.h"
 
-using depth_clustering::BoundingBox;
-
+namespace depth_clustering
+{
 class CameraProjection
 {
 public:
@@ -73,5 +73,6 @@ private:
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Polygon>> bounding_box_frame_polygon_;
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> bounding_box_frame_flat_;
 };
+} // namespace depth_clustering
 
 #endif /* SRC_POST_PROCESSING_CAMERA_PROJECTION_H_ */

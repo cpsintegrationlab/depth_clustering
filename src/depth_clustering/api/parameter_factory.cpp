@@ -11,8 +11,9 @@
 #include "image_labelers/diff_helpers/diff_factory.h"
 #include "projections/projection_params.h"
 
+namespace depth_clustering
+{
 using boost::property_tree::json_parser::read_json;
-using depth_clustering::ProjectionParamsRaw;
 
 ParameterFactory::ParameterFactory(const std::string& file_path_name_config)
 {
@@ -52,6 +53,9 @@ ParameterFactory::getDepthClusteringParameter()
 	auto size_cluster_max_optional = tree.get_optional<int>("size_cluster_max");
 	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
 	auto use_camera_fov_optional = tree.get_optional<bool>("use_camera_fov");
+	auto score_type_point_optional = tree.get_optional<std::string>("score_type_point");
+	auto score_type_cluster_optional = tree.get_optional<std::string>("score_type_cluster");
+	auto score_type_frame_optional = tree.get_optional<std::string>("score_type_frame");
 	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
 	auto difference_type_optional = tree.get_optional<std::string>("difference_type");
 	auto dataset_file_type_optional = tree.get_optional<std::string>("dataset_file_type");
@@ -100,6 +104,51 @@ ParameterFactory::getDepthClusteringParameter()
 		parameter.use_camera_fov = *use_camera_fov_optional;
 	}
 
+	if (score_type_point_optional)
+	{
+		std::string score_type_point_string = *score_type_point_optional;
+
+		if (score_type_point_string == "type_1")
+		{
+			parameter.score_type_point = Score::TypePoint::Type_1;
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown point score type." << std::endl;
+			parameter.score_type_point = Score::TypePoint::Type_1;
+		}
+	}
+
+	if (score_type_cluster_optional)
+	{
+		std::string score_type_cluster_string = *score_type_cluster_optional;
+
+		if (score_type_cluster_string == "type_1")
+		{
+			parameter.score_type_cluster = Score::TypeCluster::Type_1;
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown cluster score type." << std::endl;
+			parameter.score_type_cluster = Score::TypeCluster::Type_1;
+		}
+	}
+
+	if (score_type_frame_optional)
+	{
+		std::string score_type_frame_string = *score_type_frame_optional;
+
+		if (score_type_frame_string == "type_1")
+		{
+			parameter.score_type_frame = Score::TypeFrame::Type_1;
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown frame score type." << std::endl;
+			parameter.score_type_frame = Score::TypeFrame::Type_1;
+		}
+	}
+
 	if (bounding_box_type_optional)
 	{
 		std::string bounding_box_type_string = *bounding_box_type_optional;
@@ -110,6 +159,11 @@ ParameterFactory::getDepthClusteringParameter()
 		}
 		else if (bounding_box_type_string == "polygon")
 		{
+			parameter.bounding_box_type = BoundingBox::Type::Polygon;
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown bounding box type." << std::endl;
 			parameter.bounding_box_type = BoundingBox::Type::Polygon;
 		}
 	}
@@ -140,6 +194,7 @@ ParameterFactory::getDepthClusteringParameter()
 		}
 		else
 		{
+			std::cout << "[WARN]: Unknown clustering type." << std::endl;
 			parameter.difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 		}
 	}
@@ -431,6 +486,9 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 	auto size_cluster_max_optional = tree.get_optional<int>("size_cluster_max");
 	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
 	auto use_camera_fov_optional = tree.get_optional<bool>("use_camera_fov");
+	auto score_type_point_optional = tree.get_optional<std::string>("score_type_point");
+	auto score_type_cluster_optional = tree.get_optional<std::string>("score_type_cluster");
+	auto score_type_frame_optional = tree.get_optional<std::string>("score_type_frame");
 	auto bounding_box_type_optional = tree.get_optional<std::string>("bounding_box_type");
 	auto difference_type_optional = tree.get_optional<std::string>("difference_type");
 	auto ground_truth_cube_file_name_optional = tree.get_optional<std::string>(
@@ -477,6 +535,51 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 		parameter.use_camera_fov = *use_camera_fov_optional;
 	}
 
+	if (score_type_point_optional)
+	{
+		std::string score_type_point_string = *score_type_point_optional;
+
+		if (score_type_point_string == "type_1")
+		{
+			parameter.score_type_point = Score::TypePoint::Type_1;
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown point score type." << std::endl;
+			parameter.score_type_point = Score::TypePoint::Type_1;
+		}
+	}
+
+	if (score_type_cluster_optional)
+	{
+		std::string score_type_cluster_string = *score_type_cluster_optional;
+
+		if (score_type_cluster_string == "type_1")
+		{
+			parameter.score_type_cluster = Score::TypeCluster::Type_1;
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown cluster score type." << std::endl;
+			parameter.score_type_cluster = Score::TypeCluster::Type_1;
+		}
+	}
+
+	if (score_type_frame_optional)
+	{
+		std::string score_type_frame_string = *score_type_frame_optional;
+
+		if (score_type_frame_string == "type_1")
+		{
+			parameter.score_type_frame = Score::TypeFrame::Type_1;
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown frame score type." << std::endl;
+			parameter.score_type_frame = Score::TypeFrame::Type_1;
+		}
+	}
+
 	if (bounding_box_type_optional)
 	{
 		std::string bounding_box_type_string = *bounding_box_type_optional;
@@ -487,6 +590,11 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 		}
 		else if (bounding_box_type_string == "polygon")
 		{
+			parameter.bounding_box_type = BoundingBox::Type::Polygon;
+		}
+		else
+		{
+			std::cout << "[WARN]: Unknown bounding box type." << std::endl;
 			parameter.bounding_box_type = BoundingBox::Type::Polygon;
 		}
 	}
@@ -517,6 +625,7 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 		}
 		else
 		{
+			std::cout << "[WARN]: Unknown clustering type." << std::endl;
 			parameter.difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
 		}
 	}
@@ -588,3 +697,4 @@ ParameterFactory::setGlobalLoggerParameter(LoggerParameter& parameter_logger)
 		parameter_logger.log = *log_optional;
 	}
 }
+} // namespace depth_clustering

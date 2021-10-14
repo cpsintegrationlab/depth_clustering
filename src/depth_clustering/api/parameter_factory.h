@@ -14,8 +14,8 @@
 #include "post_processing/logger_parameter.h"
 #include "projections/projection_params.h"
 
-using depth_clustering::ProjectionParams;
-
+namespace depth_clustering
+{
 class ParameterFactory
 {
 public:
@@ -54,5 +54,6 @@ private:
 	boost::optional<boost::property_tree::ptree> camera_projection_tree_;
 	boost::optional<boost::property_tree::ptree> logger_tree_;
 };
+} // namespace depth_clustering
 
 #endif /* SRC_API_PARAMETER_FACTORY_H_ */

@@ -17,17 +17,10 @@
 #include "utils/velodyne_utils.h"
 
 using boost::property_tree::json_parser::read_json;
-using depth_clustering::DiffFactory;
-using depth_clustering::MatFromPNGCamera;
-using depth_clustering::MatFromPNGElongation;
-using depth_clustering::MatFromPNGIntensity;
-using depth_clustering::MatFromPNGRange;
-using depth_clustering::MatFromTIFFElongation;
-using depth_clustering::MatFromTIFFIntensity;
-using depth_clustering::MatFromTIFFRange;
-using depth_clustering::Radians;
-using depth_clustering::RichPoint;
 using depth_clustering::time_utils::Timer;
+
+namespace depth_clustering
+{
 
 DepthClustering::DepthClustering() :
 		DepthClustering(DepthClusteringParameter())
@@ -102,6 +95,12 @@ const cv::Mat&
 DepthClustering::getImageElongation() const
 {
 	return image_elongation_;
+}
+
+std::shared_ptr<Score>
+DepthClustering::getScore() const
+{
+	return score_;
 }
 
 std::shared_ptr<BoundingBox>
@@ -328,7 +327,9 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
-	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
+	score_ = std::make_shared<Score>(parameter_.score_type_point, parameter_.score_type_cluster,
+			parameter_.score_type_frame);
+	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type, score_,
 			parameter_projection_camera_);
 
 	Radians clustering_threshold;
@@ -383,7 +384,9 @@ DepthClustering::initializeForApollo()
 	parameter_projection_lidar_ = ProjectionParams::APOLLO();
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
-	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type);
+	score_ = std::make_shared<Score>(parameter_.score_type_point, parameter_.score_type_cluster,
+			parameter_.score_type_frame);
+	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type, score_);
 	logger_ = std::make_shared<Logger>();
 
 	Radians clustering_threshold;
@@ -522,7 +525,9 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
-	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type,
+	score_ = std::make_shared<Score>(parameter_.score_type_point, parameter_.score_type_cluster,
+			parameter_.score_type_frame);
+	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type, score_,
 			parameter_projection_camera_);
 	logger_ = std::make_shared<Logger>(logger_parameter);
 
@@ -688,7 +693,7 @@ DepthClustering::processOneFrameForDataset(const std::string& frame_path_name_ra
 		return "";
 	}
 
-	cloud_ = Cloud::FromImage(image_range_, image_intensity_, image_elongation_,
+	cloud_ = Cloud::FromImage(image_range_, image_intensity_, image_elongation_, score_,
 			*parameter_projection_lidar_);
 
 	bounding_box_->clearFrames();
@@ -725,3 +730,4 @@ DepthClustering::writeLogForDataset()
 	logger_->writeBoundingBoxLog(parameter_.bounding_box_type);
 	logger_->writeBoundingBoxLog(BoundingBox::Type::Flat);
 }
+} // namespace depth_clustering

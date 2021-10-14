@@ -200,9 +200,6 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	bool
 	operator==(const RichPoint& other) const;
 
-	void
-	calculateScore();
-
 private:
 
 	Eigen::Vector3f _point = Eigen::Vector3f::Zero();

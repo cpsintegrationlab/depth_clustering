@@ -7,6 +7,8 @@
 
 #include "post_processing/camera_projection.h"
 
+namespace depth_clustering
+{
 CameraProjection::CameraProjection() :
 		CameraProjection(CameraProjectionParameter())
 {
@@ -581,3 +583,4 @@ CameraProjection::projectFromBoundingBoxFramePolygon()
 		bounding_box_frame_flat_->push_back(*bounding_box_flat);
 	}
 }
+} // namespace depth_clustering
