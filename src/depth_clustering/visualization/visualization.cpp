@@ -462,6 +462,11 @@ Visualization::onParameterUpdated()
 		score_type_point = Score::TypePoint::Type_2;
 		break;
 	}
+	case Score::TypePoint::Type_3:
+	{
+		score_type_point = Score::TypePoint::Type_3;
+		break;
+	}
 	default:
 	{
 		score_type_point = Score::TypePoint::Type_1;

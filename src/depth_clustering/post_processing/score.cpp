@@ -54,6 +54,10 @@ Score::calculatePointScore(const RichPoint& point)
 	{
 		return calculatePointScoreType2(point);
 	}
+	case TypePoint::Type_3:
+	{
+		return calculatePointScoreType3(point);
+	}
 	default:
 	{
 		return calculatePointScoreType1(point);
@@ -103,7 +107,7 @@ float
 Score::calculatePointScoreType1(const RichPoint& point)
 {
 	/*
-	 * Intensity over elongation
+	 * Intensity / elongation
 	 */
 
 	float score = -1;
@@ -126,7 +130,7 @@ float
 Score::calculatePointScoreType2(const RichPoint& point)
 {
 	/*
-	 * one over elongation
+	 * 1 / elongation
 	 */
 
 	float score = -1;
@@ -140,6 +144,25 @@ Score::calculatePointScoreType2(const RichPoint& point)
 
 	score = 1 / elongation_shifted; // 0.5 - 1
 	score = fabs((score + 0.5) / 1.5); // 0 - 1
+
+	return boundScore(score);
+}
+
+float
+Score::calculatePointScoreType3(const RichPoint& point)
+{
+	/*
+	 * min(1, 1 / elongation + intensity)
+	 */
+
+	float score = -1;
+
+	if (point.intensity() < 0 || point.elongation() < 0)
+	{
+		return score;
+	}
+
+	score = std::min<float>(1, calculatePointScoreType2(point) + point.intensity());
 
 	return boundScore(score);
 }
