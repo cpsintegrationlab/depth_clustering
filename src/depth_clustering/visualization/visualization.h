@@ -103,6 +103,9 @@ private slots:
 	onDifferenceTypeUpdated();
 
 	void
+	onFieldOfViewUpdated();
+
+	void
 	onNextPage();
 
 	void

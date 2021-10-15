@@ -5,6 +5,8 @@
  *      Author: simonyu
  */
 
+#include <algorithm>
+
 #include "post_processing/score.h"
 
 namespace depth_clustering
@@ -48,6 +50,10 @@ Score::calculatePointScore(const RichPoint& point)
 	{
 		return calculatePointScoreType1(point);
 	}
+	case TypePoint::Type_2:
+	{
+		return calculatePointScoreType2(point);
+	}
 	default:
 	{
 		return calculatePointScoreType1(point);
@@ -88,6 +94,12 @@ Score::calculateFrameScore(const std::shared_ptr<BoundingBox::Frame<BoundingBox:
 }
 
 float
+Score::boundScore(const float& score)
+{
+	return std::min<float>(1, std::max<float>(0, score));
+}
+
+float
 Score::calculatePointScoreType1(const RichPoint& point)
 {
 	/*
@@ -107,7 +119,29 @@ Score::calculatePointScoreType1(const RichPoint& point)
 	score = intensity_shifted / elongation_shifted; // 0.5 - 2
 	score = fabs((score - 0.5) / 1.5); // 0 - 1
 
-	return score;
+	return boundScore(score);
+}
+
+float
+Score::calculatePointScoreType2(const RichPoint& point)
+{
+	/*
+	 * one over elongation
+	 */
+
+	float score = -1;
+
+	if (point.elongation() < 0)
+	{
+		return score;
+	}
+
+	float elongation_shifted = point.elongation() + 1; // 1 - 2
+
+	score = 1 / elongation_shifted; // 0.5 - 1
+	score = fabs((score + 0.5) / 1.5); // 0 - 1
+
+	return boundScore(score);
 }
 
 float
@@ -137,7 +171,7 @@ Score::calculateClusterScoreType1(const Cloud& cloud)
 		cluster_score = point_score_total / static_cast<int>(cloud.points().size());
 	}
 
-	return cluster_score;
+	return boundScore(cluster_score);
 }
 
 float
@@ -168,6 +202,6 @@ Score::calculateFrameScoreType1(
 		frame_score = cluster_score_total / static_cast<int>(frame->size());
 	}
 
-	return frame_score;
+	return boundScore(frame_score);
 }
 } // namespace depth_clustering

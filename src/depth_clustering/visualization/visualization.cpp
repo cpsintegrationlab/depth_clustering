@@ -457,6 +457,11 @@ Visualization::onParameterUpdated()
 		score_type_point = Score::TypePoint::Type_1;
 		break;
 	}
+	case Score::TypePoint::Type_2:
+	{
+		score_type_point = Score::TypePoint::Type_2;
+		break;
+	}
 	default:
 	{
 		score_type_point = Score::TypePoint::Type_1;
@@ -569,25 +574,29 @@ Visualization::onParameterUpdated()
 	}
 
 	parameter.bounding_box_type = bounding_box_type;
-	parameter.use_camera_fov = static_cast<bool>(ui->combo_field_of_view->currentIndex());
 
-	switch (static_cast<VisualizationLayout::FieldOfView>(ui->combo_field_of_view->currentIndex()))
+	if (!initialized_)
 	{
-	case VisualizationLayout::FieldOfView::Default:
-	{
-		ui->viewer_point_cloud->resetViewFOVDefault();
-		break;
-	}
-	case VisualizationLayout::FieldOfView::Camera:
-	{
-		ui->viewer_point_cloud->resetViewFOVCamera();
-		break;
-	}
-	default:
-	{
-		ui->viewer_point_cloud->resetViewFOVDefault();
-		break;
-	}
+		parameter.use_camera_fov = static_cast<bool>(ui->combo_field_of_view->currentIndex());
+
+		switch (static_cast<VisualizationLayout::FieldOfView>(ui->combo_field_of_view->currentIndex()))
+		{
+		case VisualizationLayout::FieldOfView::Default:
+		{
+			ui->viewer_point_cloud->resetViewFOVDefault();
+			break;
+		}
+		case VisualizationLayout::FieldOfView::Camera:
+		{
+			ui->viewer_point_cloud->resetViewFOVCamera();
+			break;
+		}
+		default:
+		{
+			ui->viewer_point_cloud->resetViewFOVDefault();
+			break;
+		}
+		}
 	}
 
 	depth_clustering_first_return_->setParameter(parameter);
@@ -740,6 +749,48 @@ Visualization::onDifferenceTypeUpdated()
 	onSliderMovedTo(ui->slider_frame->value());
 
 	std::cout << "[INFO]: Updated difference type." << std::endl;
+}
+
+void
+Visualization::onFieldOfViewUpdated()
+{
+	DepthClusteringParameter parameter = depth_clustering_->getParameter();
+
+	parameter.use_camera_fov = static_cast<bool>(ui->combo_field_of_view->currentIndex());
+
+	switch (static_cast<VisualizationLayout::FieldOfView>(ui->combo_field_of_view->currentIndex()))
+	{
+	case VisualizationLayout::FieldOfView::Default:
+	{
+		ui->viewer_point_cloud->resetViewFOVDefault();
+		break;
+	}
+	case VisualizationLayout::FieldOfView::Camera:
+	{
+		ui->viewer_point_cloud->resetViewFOVCamera();
+		break;
+	}
+	default:
+	{
+		ui->viewer_point_cloud->resetViewFOVDefault();
+		break;
+	}
+	}
+
+	depth_clustering_first_return_->setParameter(parameter);
+	depth_clustering_first_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
+			this);
+	depth_clustering_first_return_->getClusterer()->SetLabelImageClient(this);
+
+	depth_clustering_second_return_->setParameter(parameter);
+	depth_clustering_second_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
+			this);
+	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
+
+	resetViewer();
+	onSliderMovedTo(ui->slider_frame->value());
+
+	std::cout << "[INFO]: Updated field of view." << std::endl;
 }
 
 void
@@ -1630,7 +1681,7 @@ Visualization::connectSignals()
 			SLOT(onLoadGlobalConfiguration()));
 	connect(ui->button_layout_configuration, SIGNAL(released()), this,
 			SLOT(onLoadLayoutConfiguration()));
-	connect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onFieldOfViewUpdated()));
 	connect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
 	connect(ui->combo_point_score_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
@@ -1669,7 +1720,7 @@ Visualization::disconnectSignals()
 			SLOT(onLoadGlobalConfiguration()));
 	disconnect(ui->button_layout_configuration, SIGNAL(released()), this,
 			SLOT(onLoadLayoutConfiguration()));
-	disconnect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	disconnect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onFieldOfViewUpdated()));
 	disconnect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
 	disconnect(ui->combo_point_score_type, SIGNAL(activated(int)), this,
