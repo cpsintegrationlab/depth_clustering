@@ -30,6 +30,7 @@ using depth_clustering::DrawablePolygon3d;
 using depth_clustering::FolderReader;
 using depth_clustering::ProjectionParams;
 using depth_clustering::Radians;
+using depth_clustering::Score;
 using depth_clustering::time_utils::Timer;
 
 namespace visualization
@@ -67,8 +68,10 @@ Visualization::Visualization(QWidget* parent) :
 	setWindowTitle(QCoreApplication::arguments().at(0));
 
 	connect(ui->button_open, SIGNAL(released()), this, SLOT(onOpen()));
-	connect(ui->button_page_next, SIGNAL(released()), this, SLOT(onNextPage()));
-	connect(ui->button_page_last, SIGNAL(released()), this, SLOT(onLastPage()));
+	connect(ui->button_page_next_page_1, SIGNAL(released()), this, SLOT(onNextPage()));
+	connect(ui->button_page_next_page_2, SIGNAL(released()), this, SLOT(onNextPage()));
+	connect(ui->button_page_last_page_2, SIGNAL(released()), this, SLOT(onLastPage()));
+	connect(ui->button_page_last_page_3, SIGNAL(released()), this, SLOT(onLastPage()));
 
 	depth_clustering_first_return_ = std::make_shared<DepthClustering>();
 	depth_clustering_second_return_ = std::make_shared<DepthClustering>();
@@ -445,6 +448,60 @@ Visualization::onParameterUpdated()
 
 	DepthClusteringParameter parameter = depth_clustering_->getParameter();
 
+	Score::TypePoint score_type_point = Score::TypePoint::Type_1;
+
+	switch (static_cast<Score::TypePoint>(ui->combo_point_score_type->currentIndex()))
+	{
+	case Score::TypePoint::Type_1:
+	{
+		score_type_point = Score::TypePoint::Type_1;
+		break;
+	}
+	default:
+	{
+		score_type_point = Score::TypePoint::Type_1;
+		break;
+	}
+	}
+
+	parameter.score_type_point = score_type_point;
+
+	Score::TypeCluster score_type_cluster = Score::TypeCluster::Type_1;
+
+	switch (static_cast<Score::TypeCluster>(ui->combo_cluster_score_type->currentIndex()))
+	{
+	case Score::TypeCluster::Type_1:
+	{
+		score_type_cluster = Score::TypeCluster::Type_1;
+		break;
+	}
+	default:
+	{
+		score_type_cluster = Score::TypeCluster::Type_1;
+		break;
+	}
+	}
+
+	parameter.score_type_cluster = score_type_cluster;
+
+	Score::TypeFrame score_type_frame = Score::TypeFrame::Type_1;
+
+	switch (static_cast<Score::TypeFrame>(ui->combo_frame_score_type->currentIndex()))
+	{
+	case Score::TypeFrame::Type_1:
+	{
+		score_type_frame = Score::TypeFrame::Type_1;
+		break;
+	}
+	default:
+	{
+		score_type_frame = Score::TypeFrame::Type_1;
+		break;
+	}
+	}
+
+	parameter.score_type_frame = score_type_frame;
+
 	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
 	parameter.size_smooth_window = ui->combo_size_smooth_window->currentIndex() * 2 + 5;
 
@@ -688,13 +745,23 @@ Visualization::onDifferenceTypeUpdated()
 void
 Visualization::onNextPage()
 {
-	ui->stacked_settings->setCurrentIndex(1);
+	if (ui->stacked_settings->currentIndex() >= ui->stacked_settings->count() - 1)
+	{
+		return;
+	}
+
+	ui->stacked_settings->setCurrentIndex(ui->stacked_settings->currentIndex() + 1);
 }
 
 void
 Visualization::onLastPage()
 {
-	ui->stacked_settings->setCurrentIndex(0);
+	if (ui->stacked_settings->currentIndex() <= 0)
+	{
+		return;
+	}
+
+	ui->stacked_settings->setCurrentIndex(ui->stacked_settings->currentIndex() - 1);
 }
 
 void
@@ -1395,6 +1462,9 @@ Visualization::resetUI()
 	ui->button_global_configuration->setEnabled(false);
 	ui->button_layout_configuration->setEnabled(false);
 	ui->combo_layer_point_cloud->setEnabled(false);
+	ui->combo_point_score_type->setEnabled(false);
+	ui->combo_cluster_score_type->setEnabled(false);
+	ui->combo_frame_score_type->setEnabled(false);
 	ui->combo_layer_image_left->setEnabled(false);
 	ui->combo_layer_image_middle->setEnabled(false);
 	ui->combo_layer_image_right->setEnabled(false);
@@ -1525,6 +1595,9 @@ Visualization::initializeUI()
 	ui->button_global_configuration->setEnabled(true);
 	ui->button_layout_configuration->setEnabled(true);
 	ui->combo_layer_point_cloud->setEnabled(true);
+	ui->combo_point_score_type->setEnabled(true);
+	ui->combo_cluster_score_type->setEnabled(true);
+	ui->combo_frame_score_type->setEnabled(true);
 	ui->combo_layer_image_left->setEnabled(true);
 	ui->combo_layer_image_middle->setEnabled(true);
 	ui->combo_layer_image_right->setEnabled(true);
@@ -1560,6 +1633,9 @@ Visualization::connectSignals()
 	connect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
+	connect(ui->combo_point_score_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_cluster_score_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_frame_score_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_layer_image_left, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
 	connect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
@@ -1596,6 +1672,12 @@ Visualization::disconnectSignals()
 	disconnect(ui->combo_field_of_view, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	disconnect(ui->combo_layer_point_cloud, SIGNAL(activated(int)), this,
 			SLOT(onLayerPointCloudUpdated()));
+	disconnect(ui->combo_point_score_type, SIGNAL(activated(int)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->combo_cluster_score_type, SIGNAL(activated(int)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->combo_frame_score_type, SIGNAL(activated(int)), this,
+			SLOT(onParameterUpdated()));
 	disconnect(ui->combo_layer_image_left, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
 	disconnect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,

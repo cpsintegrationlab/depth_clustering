@@ -77,7 +77,7 @@ public:
 	getClusterer() const;
 
 	std::shared_ptr<FolderReader>
-	getFolderReaderCamera() const;
+	getFolderReaderCamera();
 
 	std::shared_ptr<FolderReader>
 	getFolderReaderRange() const;

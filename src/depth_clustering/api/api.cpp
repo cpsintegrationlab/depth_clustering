@@ -256,8 +256,15 @@ DepthClustering::getClusterer() const
 }
 
 std::shared_ptr<FolderReader>
-DepthClustering::getFolderReaderCamera() const
+DepthClustering::getFolderReaderCamera()
 {
+	if (!folder_reader_camera_)
+	{
+		std::string dataset_path_camera = dataset_path_ + "frames_camera/";
+		folder_reader_camera_ = std::make_shared<FolderReader>(dataset_path_camera, ".png",
+				FolderReader::Order::SORTED);
+	}
+
 	return folder_reader_camera_;
 }
 
@@ -512,7 +519,6 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 			+ "/intensity/";
 	std::string dataset_path_elongation = dataset_path_ + "frames_lidar/"
 			+ dataset_path_lidar_return + "/elongation/";
-	std::string dataset_path_camera = dataset_path_ + "frames_camera/";
 
 	folder_reader_range_ = std::make_shared<FolderReader>(dataset_path_range,
 			parameter_.dataset_file_type, FolderReader::Order::SORTED);
@@ -520,8 +526,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 			parameter_.dataset_file_type, FolderReader::Order::SORTED);
 	folder_reader_elongation_ = std::make_shared<FolderReader>(dataset_path_elongation,
 			parameter_.dataset_file_type, FolderReader::Order::SORTED);
-	folder_reader_camera_ = std::make_shared<FolderReader>(dataset_path_camera, ".png",
-			FolderReader::Order::SORTED);
+	folder_reader_camera_ = nullptr;
 
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);

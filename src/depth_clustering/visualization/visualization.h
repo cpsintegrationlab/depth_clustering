@@ -140,18 +140,18 @@ private:
 
 	std::unique_ptr<Ui::Visualization> ui;
 
-	std::shared_ptr<DepthClustering> depth_clustering_ = nullptr;
-	std::shared_ptr<DepthClustering> depth_clustering_first_return_ = nullptr;
-	std::shared_ptr<DepthClustering> depth_clustering_second_return_ = nullptr;
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> ground_truth_frame_flat_ = nullptr;
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> ground_truth_frame_cube_ = nullptr;
-	std::unique_ptr<QGraphicsScene> scene_empty_ = nullptr;
-	std::unique_ptr<QGraphicsScene> scene_camera_ = nullptr;
-	std::unique_ptr<QGraphicsScene> scene_difference_ = nullptr;
-	std::unique_ptr<QGraphicsScene> scene_segmentation_ = nullptr;
-	std::unique_ptr<QGraphicsScene> scene_range_ = nullptr;
-	std::unique_ptr<QGraphicsScene> scene_intensity_ = nullptr;
-	std::unique_ptr<QGraphicsScene> scene_elongation_ = nullptr;
+	std::shared_ptr<DepthClustering> depth_clustering_;
+	std::shared_ptr<DepthClustering> depth_clustering_first_return_;
+	std::shared_ptr<DepthClustering> depth_clustering_second_return_;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> ground_truth_frame_flat_;
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> ground_truth_frame_cube_;
+	std::unique_ptr<QGraphicsScene> scene_empty_;
+	std::unique_ptr<QGraphicsScene> scene_camera_;
+	std::unique_ptr<QGraphicsScene> scene_difference_;
+	std::unique_ptr<QGraphicsScene> scene_segmentation_;
+	std::unique_ptr<QGraphicsScene> scene_range_;
+	std::unique_ptr<QGraphicsScene> scene_intensity_;
+	std::unique_ptr<QGraphicsScene> scene_elongation_;
 
 	VisualizationLayout layout_;
 	std::string dataset_path_;
