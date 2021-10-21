@@ -113,6 +113,14 @@ ParameterFactory::getDepthClusteringParameter()
 		{
 			parameter.score_type_point = Score::TypePoint::Type_1;
 		}
+		else if (score_type_point_string == "type_2")
+		{
+			parameter.score_type_point = Score::TypePoint::Type_2;
+		}
+		else if (score_type_point_string == "type_3")
+		{
+			parameter.score_type_point = Score::TypePoint::Type_3;
+		}
 		else
 		{
 			std::cout << "[WARN]: Unknown point score type." << std::endl;
@@ -543,6 +551,14 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 		if (score_type_point_string == "type_1")
 		{
 			parameter.score_type_point = Score::TypePoint::Type_1;
+		}
+		else if (score_type_point_string == "type_2")
+		{
+			parameter.score_type_point = Score::TypePoint::Type_2;
+		}
+		else if (score_type_point_string == "type_3")
+		{
+			parameter.score_type_point = Score::TypePoint::Type_3;
 		}
 		else
 		{
