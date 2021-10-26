@@ -6,7 +6,8 @@
 2. [Command-Line Application](#command-line-application)
 3. [Visualizer Application](#visualizer-application)
 4. [Cross-Compilation](#cross-compilation)
-5. [Batch Execution Script](#batch-execution-script)
+5. [Installation](#installation)
+6. [Batch Execution Script](#batch-execution-script)
 
 ## Project Setup
 
@@ -55,7 +56,7 @@ apt install freeglut3-dev libqglviewer-dev-qt5 qtbase5-dev
 The visualizer application is built independently. With the above packages installed, build the visualizer application as follows:
 
 ```bash
-cd build/releasebuild/amd64/depth_clustering/release
+cd build/amd64/depth_clustering/release
 make visualizer
 ```
 
@@ -105,6 +106,19 @@ make
 The cross-compiled binaries and libraries for arm64 would be located in `install/arm64/depth_clustering/release`
 
 Note: the visualizer application is currently not supported for the arm64 architecture.
+
+## Installation
+
+This project can be installed to the system as follows:
+
+```bash
+cd build/amd64/depth_clustering/release
+make install
+```
+
+The installed binaries, libraries, and headers would be located under `/usr/local/bin`, `/usr/local/lib`, and `/usr/local/include/depth_clustering`, respectively.
+
+Note: the visualizer application would not be installed.
 
 ## Batch Execution Script
 
