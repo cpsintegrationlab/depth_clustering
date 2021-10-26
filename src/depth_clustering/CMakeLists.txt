@@ -1,6 +1,7 @@
 # Add subdirectories
 add_subdirectory(api)
 add_subdirectory(applications)
+add_subdirectory(clusterers)
 add_subdirectory(communication)
 add_subdirectory(ground_removal)
 add_subdirectory(image_labelers)
@@ -10,5 +11,5 @@ add_subdirectory(utils)
 
 # amd64-only configurations
 if(ARCH STREQUAL "amd64")
-  add_subdirectory(visualization)
+  add_subdirectory(visualization EXCLUDE_FROM_ALL)
 endif()

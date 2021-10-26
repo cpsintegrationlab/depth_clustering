@@ -45,7 +45,7 @@ if(${OpenGL_FOUND} AND ${QGLViewer_FOUND} AND ${Qt5_FOUND})
 
 	# Add libraries
 	add_library(
-		dc_visualization SHARED EXCLUDE_FROM_ALL
+		dc_visualization SHARED
 		drawables/drawable_cloud.cpp
 		drawables/drawable_cube.cpp
 		drawables/drawable_polygon3d.cpp
