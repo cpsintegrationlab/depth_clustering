@@ -142,8 +142,8 @@ private:
 	cv::Mat image_intensity_;
 	cv::Mat image_elongation_;
 
-	boost::property_tree::ptree ground_truth_cube_tree_;
-	boost::property_tree::ptree ground_truth_flat_tree_;
+	boost::optional<boost::property_tree::ptree> ground_truth_cube_tree_;
+	boost::optional<boost::property_tree::ptree> ground_truth_flat_tree_;
 };
 } // namespace depth_clustering
 

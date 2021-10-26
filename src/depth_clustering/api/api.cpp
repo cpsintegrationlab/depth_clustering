@@ -142,9 +142,29 @@ DepthClustering::getGroundTruthFrameCube(const std::string& frame_path_name_rang
 		return nullptr;
 	}
 
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> ground_truth_frame_cube;
+	if (!ground_truth_cube_tree_)
+	{
+		boost::property_tree::ptree ground_truth_cube_tree;
 
-	auto ground_truth_frame_cube_tree_optioal = ground_truth_cube_tree_.get_child_optional(
+		try
+		{
+			boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_cube_file_name,
+					ground_truth_cube_tree);
+		} catch (boost::exception const &e)
+		{
+			std::cout << "[WARN]: Failed to load cube ground truth file from \"" << dataset_path_
+					<< "\"." << std::endl;
+			return nullptr;
+		}
+
+		ground_truth_cube_tree_ = boost::optional<boost::property_tree::ptree>(
+				ground_truth_cube_tree);
+	}
+
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> ground_truth_frame_cube;
+	boost::property_tree::ptree &ground_truth_cube_tree = *ground_truth_cube_tree_;
+
+	auto ground_truth_frame_cube_tree_optioal = ground_truth_cube_tree.get_child_optional(
 			boost::property_tree::ptree::path_type(frame_name_range, '/'));
 
 	if (!ground_truth_frame_cube_tree_optioal)
@@ -206,9 +226,29 @@ DepthClustering::getGroundTruthFrameFlat(const std::string& frame_path_name_rang
 		return nullptr;
 	}
 
-	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> ground_truth_frame_flat;
+	if (!ground_truth_flat_tree_)
+	{
+		boost::property_tree::ptree ground_truth_flat_tree;
 
-	auto ground_truth_frame_flat_tree_optioal = ground_truth_flat_tree_.get_child_optional(
+		try
+		{
+			boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_flat_file_name,
+					ground_truth_flat_tree);
+		} catch (boost::exception const &e)
+		{
+			std::cout << "[WARN]: Failed to load flat ground truth file from \"" << dataset_path_
+					<< "\"." << std::endl;
+			return nullptr;
+		}
+
+		ground_truth_flat_tree_ = boost::optional<boost::property_tree::ptree>(
+				ground_truth_flat_tree);
+	}
+
+	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> ground_truth_frame_flat;
+	boost::property_tree::ptree &ground_truth_flat_tree = *ground_truth_flat_tree_;
+
+	auto ground_truth_frame_flat_tree_optioal = ground_truth_flat_tree.get_child_optional(
 			boost::property_tree::ptree::path_type(frame_name_range, '/'));
 
 	if (!ground_truth_frame_flat_tree_optioal)
@@ -580,26 +620,6 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 
 	depth_ground_remover_->DepthGroundRemover::SenderTCloud::AddClient(clusterer_.get()); // @suppress("Method cannot be resolved")
 	clusterer_->AddClient(bounding_box_.get());
-
-	try
-	{
-		boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_cube_file_name,
-				ground_truth_cube_tree_);
-	} catch (boost::exception const &e)
-	{
-		std::cout << "[WARN]: Failed to load cube ground truth file from \"" << dataset_path_
-				<< "\"." << std::endl;
-	}
-
-	try
-	{
-		boost::property_tree::read_json(dataset_path_ + parameter_.ground_truth_flat_file_name,
-				ground_truth_flat_tree_);
-	} catch (boost::exception const &e)
-	{
-		std::cout << "[WARN]: Failed to load flat ground truth file from \"" << dataset_path_
-				<< "\"." << std::endl;
-	}
 
 	return true;
 }
