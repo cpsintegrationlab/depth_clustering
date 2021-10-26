@@ -7,12 +7,12 @@ using visualization::Visualization;
 void
 printUsage(int argc, char* argv[])
 {
+	std::cout << "Depth Clustering Visualizer Application 2.8.0" << std::endl;
 	std::cout << std::endl << "Usage:\t" << argv[0] << std::endl;
 	std::cout << "\t" << argv[0] << " [dataset segment path]" << std::endl;
 	std::cout << "\t" << argv[0] << " [dataset segment path] [global config file]" << std::endl;
 	std::cout << "\t" << argv[0]
-			<< " [dataset segment path] [global config file] [layout config file]" << std::endl
-			<< std::endl;
+			<< " [dataset segment path] [global config file] [layout config file]" << std::endl;
 }
 
 int
