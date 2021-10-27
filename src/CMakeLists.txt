@@ -47,5 +47,8 @@ include_directories(
 	${OpenCV_INCLUDE_DIRS}
 )
 
+# Set installation targets
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/../config/ DESTINATION config/depth_clustering)
+
 # Add subdirectories
 add_subdirectory(depth_clustering)
