@@ -54,12 +54,9 @@ Score::calculatePointScore(const RichPoint& point)
 	{
 		return calculatePointScoreType2(point);
 	}
-	case TypePoint::Type_3:
-	{
-		return calculatePointScoreType3(point);
-	}
 	default:
 	{
+		std::cout << "[WARN]: Unknown point score type." << std::endl;
 		return calculatePointScoreType1(point);
 	}
 	}
@@ -76,6 +73,7 @@ Score::calculateClusterScore(const Cloud& cloud)
 	}
 	default:
 	{
+		std::cout << "[WARN]: Unknown cluster score type." << std::endl;
 		return calculateClusterScoreType1(cloud);
 	}
 	}
@@ -92,6 +90,7 @@ Score::calculateFrameScore(const std::shared_ptr<BoundingBox::Frame<BoundingBox:
 	}
 	default:
 	{
+		std::cout << "[WARN]: Unknown frame score type." << std::endl;
 		return calculateFrameScoreType1(frame);
 	}
 	}
@@ -107,7 +106,7 @@ float
 Score::calculatePointScoreType1(const RichPoint& point)
 {
 	/*
-	 * Intensity / elongation
+	 * min(1, intensity + (1 - elongation))
 	 */
 
 	float score = -1;
@@ -117,11 +116,7 @@ Score::calculatePointScoreType1(const RichPoint& point)
 		return score;
 	}
 
-	float intensity_shifted = point.intensity() + 1; // 1 - 2
-	float elongation_shifted = point.elongation() + 1; // 1 - 2
-
-	score = intensity_shifted / elongation_shifted; // 0.5 - 2
-	score = fabs((score - 0.5) / 1.5); // 0 - 1
+	score = point.intensity() + (1 - point.elongation());
 
 	return boundScore(score);
 }
@@ -130,7 +125,7 @@ float
 Score::calculatePointScoreType2(const RichPoint& point)
 {
 	/*
-	 * 1 / elongation
+	 * 1 - elongation
 	 */
 
 	float score = -1;
@@ -140,29 +135,7 @@ Score::calculatePointScoreType2(const RichPoint& point)
 		return score;
 	}
 
-	float elongation_shifted = point.elongation() + 1; // 1 - 2
-
-	score = 1 / elongation_shifted; // 0.5 - 1
-	score = fabs((score + 0.5) / 1.5); // 0 - 1
-
-	return boundScore(score);
-}
-
-float
-Score::calculatePointScoreType3(const RichPoint& point)
-{
-	/*
-	 * min(1, 1 / elongation + intensity)
-	 */
-
-	float score = -1;
-
-	if (point.intensity() < 0 || point.elongation() < 0)
-	{
-		return score;
-	}
-
-	score = std::min<float>(1, calculatePointScoreType2(point) + point.intensity());
+	score = 1 - point.elongation();
 
 	return boundScore(score);
 }

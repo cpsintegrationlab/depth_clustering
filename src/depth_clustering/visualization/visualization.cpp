@@ -448,69 +448,35 @@ Visualization::onParameterUpdated()
 
 	DepthClusteringParameter parameter = depth_clustering_->getParameter();
 
-	Score::TypePoint score_type_point = Score::TypePoint::Type_1;
-
-	switch (static_cast<Score::TypePoint>(ui->combo_point_score_type->currentIndex()))
+	try
 	{
-	case Score::TypePoint::Type_1:
+		parameter.score_type_point =
+				static_cast<Score::TypePoint>(ui->combo_point_score_type->currentIndex());
+	} catch (const std::exception &e)
 	{
-		score_type_point = Score::TypePoint::Type_1;
-		break;
-	}
-	case Score::TypePoint::Type_2:
-	{
-		score_type_point = Score::TypePoint::Type_2;
-		break;
-	}
-	case Score::TypePoint::Type_3:
-	{
-		score_type_point = Score::TypePoint::Type_3;
-		break;
-	}
-	default:
-	{
-		score_type_point = Score::TypePoint::Type_1;
-		break;
-	}
+		std::cout << "[WARN]: Unknown point score type." << std::endl;
+		parameter.score_type_point = Score::TypePoint::Type_1;
 	}
 
-	parameter.score_type_point = score_type_point;
-
-	Score::TypeCluster score_type_cluster = Score::TypeCluster::Type_1;
-
-	switch (static_cast<Score::TypeCluster>(ui->combo_cluster_score_type->currentIndex()))
+	try
 	{
-	case Score::TypeCluster::Type_1:
+		parameter.score_type_cluster =
+				static_cast<Score::TypeCluster>(ui->combo_cluster_score_type->currentIndex());
+	} catch (const std::exception &e)
 	{
-		score_type_cluster = Score::TypeCluster::Type_1;
-		break;
-	}
-	default:
-	{
-		score_type_cluster = Score::TypeCluster::Type_1;
-		break;
-	}
+		std::cout << "[WARN]: Unknown cluster score type." << std::endl;
+		parameter.score_type_cluster = Score::TypeCluster::Type_1;
 	}
 
-	parameter.score_type_cluster = score_type_cluster;
-
-	Score::TypeFrame score_type_frame = Score::TypeFrame::Type_1;
-
-	switch (static_cast<Score::TypeFrame>(ui->combo_frame_score_type->currentIndex()))
+	try
 	{
-	case Score::TypeFrame::Type_1:
+		parameter.score_type_frame =
+				static_cast<Score::TypeFrame>(ui->combo_frame_score_type->currentIndex());
+	} catch (const std::exception &e)
 	{
-		score_type_frame = Score::TypeFrame::Type_1;
-		break;
+		std::cout << "[WARN]: Unknown frame score type." << std::endl;
+		parameter.score_type_frame = Score::TypeFrame::Type_1;
 	}
-	default:
-	{
-		score_type_frame = Score::TypeFrame::Type_1;
-		break;
-	}
-	}
-
-	parameter.score_type_frame = score_type_frame;
 
 	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
 	parameter.size_smooth_window = ui->combo_size_smooth_window->currentIndex() * 2 + 5;

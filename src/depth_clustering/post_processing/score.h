@@ -20,7 +20,7 @@ public:
 
 	enum class TypePoint
 	{
-		Type_1, Type_2, Type_3
+		Type_1, Type_2
 	};
 
 	enum class TypeCluster
@@ -66,9 +66,6 @@ private:
 
 	float
 	calculatePointScoreType2(const RichPoint& point);
-
-	float
-	calculatePointScoreType3(const RichPoint& point);
 
 	float
 	calculateClusterScoreType1(const Cloud& cloud);
