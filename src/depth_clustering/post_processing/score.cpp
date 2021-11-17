@@ -109,16 +109,17 @@ Score::calculatePointScoreType1(const RichPoint& point)
 	 * min(1, intensity + (1 - elongation))
 	 */
 
-	float score = -1;
+	float point_score = -1;
 
 	if (point.intensity() < 0 || point.elongation() < 0)
 	{
-		return score;
+		return point_score;
 	}
 
-	score = point.intensity() + (1 - point.elongation());
+	point_score = point.intensity() + (1 - point.elongation());
+	point_score = boundScore(point_score);
 
-	return boundScore(score);
+	return point_score;
 }
 
 float
@@ -128,16 +129,17 @@ Score::calculatePointScoreType2(const RichPoint& point)
 	 * 1 - elongation
 	 */
 
-	float score = -1;
+	float point_score = -1;
 
 	if (point.elongation() < 0)
 	{
-		return score;
+		return point_score;
 	}
 
-	score = 1 - point.elongation();
+	point_score = 1 - point.elongation();
+	point_score = boundScore(point_score);
 
-	return boundScore(score);
+	return point_score;
 }
 
 float
@@ -165,9 +167,10 @@ Score::calculateClusterScoreType1(const Cloud& cloud)
 	if (point_counter_invalid < static_cast<int>(cloud.points().size()))
 	{
 		cluster_score = point_score_total / static_cast<int>(cloud.points().size());
+		cluster_score = boundScore(cluster_score);
 	}
 
-	return boundScore(cluster_score);
+	return cluster_score;
 }
 
 float
@@ -196,8 +199,9 @@ Score::calculateFrameScoreType1(
 	if (cluster_counter_invalid < static_cast<int>(frame->size()))
 	{
 		frame_score = cluster_score_total / static_cast<int>(frame->size());
+		frame_score = boundScore(frame_score);
 	}
 
-	return boundScore(frame_score);
+	return frame_score;
 }
 } // namespace depth_clustering
