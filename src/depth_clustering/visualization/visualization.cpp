@@ -478,6 +478,8 @@ Visualization::onParameterUpdated()
 		parameter.score_type_frame = Score::TypeFrame::Type_1;
 	}
 
+	parameter.use_score_filter = static_cast<bool>(ui->combo_score_filter->currentIndex());
+	parameter.score_filter_threshold = ui->spin_score_filter_threshold->value();
 	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
 	parameter.size_smooth_window = ui->combo_size_smooth_window->currentIndex() * 2 + 5;
 
@@ -1472,6 +1474,8 @@ Visualization::resetUI()
 	ui->combo_point_score_type->setEnabled(false);
 	ui->combo_cluster_score_type->setEnabled(false);
 	ui->combo_frame_score_type->setEnabled(false);
+	ui->combo_score_filter->setEnabled(false);
+	ui->spin_score_filter_threshold->setEnabled(false);
 	ui->combo_layer_image_left->setEnabled(false);
 	ui->combo_layer_image_middle->setEnabled(false);
 	ui->combo_layer_image_right->setEnabled(false);
@@ -1563,6 +1567,8 @@ Visualization::initializeUI()
 
 	ui->combo_layer_point_cloud->setCurrentIndex(
 			static_cast<int>(layout_.point_cloud_viewer_layer));
+	ui->combo_score_filter->setCurrentIndex(static_cast<int>(parameter.use_score_filter));
+	ui->spin_score_filter_threshold->setValue(parameter.score_filter_threshold);
 	ui->combo_layer_image_left->setCurrentIndex(static_cast<int>(layout_.image_viewer_layer_left));
 	ui->combo_layer_image_middle->setCurrentIndex(
 			static_cast<int>(layout_.image_viewer_layer_middle));
@@ -1605,6 +1611,8 @@ Visualization::initializeUI()
 	ui->combo_point_score_type->setEnabled(true);
 	ui->combo_cluster_score_type->setEnabled(true);
 	ui->combo_frame_score_type->setEnabled(true);
+	ui->combo_score_filter->setEnabled(true);
+	ui->spin_score_filter_threshold->setEnabled(true);
 	ui->combo_layer_image_left->setEnabled(true);
 	ui->combo_layer_image_middle->setEnabled(true);
 	ui->combo_layer_image_right->setEnabled(true);
@@ -1643,6 +1651,9 @@ Visualization::connectSignals()
 	connect(ui->combo_point_score_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_cluster_score_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
 	connect(ui->combo_frame_score_type, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->combo_score_filter, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	connect(ui->spin_score_filter_threshold, SIGNAL(valueChanged(double)), this,
+			SLOT(onParameterUpdated()));
 	connect(ui->combo_layer_image_left, SIGNAL(activated(int)), this, SLOT(onLayerImageUpdated()));
 	connect(ui->combo_layer_image_middle, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
@@ -1684,6 +1695,9 @@ Visualization::disconnectSignals()
 	disconnect(ui->combo_cluster_score_type, SIGNAL(activated(int)), this,
 			SLOT(onParameterUpdated()));
 	disconnect(ui->combo_frame_score_type, SIGNAL(activated(int)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->combo_score_filter, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
+	disconnect(ui->spin_score_filter_threshold, SIGNAL(valueChanged(double)), this,
 			SLOT(onParameterUpdated()));
 	disconnect(ui->combo_layer_image_left, SIGNAL(activated(int)), this,
 			SLOT(onLayerImageUpdated()));
