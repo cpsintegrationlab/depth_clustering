@@ -8,6 +8,7 @@
         "size_smooth_window": 5,
         "use_camera_fov": false,
         "use_score_filter": false,
+        "score_filter_threshold": 0.0,
         "score_type_point": "type_1",
         "score_type_cluster": "type_1",
         "score_type_frame": "type_1",
