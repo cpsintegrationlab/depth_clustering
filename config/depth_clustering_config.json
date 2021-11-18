@@ -7,12 +7,12 @@
         "size_cluster_max": 20000,
         "size_smooth_window": 5,
         "use_camera_fov": true,
+        "use_score_filter": true,
         "score_type_point": "type_1",
         "score_type_cluster": "type_1",
         "score_type_frame": "type_1",
         "bounding_box_type": "polygon",
         "difference_type": "angles_precomputed",
-        "cluster_filter_type": "score",
         "ground_truth_cube_file_name": "waymo_ground_truth_cube.json",
         "ground_truth_flat_file_name": "waymo_ground_truth_flat.json"
     },
