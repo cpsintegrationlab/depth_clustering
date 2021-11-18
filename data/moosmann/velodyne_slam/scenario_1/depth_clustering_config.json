@@ -12,6 +12,7 @@
         "score_type_frame": "type_1",
         "bounding_box_type": "polygon",
         "difference_type": "angles_precomputed",
+        "cluster_filter_type": "none",
         "dataset_file_type": ".png",
         "dataset_name": "scenario_1",
         "ground_truth_cube_file_name": "waymo_ground_truth_cube.json",
