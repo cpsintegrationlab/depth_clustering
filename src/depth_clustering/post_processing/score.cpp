@@ -71,6 +71,10 @@ Score::calculateClusterScore(const Cloud& cloud)
 	{
 		return calculateClusterScoreType1(cloud);
 	}
+	case TypeCluster::Type_2:
+	{
+		return calculateClusterScoreType2(cloud);
+	}
 	default:
 	{
 		std::cout << "[WARN]: Unknown cluster score type." << std::endl;
@@ -146,7 +150,7 @@ float
 Score::calculateClusterScoreType1(const Cloud& cloud)
 {
 	/*
-	 * Point score average
+	 * Average on point scores
 	 */
 
 	int point_counter_invalid = 0;
@@ -167,6 +171,56 @@ Score::calculateClusterScoreType1(const Cloud& cloud)
 	if (point_counter_invalid < static_cast<int>(cloud.points().size()))
 	{
 		cluster_score = point_score_total / static_cast<int>(cloud.points().size());
+		cluster_score = boundScore(cluster_score);
+	}
+
+	return cluster_score;
+}
+
+float
+Score::calculateClusterScoreType2(const Cloud& cloud)
+{
+	/*
+	 * Weighted average on point scores over depth
+	 */
+
+	int point_counter_invalid = 0;
+	float weight_min = std::numeric_limits<float>::max();
+	float weight_max = std::numeric_limits<float>::min();
+	float point_score_total_weighted = 0;
+	float weight_total = 0;
+	float cluster_score = -1;
+
+	for (const auto &point : cloud.points())
+	{
+		if (point.AsEigenVector().norm() < weight_min)
+		{
+			weight_min = point.AsEigenVector().norm();
+		}
+
+		if (point.AsEigenVector().norm() > weight_max)
+		{
+			weight_max = point.AsEigenVector().norm();
+		}
+	}
+
+	for (const auto &point : cloud.points())
+	{
+		if (point.score() < 0 || point.score() > 1)
+		{
+			point_counter_invalid++;
+			continue;
+		}
+
+		float weight = 1 - (point.AsEigenVector().norm() - weight_min) / (weight_max - weight_min);
+
+		point_score_total_weighted += weight * point.score();
+		weight_total += weight;
+	}
+
+	if (point_counter_invalid < static_cast<int>(cloud.points().size()))
+	{
+		cluster_score = point_score_total_weighted / weight_total;
 		cluster_score = boundScore(cluster_score);
 	}
 

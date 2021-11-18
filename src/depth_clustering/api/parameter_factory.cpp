@@ -132,6 +132,10 @@ ParameterFactory::getDepthClusteringParameter()
 		{
 			parameter.score_type_cluster = Score::TypeCluster::Type_1;
 		}
+		else if (score_type_cluster_string == "type_2")
+		{
+			parameter.score_type_cluster = Score::TypeCluster::Type_2;
+		}
 		else
 		{
 			std::cout << "[WARN]: Unknown cluster score type." << std::endl;
@@ -566,6 +570,10 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 		if (score_type_cluster_string == "type_1")
 		{
 			parameter.score_type_cluster = Score::TypeCluster::Type_1;
+		}
+		else if (score_type_cluster_string == "type_2")
+		{
+			parameter.score_type_cluster = Score::TypeCluster::Type_2;
 		}
 		else
 		{

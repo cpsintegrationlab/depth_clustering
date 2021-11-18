@@ -25,7 +25,7 @@ public:
 
 	enum class TypeCluster
 	{
-		Type_1
+		Type_1, Type_2
 	};
 
 	enum class TypeFrame
@@ -69,6 +69,9 @@ private:
 
 	float
 	calculateClusterScoreType1(const Cloud& cloud);
+
+	float
+	calculateClusterScoreType2(const Cloud& cloud);
 
 	float
 	calculateFrameScoreType1(const std::shared_ptr<BoundingBox::Frame<BoundingBox::Cluster>> frame);
