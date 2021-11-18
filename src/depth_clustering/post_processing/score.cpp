@@ -110,6 +110,27 @@ float
 Score::calculatePointScoreType1(const RichPoint& point)
 {
 	/*
+	 * 1 - elongation
+	 */
+
+	float point_score = -1;
+
+	if (point.elongation() < 0)
+	{
+		return point_score;
+	}
+
+	point_score = 1 - point.elongation();
+	point_score = boundScore(point_score);
+
+	return point_score;
+
+}
+
+float
+Score::calculatePointScoreType2(const RichPoint& point)
+{
+	/*
 	 * min(1, intensity + (1 - elongation))
 	 */
 
@@ -127,58 +148,7 @@ Score::calculatePointScoreType1(const RichPoint& point)
 }
 
 float
-Score::calculatePointScoreType2(const RichPoint& point)
-{
-	/*
-	 * 1 - elongation
-	 */
-
-	float point_score = -1;
-
-	if (point.elongation() < 0)
-	{
-		return point_score;
-	}
-
-	point_score = 1 - point.elongation();
-	point_score = boundScore(point_score);
-
-	return point_score;
-}
-
-float
 Score::calculateClusterScoreType1(const Cloud& cloud)
-{
-	/*
-	 * Average on point scores
-	 */
-
-	int point_counter_invalid = 0;
-	float point_score_total = 0;
-	float cluster_score = -1;
-
-	for (const auto &point : cloud.points())
-	{
-		if (point.score() < 0 || point.score() > 1)
-		{
-			point_counter_invalid++;
-			continue;
-		}
-
-		point_score_total += point.score();
-	}
-
-	if (point_counter_invalid < static_cast<int>(cloud.points().size()))
-	{
-		cluster_score = point_score_total / static_cast<int>(cloud.points().size());
-		cluster_score = boundScore(cluster_score);
-	}
-
-	return cluster_score;
-}
-
-float
-Score::calculateClusterScoreType2(const Cloud& cloud)
 {
 	/*
 	 * Weighted average on point scores over depth
@@ -221,6 +191,37 @@ Score::calculateClusterScoreType2(const Cloud& cloud)
 	if (point_counter_invalid < static_cast<int>(cloud.points().size()))
 	{
 		cluster_score = point_score_total_weighted / weight_total;
+		cluster_score = boundScore(cluster_score);
+	}
+
+	return cluster_score;
+}
+
+float
+Score::calculateClusterScoreType2(const Cloud& cloud)
+{
+	/*
+	 * Average on point scores
+	 */
+
+	int point_counter_invalid = 0;
+	float point_score_total = 0;
+	float cluster_score = -1;
+
+	for (const auto &point : cloud.points())
+	{
+		if (point.score() < 0 || point.score() > 1)
+		{
+			point_counter_invalid++;
+			continue;
+		}
+
+		point_score_total += point.score();
+	}
+
+	if (point_counter_invalid < static_cast<int>(cloud.points().size()))
+	{
+		cluster_score = point_score_total / static_cast<int>(cloud.points().size());
 		cluster_score = boundScore(cluster_score);
 	}
 
