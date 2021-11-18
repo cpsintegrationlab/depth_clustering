@@ -177,13 +177,12 @@ BoundingBox::CreateCubes(const Cluster& cluster)
 			std::numeric_limits<float>::max());
 	for (const auto &point : cloud.points())
 	{
-		center = center + point.AsEigenVector();
 		min_point << std::min(min_point.x(), point.x()), std::min(min_point.y(), point.y()), std::min(
 				min_point.z(), point.z());
 		max_point << std::max(max_point.x(), point.x()), std::max(max_point.y(), point.y()), std::max(
 				max_point.z(), point.z());
 	}
-	center /= cloud.size();
+	center = min_point + (max_point - min_point) / 2;
 	if (min_point.x() < max_point.x())
 	{
 		extent = max_point - min_point;
