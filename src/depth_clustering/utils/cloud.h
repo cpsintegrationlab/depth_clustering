@@ -116,6 +116,12 @@ public:EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	}
 
 	inline void
+	clear()
+	{
+		_points.clear();
+	}
+
+	inline void
 	reserve(size_t size)
 	{
 		_points.reserve(size);

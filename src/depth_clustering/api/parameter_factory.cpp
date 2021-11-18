@@ -54,6 +54,8 @@ ParameterFactory::getDepthClusteringParameter()
 	auto size_cluster_max_optional = tree.get_optional<int>("size_cluster_max");
 	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
 	auto use_camera_fov_optional = tree.get_optional<bool>("use_camera_fov");
+	auto use_score_filter_optional = tree.get_optional<bool>("use_score_filter");
+	auto score_filter_threshold_optional = tree.get_optional<float>("score_filter_threshold");
 	auto score_type_point_optional = tree.get_optional<std::string>("score_type_point");
 	auto score_type_cluster_optional = tree.get_optional<std::string>("score_type_cluster");
 	auto score_type_frame_optional = tree.get_optional<std::string>("score_type_frame");
@@ -103,6 +105,16 @@ ParameterFactory::getDepthClusteringParameter()
 	if (use_camera_fov_optional)
 	{
 		parameter.use_camera_fov = *use_camera_fov_optional;
+	}
+
+	if (use_score_filter_optional)
+	{
+		parameter.use_score_filter = *use_score_filter_optional;
+	}
+
+	if (score_filter_threshold_optional)
+	{
+		parameter.score_filter_threshold = *score_filter_threshold_optional;
 	}
 
 	if (score_type_point_optional)
@@ -495,6 +507,8 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 	auto size_cluster_max_optional = tree.get_optional<int>("size_cluster_max");
 	auto size_smooth_window_optional = tree.get_optional<int>("size_smooth_window");
 	auto use_camera_fov_optional = tree.get_optional<bool>("use_camera_fov");
+	auto use_score_filter_optional = tree.get_optional<bool>("use_score_filter");
+	auto score_filter_threshold_optional = tree.get_optional<float>("score_filter_threshold");
 	auto score_type_point_optional = tree.get_optional<std::string>("score_type_point");
 	auto score_type_cluster_optional = tree.get_optional<std::string>("score_type_cluster");
 	auto score_type_frame_optional = tree.get_optional<std::string>("score_type_frame");
@@ -542,6 +556,16 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 	if (use_camera_fov_optional)
 	{
 		parameter.use_camera_fov = *use_camera_fov_optional;
+	}
+
+	if (use_score_filter_optional)
+	{
+		parameter.use_score_filter = *use_score_filter_optional;
+	}
+
+	if (score_filter_threshold_optional)
+	{
+		parameter.score_filter_threshold = *score_filter_threshold_optional;
 	}
 
 	if (score_type_point_optional)

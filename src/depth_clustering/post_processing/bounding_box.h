@@ -21,8 +21,12 @@
 #include "utils/cloud.h"
 #include "utils/timer.h"
 
+using depth_clustering::Cloud;
+using depth_clustering::time_utils::Timer;
+
 namespace depth_clustering
 {
+class DepthClusteringParameter;
 class CameraProjection;
 class Score;
 
@@ -30,11 +34,8 @@ class BoundingBox: public depth_clustering::AbstractClient<std::unordered_map<ui
 {
 public:
 
-	using Cloud = depth_clustering::Cloud;
-	using Timer = depth_clustering::time_utils::Timer;
 	using AlignedEigenVectors =
 	std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>>;
-
 	template<typename Type>
 	using Frame = std::vector<Type>;
 	using Cluster = std::tuple<Cloud, float, std::string>; // <cloud, score, id>
@@ -49,9 +50,9 @@ public:
 
 	BoundingBox();
 
-	BoundingBox(const Type& type, const std::shared_ptr<Score> score);
+	BoundingBox(const std::shared_ptr<Score> score, const DepthClusteringParameter& parameter);
 
-	BoundingBox(const Type& type, const std::shared_ptr<Score> score,
+	BoundingBox(const std::shared_ptr<Score> score, const DepthClusteringParameter& parameter,
 			const CameraProjectionParameter& camera_projection_parameter);
 
 	std::shared_ptr<Frame<Cluster>>
@@ -90,17 +91,22 @@ public:
 private:
 
 	void
+	filterByScore(Cloud& cloud);
+
+	void
 	CreateCubes(const Cluster& cluster);
 
 	void
 	CreatePolygons(const Cluster& cluster);
 
 	Type type_;
+	bool use_score_filter_;
+	float score_filter_threshold_;
 	float frame_score_;
 	int id_;
 
 	std::shared_ptr<Frame<Cluster>> frame_cluster_;
-	std::shared_ptr<Frame<Cube>> frame_cube_ ;
+	std::shared_ptr<Frame<Cube>> frame_cube_;
 	std::shared_ptr<Frame<Polygon>> frame_polygon_;
 	std::shared_ptr<Frame<Flat>> frame_flat_;
 	std::shared_ptr<CameraProjection> camera_projection_;

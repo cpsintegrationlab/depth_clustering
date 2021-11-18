@@ -376,8 +376,7 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	score_ = std::make_shared<Score>(parameter_.score_type_point, parameter_.score_type_cluster,
 			parameter_.score_type_frame);
-	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type, score_,
-			parameter_projection_camera_);
+	bounding_box_ = std::make_shared<BoundingBox>(score_, parameter_, parameter_projection_camera_);
 
 	Radians clustering_threshold;
 
@@ -433,7 +432,7 @@ DepthClustering::initializeForApollo()
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	score_ = std::make_shared<Score>(parameter_.score_type_point, parameter_.score_type_cluster,
 			parameter_.score_type_frame);
-	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type, score_);
+	bounding_box_ = std::make_shared<BoundingBox>(score_, parameter_);
 	logger_ = std::make_shared<Logger>();
 
 	Radians clustering_threshold;
@@ -572,8 +571,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	score_ = std::make_shared<Score>(parameter_.score_type_point, parameter_.score_type_cluster,
 			parameter_.score_type_frame);
-	bounding_box_ = std::make_shared<BoundingBox>(parameter_.bounding_box_type, score_,
-			parameter_projection_camera_);
+	bounding_box_ = std::make_shared<BoundingBox>(score_, parameter_, parameter_projection_camera_);
 	logger_ = std::make_shared<Logger>(logger_parameter);
 
 	Radians clustering_threshold;
