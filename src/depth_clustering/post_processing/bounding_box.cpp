@@ -124,25 +124,25 @@ BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clou
 
 	for (const auto &cloud_labeled : clouds)
 	{
-		Cloud cloud(cloud_labeled.second);
 		float cluster_score = -1;
 
-		if (use_score_filter_)
-		{
-			filterByScore(cloud);
-		}
-
-		if (cloud.empty())
+		if (cloud_labeled.second.empty())
 		{
 			continue;
 		}
 
 		if (score_)
 		{
-			cluster_score = score_->calculateClusterScore(cloud);
+			cluster_score = score_->calculateClusterScore(cloud_labeled.second);
 		}
 
-		BoundingBox::Cluster cluster = std::make_tuple(cloud, cluster_score, std::to_string(id_));
+		if (use_score_filter_ && cluster_score < score_filter_threshold_)
+		{
+			continue;
+		}
+
+		BoundingBox::Cluster cluster = std::make_tuple(cloud_labeled.second, cluster_score,
+				std::to_string(id_));
 
 		frame_cluster_->push_back(cluster);
 
@@ -171,22 +171,6 @@ BoundingBox::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clou
 	if (score_)
 	{
 		frame_score_ = score_->calculateFrameScore(frame_cluster_);
-	}
-}
-
-void
-BoundingBox::filterByScore(Cloud& cloud)
-{
-	const auto points = cloud.points();
-
-	cloud.clear();
-
-	for (const auto &point : points)
-	{
-		if (point.score() >= score_filter_threshold_)
-		{
-			cloud.push_back(point);
-		}
 	}
 }
 

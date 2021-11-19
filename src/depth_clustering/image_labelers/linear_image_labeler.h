@@ -124,7 +124,7 @@ class LinearImageLabeler : public AbstractImageLabeler {
         }
 
         if (diff_helper->SatisfiesThreshold(diff, _radians_threshold)) {
-          if (score_clustering_threshold < 0 || diff_score <= score_clustering_threshold)
+          if (score_clustering_threshold < 0 || diff_score < score_clustering_threshold)
           {
             labeling_queue.push(neighbor);
           }

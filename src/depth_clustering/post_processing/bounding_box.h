@@ -91,9 +91,6 @@ public:
 private:
 
 	void
-	filterByScore(Cloud& cloud);
-
-	void
 	CreateCubes(const Cluster& cluster);
 
 	void
