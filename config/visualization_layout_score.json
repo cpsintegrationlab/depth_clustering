@@ -1,5 +1,5 @@
 {
-	"point_cloud_viewer_layer": "point_score",
+	"point_cloud_viewer_layer": "cluster_score",
 	"image_viewer_layer_left": "range",
 	"image_viewer_layer_middle": "intensity",
 	"image_viewer_layer_right": "elongation",
