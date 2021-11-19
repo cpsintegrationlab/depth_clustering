@@ -124,6 +124,14 @@ struct VisualizationLayout
 			{
 				point_cloud_viewer_layer = PointCloudViewerLayer::Point_Score;
 			}
+			else if (point_cloud_viewer_layer_string == "cluster_score")
+			{
+				point_cloud_viewer_layer = PointCloudViewerLayer::Cluster_Score;
+			}
+			else if (point_cloud_viewer_layer_string == "frame_score")
+			{
+				point_cloud_viewer_layer = PointCloudViewerLayer::Frame_Score;
+			}
 			else
 			{
 				std::cout << "[WARN]: Unknown point cloud viewer layer: "
