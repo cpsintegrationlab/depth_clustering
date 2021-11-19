@@ -435,6 +435,9 @@ DepthClustering::initializeForApollo()
 	bounding_box_ = std::make_shared<BoundingBox>(score_, parameter_);
 	logger_ = std::make_shared<Logger>();
 
+	ground_truth_cube_tree_ = boost::none;
+	ground_truth_flat_tree_ = boost::none;
+
 	Radians clustering_threshold;
 
 	switch (parameter_.difference_type)
@@ -573,6 +576,9 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 			parameter_.score_type_frame);
 	bounding_box_ = std::make_shared<BoundingBox>(score_, parameter_, parameter_projection_camera_);
 	logger_ = std::make_shared<Logger>(logger_parameter);
+
+	ground_truth_cube_tree_ = boost::none;
+	ground_truth_flat_tree_ = boost::none;
 
 	Radians clustering_threshold;
 
