@@ -482,37 +482,41 @@ Visualization::onParameterUpdated()
 	parameter.score_filter_threshold = ui->spin_score_filter_threshold->value();
 	parameter.angle_ground_removal = Radians::FromDegrees(ui->spin_angle_ground_removal->value());
 	parameter.size_smooth_window = ui->combo_size_smooth_window->currentIndex() * 2 + 5;
+	parameter.score_clustering = ui->spin_clustering_score_threshold->value();
 
 	switch (ui->combo_difference_type->currentIndex())
 	{
 	case 0:
 	{
-		parameter.angle_clustering = Radians::FromDegrees(ui->spin_clustering_threshold->value());
+		parameter.angle_clustering = Radians::FromDegrees(
+				ui->spin_clustering_depth_threshold->value());
 		break;
 	}
 	case 1:
 	{
-		parameter.angle_clustering = Radians::FromDegrees(ui->spin_clustering_threshold->value());
+		parameter.angle_clustering = Radians::FromDegrees(
+				ui->spin_clustering_depth_threshold->value());
 		break;
 	}
 	case 2:
 	{
-		parameter.distance_clustering = ui->spin_clustering_threshold->value();
+		parameter.distance_clustering = ui->spin_clustering_depth_threshold->value();
 		break;
 	}
 	case 3:
 	{
-		parameter.distance_clustering = ui->spin_clustering_threshold->value();
+		parameter.distance_clustering = ui->spin_clustering_depth_threshold->value();
 		break;
 	}
 	case 4:
 	{
-		parameter.distance_clustering = ui->spin_clustering_threshold->value();
+		parameter.distance_clustering = ui->spin_clustering_depth_threshold->value();
 		break;
 	}
 	default:
 	{
-		parameter.angle_clustering = Radians::FromDegrees(ui->spin_clustering_threshold->value());
+		parameter.angle_clustering = Radians::FromDegrees(
+				ui->spin_clustering_depth_threshold->value());
 		break;
 	}
 	}
@@ -671,37 +675,37 @@ Visualization::onDifferenceTypeUpdated()
 	case 0:
 	{
 		difference_type = DiffFactory::DiffType::ANGLES;
-		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
+		ui->spin_clustering_depth_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	case 1:
 	{
 		difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
-		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
+		ui->spin_clustering_depth_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	case 2:
 	{
 		difference_type = DiffFactory::DiffType::LINE_DIST;
-		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
+		ui->spin_clustering_depth_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	case 3:
 	{
 		difference_type = DiffFactory::DiffType::LINE_DIST_PRECOMPUTED;
-		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
+		ui->spin_clustering_depth_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	case 4:
 	{
 		difference_type = DiffFactory::DiffType::SIMPLE;
-		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
+		ui->spin_clustering_depth_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	default:
 	{
 		difference_type = DiffFactory::DiffType::ANGLES_PRECOMPUTED;
-		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
+		ui->spin_clustering_depth_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	}
@@ -1464,7 +1468,8 @@ Visualization::resetUI()
 	ui->spin_frame->setEnabled(false);
 	ui->spin_angle_ground_removal->setEnabled(false);
 	ui->combo_size_smooth_window->setEnabled(false);
-	ui->spin_clustering_threshold->setEnabled(false);
+	ui->spin_clustering_depth_threshold->setEnabled(false);
+	ui->spin_clustering_score_threshold->setEnabled(false);
 	ui->combo_difference_type->setEnabled(false);
 	ui->spin_size_cluster_min->setEnabled(false);
 	ui->spin_size_cluster_max->setEnabled(false);
@@ -1526,37 +1531,38 @@ Visualization::initializeUI()
 	ui->spin_frame->setValue(ui->slider_frame->minimum());
 	ui->spin_angle_ground_removal->setValue(parameter.angle_ground_removal.ToDegrees());
 	ui->combo_size_smooth_window->setCurrentIndex((parameter.size_smooth_window - 5) / 2);
+	ui->spin_clustering_score_threshold->setValue(parameter.score_clustering);
 
 	switch (parameter.difference_type)
 	{
 	case DiffFactory::DiffType::ANGLES:
 	{
-		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
+		ui->spin_clustering_depth_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	case DiffFactory::DiffType::ANGLES_PRECOMPUTED:
 	{
-		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
+		ui->spin_clustering_depth_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	case DiffFactory::DiffType::LINE_DIST:
 	{
-		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
+		ui->spin_clustering_depth_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	case DiffFactory::DiffType::LINE_DIST_PRECOMPUTED:
 	{
-		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
+		ui->spin_clustering_depth_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	case DiffFactory::DiffType::SIMPLE:
 	{
-		ui->spin_clustering_threshold->setValue(parameter.distance_clustering);
+		ui->spin_clustering_depth_threshold->setValue(parameter.distance_clustering);
 		break;
 	}
 	default:
 	{
-		ui->spin_clustering_threshold->setValue(parameter.angle_clustering.ToDegrees());
+		ui->spin_clustering_depth_threshold->setValue(parameter.angle_clustering.ToDegrees());
 		break;
 	}
 	}
@@ -1601,7 +1607,8 @@ Visualization::initializeUI()
 	ui->spin_frame->setEnabled(true);
 	ui->spin_angle_ground_removal->setEnabled(true);
 	ui->combo_size_smooth_window->setEnabled(true);
-	ui->spin_clustering_threshold->setEnabled(true);
+	ui->spin_clustering_depth_threshold->setEnabled(true);
+	ui->spin_clustering_score_threshold->setEnabled(true);
 	ui->combo_difference_type->setEnabled(true);
 	ui->spin_size_cluster_min->setEnabled(true);
 	ui->spin_size_cluster_max->setEnabled(true);
@@ -1635,7 +1642,9 @@ Visualization::connectSignals()
 	connect(ui->spin_angle_ground_removal, SIGNAL(valueChanged(double)), this,
 			SLOT(onParameterUpdated()));
 	connect(ui->combo_size_smooth_window, SIGNAL(activated(int)), this, SLOT(onParameterUpdated()));
-	connect(ui->spin_clustering_threshold, SIGNAL(valueChanged(double)), this,
+	connect(ui->spin_clustering_depth_threshold, SIGNAL(valueChanged(double)), this,
+			SLOT(onParameterUpdated()));
+	connect(ui->spin_clustering_score_threshold, SIGNAL(valueChanged(double)), this,
 			SLOT(onParameterUpdated()));
 	connect(ui->combo_difference_type, SIGNAL(activated(int)), this,
 			SLOT(onDifferenceTypeUpdated()));
@@ -1675,7 +1684,9 @@ Visualization::disconnectSignals()
 			SLOT(onParameterUpdated()));
 	disconnect(ui->combo_size_smooth_window, SIGNAL(activated(int)), this,
 			SLOT(onParameterUpdated()));
-	disconnect(ui->spin_clustering_threshold, SIGNAL(valueChanged(double)), this,
+	disconnect(ui->spin_clustering_depth_threshold, SIGNAL(valueChanged(double)), this,
+			SLOT(onParameterUpdated()));
+	disconnect(ui->spin_clustering_score_threshold, SIGNAL(valueChanged(double)), this,
 			SLOT(onParameterUpdated()));
 	disconnect(ui->combo_difference_type, SIGNAL(activated(int)), this,
 			SLOT(onDifferenceTypeUpdated()));

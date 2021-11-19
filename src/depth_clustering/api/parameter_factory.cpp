@@ -48,6 +48,7 @@ ParameterFactory::getDepthClusteringParameter()
 	auto tree = *depth_clustering_tree_;
 
 	auto distance_clustering_optional = tree.get_optional<float>("distance_clustering");
+	auto score_clustering_optional = tree.get_optional<float>("score_clustering");
 	auto angle_clustering_optional = tree.get_optional<float>("angle_clustering");
 	auto angle_ground_removal_optional = tree.get_optional<float>("angle_ground_removal");
 	auto size_cluster_min_optional = tree.get_optional<int>("size_cluster_min");
@@ -71,6 +72,11 @@ ParameterFactory::getDepthClusteringParameter()
 	if (distance_clustering_optional)
 	{
 		parameter.distance_clustering = *distance_clustering_optional;
+	}
+
+	if (score_clustering_optional)
+	{
+		parameter.score_clustering = *score_clustering_optional;
 	}
 
 	if (angle_clustering_optional)
@@ -501,6 +507,7 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 	auto tree = *depth_clustering_tree_;
 
 	auto distance_clustering_optional = tree.get_optional<float>("distance_clustering");
+	auto score_clustering_optional = tree.get_optional<float>("score_clustering");
 	auto angle_clustering_optional = tree.get_optional<float>("angle_clustering");
 	auto angle_ground_removal_optional = tree.get_optional<float>("angle_ground_removal");
 	auto size_cluster_min_optional = tree.get_optional<int>("size_cluster_min");
@@ -522,6 +529,11 @@ ParameterFactory::setGlobalDepthClusteringParameter(DepthClusteringParameter& pa
 	if (distance_clustering_optional)
 	{
 		parameter.distance_clustering = *distance_clustering_optional;
+	}
+
+	if (score_clustering_optional)
+	{
+		parameter.score_clustering = *score_clustering_optional;
 	}
 
 	if (angle_clustering_optional)

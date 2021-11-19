@@ -25,7 +25,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_26">
+  <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <widget class="QSplitter" name="splitter_overall">
      <property name="orientation">
@@ -455,7 +455,7 @@
                  <double>1.000000000000000</double>
                 </property>
                 <property name="singleStep">
-                 <double>0.100000000000000</double>
+                 <double>0.010000000000000</double>
                 </property>
                 <property name="value">
                  <double>0.500000000000000</double>
@@ -807,7 +807,7 @@
               </size>
              </property>
              <property name="title">
-              <string>Ground Removal Threshold (°)</string>
+              <string>Ground Removal Threshold</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -829,50 +829,26 @@
                 </property>
                </widget>
               </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QGroupBox" name="group_size_smooth_window">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>70</height>
-              </size>
-             </property>
-             <property name="title">
-              <string>Ground Removal Filter</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_2">
-              <item row="0" column="0">
+              <item row="0" column="2">
                <widget class="QComboBox" name="combo_size_smooth_window">
                 <item>
                  <property name="text">
-                  <string>Window Size 5</string>
+                  <string>Filter Size 5</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>Window Size 7</string>
+                  <string>Filter Size 7</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>Window Size 9</string>
+                  <string>Filter Size 9</string>
                  </property>
                 </item>
                 <item>
                  <property name="text">
-                  <string>Window Size 11</string>
+                  <string>Filter Size 11</string>
                  </property>
                 </item>
                 <item>
@@ -882,11 +858,24 @@
                 </item>
                </widget>
               </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="label_size_cluster_range_2">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(°)&amp;nbsp;&amp;nbsp;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
-           <item row="0" column="2">
-            <widget class="QGroupBox" name="group_clustering_threshold">
+           <item row="0" column="1">
+            <widget class="QGroupBox" name="group_clustering_depth_threshold">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -900,14 +889,14 @@
               </size>
              </property>
              <property name="title">
-              <string>Clustering Threshold</string>
+              <string>Clustering Depth Threshold</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
              <layout class="QGridLayout" name="gridLayout_3">
               <item row="0" column="0">
-               <widget class="QDoubleSpinBox" name="spin_clustering_threshold">
+               <widget class="QDoubleSpinBox" name="spin_clustering_depth_threshold">
                 <property name="minimum">
                  <double>0.000000000000000</double>
                 </property>
@@ -980,6 +969,12 @@
              <layout class="QGridLayout" name="gridLayout_4">
               <item row="0" column="0">
                <widget class="QSpinBox" name="spin_size_cluster_min">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="maximum">
                  <number>100000</number>
                 </property>
@@ -990,8 +985,14 @@
               </item>
               <item row="0" column="1">
                <widget class="QLabel" name="label_size_cluster_range">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="text">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;-&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;&amp;nbsp;&amp;nbsp;-&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
@@ -1049,6 +1050,43 @@
                 </property>
                 <property name="text">
                  <string>Next Page</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QGroupBox" name="group_clustering_score_threshold">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>70</height>
+              </size>
+             </property>
+             <property name="title">
+              <string>Clustering Score Threshold</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_26">
+              <item row="0" column="0">
+               <widget class="QDoubleSpinBox" name="spin_clustering_score_threshold">
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.010000000000000</double>
+                </property>
+                <property name="value">
+                 <double>0.200000000000000</double>
                 </property>
                </widget>
               </item>
