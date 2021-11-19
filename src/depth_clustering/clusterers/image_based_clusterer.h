@@ -58,8 +58,9 @@ public:
 	 */
 	explicit
 	ImageBasedClusterer(Radians angle_tollerance = 8_deg, uint16_t min_cluster_size = 100,
-			uint16_t max_cluster_size = 25000) :
-			AbstractClusterer(0.0, min_cluster_size, max_cluster_size), _counter(0), _angle_tollerance(
+			uint16_t max_cluster_size = 25000, const float &score_clustering_threshold = -1) :
+			AbstractClusterer(0.0, min_cluster_size, max_cluster_size), _counter(0), _score_clustering_threshold(
+					score_clustering_threshold), _angle_tollerance(
 					angle_tollerance), _label_client
 			{ nullptr }
 	{
@@ -110,8 +111,8 @@ public:
 		}
 		time_utils::Timer timer;
 		LabelerT image_labeler(cloud.projection_ptr()->depth_image(),
-				cloud.projection_ptr()->params(), _angle_tollerance);
-		image_labeler.ComputeLabels(_diff_type);
+				cloud.projection_ptr()->elongation_image(), cloud.projection_ptr()->params(), _angle_tollerance);
+		image_labeler.ComputeLabels(_diff_type, _score_clustering_threshold);
 		const cv::Mat *labels_ptr = image_labeler.GetLabelImage();
 
 		// send image to whoever wants to get it
@@ -167,6 +168,7 @@ public:
 
 private:
 	int _counter;
+	float _score_clustering_threshold;
 	Radians _angle_tollerance;
 
 	AbstractClient<cv::Mat> *_label_client;

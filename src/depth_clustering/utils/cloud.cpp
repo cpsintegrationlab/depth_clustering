@@ -133,6 +133,7 @@ Cloud::FromImage(const cv::Mat& image_range, const cv::Mat& image_intensity,
 
 	proj->CheckImageAndStorage(image_range);
 	proj->CloneDepthImage(image_range);
+	proj->CloneElongationImage(image_elongation);
 
 	for (int r = 0; r < image_range.rows; ++r)
 	{

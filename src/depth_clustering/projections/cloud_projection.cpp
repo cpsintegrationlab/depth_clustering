@@ -91,4 +91,10 @@ const cv::Mat& CloudProjection::depth_image() const {
 
 cv::Mat& CloudProjection::depth_image() { return this->_depth_image; }
 
+const cv::Mat& CloudProjection::elongation_image() const {
+  return this->_elongation_image;
+}
+
+cv::Mat& CloudProjection::elongation_image() { return this->_elongation_image; }
+
 }  // namespace depth_clustering

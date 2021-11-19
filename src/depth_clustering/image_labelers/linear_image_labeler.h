@@ -46,9 +46,10 @@ class LinearImageLabeler : public AbstractImageLabeler {
    * @param[in]  angle_threshold  The angle threshold to seaparate clusters
    */
   explicit LinearImageLabeler(const cv::Mat& depth_image,
+                              const cv::Mat& elongation_image,
                               const ProjectionParams& params,
                               const Radians& angle_threshold)
-      : AbstractImageLabeler(depth_image, params, angle_threshold) {
+      : AbstractImageLabeler(depth_image, elongation_image, params, angle_threshold) {
     // this can probably be done at compile time
     int16_t counter = 0;
     for (int16_t r = STEP_ROW; r > 0; --r) {
@@ -71,7 +72,7 @@ class LinearImageLabeler : public AbstractImageLabeler {
    * @param[in]  diff_helper  The difference helper
    */
   void LabelOneComponent(uint16_t label, const PixelCoord& start,
-                         const AbstractDiff* diff_helper) {
+                         const AbstractDiff* diff_helper, const float &score_clustering_threshold) {
     // breadth first search
     std::queue<PixelCoord> labeling_queue;
     labeling_queue.push(start);
@@ -111,8 +112,22 @@ class LinearImageLabeler : public AbstractImageLabeler {
           continue;
         }
         auto diff = diff_helper->DiffAt(current, neighbor);
+        float diff_score = -1;
+
+        if (score_clustering_threshold >= 0 && !_elongation_image_ptr->empty())
+        {
+          float score_current = 1 - _elongation_image_ptr->at<float>(current.row, current.col) /
+                _params.getProjectionParamsRaw()->elongation_norm_factor;
+          float score_neighbor = 1 - _elongation_image_ptr->at<float>(neighbor.row, neighbor.col) /
+                _params.getProjectionParamsRaw()->elongation_norm_factor;
+          diff_score = fabs(score_current - score_neighbor);
+        }
+
         if (diff_helper->SatisfiesThreshold(diff, _radians_threshold)) {
-          labeling_queue.push(neighbor);
+          if (score_clustering_threshold < 0 || diff_score <= score_clustering_threshold)
+          {
+            labeling_queue.push(neighbor);
+          }
         }
       }
     }
@@ -166,7 +181,7 @@ class LinearImageLabeler : public AbstractImageLabeler {
   /**
    * @brief      Calculates the labels running over the whole image.
    */
-  void ComputeLabels(DiffFactory::DiffType diff_type) override {
+  void ComputeLabels(DiffFactory::DiffType diff_type, const float &score_clustering_threshold) override {
     _label_image =
         cv::Mat::zeros(_depth_image_ptr->size(), cv::DataType<uint16_t>::type);
     auto diff_helper_ptr =
@@ -184,7 +199,7 @@ class LinearImageLabeler : public AbstractImageLabeler {
           // depth is zero, not interested
           continue;
         }
-        LabelOneComponent(label, PixelCoord(row, col), diff_helper_ptr.get());
+        LabelOneComponent(label, PixelCoord(row, col), diff_helper_ptr.get(), score_clustering_threshold);
         // we have finished labeling this connected component. We now need to
         // label the next one, so we increment the label
         label++;

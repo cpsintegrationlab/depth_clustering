@@ -38,9 +38,11 @@ namespace depth_clustering {
 class AbstractImageLabeler {
  public:
   explicit AbstractImageLabeler(const cv::Mat& depth_image,
+                                const cv::Mat& elongation_image,
                                 const ProjectionParams& params,
                                 const Radians& angle_threshold)
       : _depth_image_ptr(&depth_image),
+        _elongation_image_ptr(&elongation_image),
         _params(params),
         _radians_threshold(angle_threshold.val()) {
     _label_image =
@@ -55,7 +57,7 @@ class AbstractImageLabeler {
   /**
    * @brief      An interface for children to compute labels
    */
-  virtual void ComputeLabels(DiffFactory::DiffType diff_type) = 0;
+  virtual void ComputeLabels(DiffFactory::DiffType diff_type, const float &score_clustering_threshold) = 0;
 
   /**
    * @brief      Gets the label image.
@@ -75,6 +77,7 @@ class AbstractImageLabeler {
 
  protected:
   const cv::Mat* _depth_image_ptr;
+  const cv::Mat* _elongation_image_ptr;
   ProjectionParams _params;
   cv::Mat _label_image;
   float _radians_threshold;

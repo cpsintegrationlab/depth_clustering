@@ -415,7 +415,7 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 	}
 
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(clustering_threshold,
-			parameter_.size_cluster_min, parameter_.size_cluster_max);
+			parameter_.size_cluster_min, parameter_.size_cluster_max, parameter_.score_clustering);
 
 	clusterer_->SetDiffType(parameter_.difference_type);
 	logger_->setBoundingBox(bounding_box_);
@@ -472,7 +472,7 @@ DepthClustering::initializeForApollo()
 	}
 
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(clustering_threshold,
-			parameter_.size_cluster_min, parameter_.size_cluster_max);
+			parameter_.size_cluster_min, parameter_.size_cluster_max, parameter_.score_clustering);
 
 	clusterer_->SetDiffType(parameter_.difference_type);
 	logger_->setBoundingBox(bounding_box_);
@@ -611,7 +611,7 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 	}
 
 	clusterer_ = std::make_shared<ImageBasedClusterer<LinearImageLabeler<>>>(clustering_threshold,
-			parameter_.size_cluster_min, parameter_.size_cluster_max);
+			parameter_.size_cluster_min, parameter_.size_cluster_max, parameter_.score_clustering);
 
 	clusterer_->SetDiffType(parameter_.difference_type);
 	logger_->setBoundingBox(bounding_box_);

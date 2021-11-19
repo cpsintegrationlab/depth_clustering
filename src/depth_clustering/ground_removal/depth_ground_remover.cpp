@@ -98,7 +98,8 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 {
 	Mat image_ground = cv::Mat::zeros(image.size(), CV_32F);
 	Mat image_no_ground = cv::Mat::zeros(image.size(), CV_32F);
-	LinearImageLabeler<> image_labeler(image, _params, threshold);
+	Mat image_empty = cv::Mat();
+	LinearImageLabeler<> image_labeler(image, image_empty, _params, threshold);
 	SimpleDiff simple_diff_helper(&angle_image);
 	Radians start_thresh = 30_deg;
 	for (int c = 0; c < image.cols; ++c)
@@ -121,7 +122,7 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 		{
 			continue;
 		}
-		image_labeler.LabelOneComponent(1, current_coord, &simple_diff_helper);
+		image_labeler.LabelOneComponent(1, current_coord, &simple_diff_helper, -1);
 	}
 	auto label_image_ptr = image_labeler.GetLabelImage();
 	if (label_image_ptr->rows != image.rows || label_image_ptr->cols != image.cols)

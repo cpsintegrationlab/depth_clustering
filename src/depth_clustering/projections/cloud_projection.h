@@ -67,8 +67,13 @@ class CloudProjection {
 
   const cv::Mat& depth_image() const;
   cv::Mat& depth_image();
+  const cv::Mat& elongation_image() const;
+  cv::Mat& elongation_image();
   inline void CloneDepthImage(const cv::Mat& image) {
     _depth_image = image.clone();
+  }
+  inline void CloneElongationImage(const cv::Mat& image) {
+	_elongation_image = image.clone();
   }
 
   inline size_t rows() const { return _params.rows(); }
@@ -131,6 +136,7 @@ class CloudProjection {
   ProjectionParams _params;
 
   cv::Mat _depth_image;
+  cv::Mat _elongation_image;
 
   std::vector<float> _corrections;
 };
