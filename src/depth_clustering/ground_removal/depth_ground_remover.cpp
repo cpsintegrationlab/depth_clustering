@@ -101,7 +101,6 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 	Mat image_empty = cv::Mat();
 	LinearImageLabeler<> image_labeler(image, image_empty, _params, threshold);
 	SimpleDiff simple_diff_helper(&angle_image);
-	Radians start_thresh = 30_deg;
 	for (int c = 0; c < image.cols; ++c)
 	{
 		// start at bottom pixels and do bfs
@@ -115,11 +114,6 @@ DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_
 		if (current_label > 0)
 		{
 			// this coord was already labeled, skip
-			continue;
-		}
-		// TODO(igor): this is a test. Maybe switch it on, maybe off.
-		if (angle_image.at<float>(r, c) > start_thresh.val())
-		{
 			continue;
 		}
 		image_labeler.LabelOneComponent(1, current_coord, &simple_diff_helper, -1);
