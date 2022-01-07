@@ -36,7 +36,7 @@ struct VisualizationLayout
 
 	enum class LidarReturn : int
 	{
-		First = 0, Second
+		First = 0, Second, Custom
 	};
 
 	enum class BoundingBoxType : int

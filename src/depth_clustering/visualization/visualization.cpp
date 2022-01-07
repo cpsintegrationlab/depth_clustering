@@ -75,6 +75,7 @@ Visualization::Visualization(QWidget* parent) :
 
 	depth_clustering_first_return_ = std::make_shared<DepthClustering>();
 	depth_clustering_second_return_ = std::make_shared<DepthClustering>();
+	depth_clustering_custom_return_ = std::make_shared<DepthClustering>();
 	depth_clustering_ = depth_clustering_first_return_;
 	layout_ = VisualizationLayout();
 
@@ -439,6 +440,11 @@ Visualization::onParameterUpdated()
 		depth_clustering_ = depth_clustering_second_return_;
 		break;
 	}
+	case VisualizationLayout::LidarReturn::Custom:
+	{
+		depth_clustering_ = depth_clustering_custom_return_;
+		break;
+	}
 	default:
 	{
 		depth_clustering_ = depth_clustering_first_return_;
@@ -586,6 +592,11 @@ Visualization::onParameterUpdated()
 			this);
 	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
 
+	depth_clustering_custom_return_->setParameter(parameter);
+	depth_clustering_custom_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
+			this);
+	depth_clustering_custom_return_->getClusterer()->SetLabelImageClient(this);
+
 	resetViewer();
 	onSliderMovedTo(ui->slider_frame->value());
 
@@ -722,6 +733,11 @@ Visualization::onDifferenceTypeUpdated()
 			this);
 	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
 
+	depth_clustering_custom_return_->setParameter(parameter);
+	depth_clustering_custom_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
+			this);
+	depth_clustering_custom_return_->getClusterer()->SetLabelImageClient(this);
+
 	resetViewer();
 	onSliderMovedTo(ui->slider_frame->value());
 
@@ -763,6 +779,11 @@ Visualization::onFieldOfViewUpdated()
 	depth_clustering_second_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
 			this);
 	depth_clustering_second_return_->getClusterer()->SetLabelImageClient(this);
+
+	depth_clustering_custom_return_->setParameter(parameter);
+	depth_clustering_custom_return_->getDepthGroundRemover()->DepthGroundRemover::SenderTImage::AddClient( // @suppress("Method cannot be resolved")
+			this);
+	depth_clustering_custom_return_->getClusterer()->SetLabelImageClient(this);
 
 	resetViewer();
 	onSliderMovedTo(ui->slider_frame->value());
@@ -808,7 +829,7 @@ Visualization::openDataset(const std::string& dataset_path,
 	file_path_name_config_global_ = file_path_name_config_global;
 	play_ = false;
 
-	if (!depth_clustering_first_return_ || !depth_clustering_second_return_)
+	if (!depth_clustering_first_return_ || !depth_clustering_second_return_ || !depth_clustering_custom_return_)
 	{
 		std::cerr << "[ERROR]: API missing." << std::endl;
 		return;
@@ -816,12 +837,15 @@ Visualization::openDataset(const std::string& dataset_path,
 
 	auto depth_clustering_first_return_initialized =
 			depth_clustering_first_return_->initializeForDataset(dataset_path_,
-					file_path_name_config_global_, false);
+					file_path_name_config_global_, false, false);
 	auto depth_clustering_second_return_initialized =
 			depth_clustering_second_return_->initializeForDataset(dataset_path_,
-					file_path_name_config_global_, true);
+					file_path_name_config_global_, true, false);
+	auto depth_clustering_custom_return_initialized =
+			depth_clustering_custom_return_->initializeForDataset(dataset_path_,
+					file_path_name_config_global_, false, true);
 
-	if (!depth_clustering_first_return_initialized || !depth_clustering_second_return_initialized)
+	if (!depth_clustering_first_return_initialized || !depth_clustering_second_return_initialized || !depth_clustering_custom_return_initialized)
 	{
 		std::cerr << "[ERROR]: Failed to open dataset at \"" << dataset_path_ << "\"." << std::endl;
 		return;

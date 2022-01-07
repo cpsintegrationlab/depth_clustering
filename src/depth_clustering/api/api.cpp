@@ -488,7 +488,7 @@ DepthClustering::initializeForApollo()
 
 bool
 DepthClustering::initializeForDataset(const std::string& dataset_path,
-		const std::string& file_path_name_config_global, const bool& second_return)
+		const std::string& file_path_name_config_global, const bool& second_return, const bool& custom_return)
 {
 	dataset_path_ = dataset_path;
 
@@ -503,6 +503,12 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 	{
 		dataset_path_lidar_return = "second_return";
 	}
+
+	if (custom_return)
+	{
+		dataset_path_lidar_return = "custom_return";
+	}
+
 
 	parameter_factory_ = std::make_shared<ParameterFactory>(
 			dataset_path_ + "depth_clustering_config.json");

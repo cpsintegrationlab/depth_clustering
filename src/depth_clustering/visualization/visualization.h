@@ -146,6 +146,7 @@ private:
 	std::shared_ptr<DepthClustering> depth_clustering_;
 	std::shared_ptr<DepthClustering> depth_clustering_first_return_;
 	std::shared_ptr<DepthClustering> depth_clustering_second_return_;
+	std::shared_ptr<DepthClustering> depth_clustering_custom_return_;
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Flat>> ground_truth_frame_flat_;
 	std::shared_ptr<BoundingBox::Frame<BoundingBox::Cube>> ground_truth_frame_cube_;
 	std::unique_ptr<QGraphicsScene> scene_empty_;

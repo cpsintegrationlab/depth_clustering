@@ -67,7 +67,7 @@ main(int argc, char* argv[])
 	DepthClustering depth_clustering;
 
 	if (!depth_clustering.initializeForDataset(dataset_path, file_path_name_config_global,
-			second_return))
+			second_return, false))
 	{
 		std::cout << "[ERROR]: Failed to initialize for dataset. Quit." << std::endl;
 		return -1;
