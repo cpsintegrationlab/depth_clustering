@@ -116,7 +116,13 @@ cd build/amd64/depth_clustering/release
 make install
 ```
 
-The installed binaries, libraries, and headers would be located under `/usr/local/bin`, `/usr/local/lib`, and `/usr/local/include/depth_clustering`, respectively.
+The installed binaries and scripts, libraries, and headers would be located under `/usr/local/bin`, `/usr/local/lib`, and `/usr/local/include/depth_clustering`, respectively.
+
+Then, refresh the dynamic linker cache to register the newly installed shared libraries as follows:
+
+```bash
+ldconfig
+```
 
 Note: the visualizer application would not be installed.
 
