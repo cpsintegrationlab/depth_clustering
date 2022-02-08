@@ -829,7 +829,8 @@ Visualization::openDataset(const std::string& dataset_path,
 	file_path_name_config_global_ = file_path_name_config_global;
 	play_ = false;
 
-	if (!depth_clustering_first_return_ || !depth_clustering_second_return_ || !depth_clustering_custom_return_)
+	if (!depth_clustering_first_return_ || !depth_clustering_second_return_
+			|| !depth_clustering_custom_return_)
 	{
 		std::cerr << "[ERROR]: API missing." << std::endl;
 		return;
@@ -837,15 +838,16 @@ Visualization::openDataset(const std::string& dataset_path,
 
 	auto depth_clustering_first_return_initialized =
 			depth_clustering_first_return_->initializeForDataset(dataset_path_,
-					file_path_name_config_global_, false, false);
+					file_path_name_config_global_, "first_return");
 	auto depth_clustering_second_return_initialized =
 			depth_clustering_second_return_->initializeForDataset(dataset_path_,
-					file_path_name_config_global_, true, false);
+					file_path_name_config_global_, "second_return");
 	auto depth_clustering_custom_return_initialized =
 			depth_clustering_custom_return_->initializeForDataset(dataset_path_,
-					file_path_name_config_global_, false, true);
+					file_path_name_config_global_, "custom_return");
 
-	if (!depth_clustering_first_return_initialized || !depth_clustering_second_return_initialized || !depth_clustering_custom_return_initialized)
+	if (!depth_clustering_first_return_initialized || !depth_clustering_second_return_initialized
+			|| !depth_clustering_custom_return_initialized)
 	{
 		std::cerr << "[ERROR]: Failed to open dataset at \"" << dataset_path_ << "\"." << std::endl;
 		return;

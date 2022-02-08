@@ -37,13 +37,13 @@ To run the command-line application, do as follows:
 
 ```bash
 cd install/amd64/depth_clustering/release/bin
-./depth_clustering dataset_segment_path global_config_file use_second_return
+./depth_clustering dataset_segment_path global_config_file lidar_return_directory
 ```
 
 Note:
-1. Any resulting output files would be stored under the provided `dataset_segment_path` folder. Two example datasets are provided under the `data` folder.
+1. Any resulting output files would be stored under the provided `dataset_segment_path` directory. Two example datasets are provided under the `data` folder.
 2. The `global_config_file` is an optional parameter that specifies the path to a global configuration file. The global configuration file enables the same set of configurations to be applied across various datasets. Regardless of the presence of the `global_config_file`, the applications would first attempt to load the configuration file under the `dataset_segment_path` folder first. When specified, the global configuration file would be loaded, and the loaded global configurations would then override the existing configurations.
-3. The `use_second_return` is an optional parameter that specifies whether to use the first return or second return lidar frames. The command-line application uses first return lidar frames by default if `use_second_return` is unspecified.
+3. The `lidar_return_directory` is an optional parameter that specifies the directory name of the lidar frames of a particular lidar return, such as `first_return`, `second_return`, etc., inside the `dataset_segment_path` directory. The command-line application uses first return lidar frames by default if `lidar_return_directory` is unspecified.
 
 ## Visualizer Application
 

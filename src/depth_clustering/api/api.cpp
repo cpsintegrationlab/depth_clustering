@@ -488,7 +488,7 @@ DepthClustering::initializeForApollo()
 
 bool
 DepthClustering::initializeForDataset(const std::string& dataset_path,
-		const std::string& file_path_name_config_global, const bool& second_return, const bool& custom_return)
+		const std::string& file_path_name_config_global, std::string directory_name_lidar_return)
 {
 	dataset_path_ = dataset_path;
 
@@ -497,18 +497,21 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 		dataset_path_ += "/";
 	}
 
-	std::string dataset_path_lidar_return = "first_return";
-
-	if (second_return)
+	if (directory_name_lidar_return == "")
 	{
-		dataset_path_lidar_return = "second_return";
+		directory_name_lidar_return = "first_return";
+	}
+	else if (directory_name_lidar_return != "first_return"
+			&& directory_name_lidar_return != "second_return"
+			&& directory_name_lidar_return != "custom_return")
+	{
+		std::cout << "[WARN]: Invalid lidar return directory: \"" << directory_name_lidar_return
+				<< "\"." << std::endl;
+		directory_name_lidar_return = "first_return";
 	}
 
-	if (custom_return)
-	{
-		dataset_path_lidar_return = "custom_return";
-	}
-
+	std::cout << "[INFO]: Using lidar return directory \"" << directory_name_lidar_return << "\"."
+			<< std::endl;
 
 	parameter_factory_ = std::make_shared<ParameterFactory>(
 			dataset_path_ + "depth_clustering_config.json");
@@ -559,14 +562,14 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 		parameter_projection_camera_.extrinsic[11] = 0;
 	}
 
-	logger_parameter.log_path = dataset_path_ + "frames_lidar/" + dataset_path_lidar_return;
+	logger_parameter.log_path = dataset_path_ + "frames_lidar/" + directory_name_lidar_return;
 
-	std::string dataset_path_range = dataset_path_ + "frames_lidar/" + dataset_path_lidar_return
+	std::string dataset_path_range = dataset_path_ + "frames_lidar/" + directory_name_lidar_return
 			+ "/range/";
-	std::string dataset_path_intensity = dataset_path_ + "frames_lidar/" + dataset_path_lidar_return
-			+ "/intensity/";
+	std::string dataset_path_intensity = dataset_path_ + "frames_lidar/"
+			+ directory_name_lidar_return + "/intensity/";
 	std::string dataset_path_elongation = dataset_path_ + "frames_lidar/"
-			+ dataset_path_lidar_return + "/elongation/";
+			+ directory_name_lidar_return + "/elongation/";
 
 	folder_reader_range_ = std::make_shared<FolderReader>(dataset_path_range,
 			parameter_.dataset_file_type, FolderReader::Order::SORTED);
