@@ -2,8 +2,8 @@
 
 if [ "$1" = "-h" ] || [ "$1" = "" ]
 then
-	printf "\nUsage:\t$0 [dataset path]\n"
-	printf "\t$0 [dataset path] [arguments]\n\n"
+	printf "Usage:\t$0 [dataset path]\n"
+	printf "\t$0 [dataset path] [arguments]\n"
 	exit
 fi
 

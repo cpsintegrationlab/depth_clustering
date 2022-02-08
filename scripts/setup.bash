@@ -14,10 +14,8 @@ if [ "$#" -gt 0 ]; then
 	elif [ "$1" = "--arch=arm64" ]; then
 		ARCH=arm64
 	else
-		echo ""
 		printf "Usage:\t$0\n"
 		printf "\t$0 --arch=[amd64, arm64]\n"
-		echo ""
 
 		exit
 	fi

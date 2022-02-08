@@ -48,7 +48,15 @@ include_directories(
 )
 
 # Set installation targets
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/../config/ DESTINATION config/depth_clustering)
+install(
+	DIRECTORY ${PROJECT_SOURCE_DIR}/../config/
+	DESTINATION config/depth_clustering
+)
+install(
+	FILES ${PROJECT_SOURCE_DIR}/../scripts/depth_clustering.bash
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+	DESTINATION bin
+)
 
 # Add subdirectories
 add_subdirectory(depth_clustering)
