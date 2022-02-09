@@ -31,7 +31,7 @@ fi
 
 for dataset_path_segment in $(ls -d $dataset_path/segment-*/)
 do
-    ../install/amd64/depth_clustering/release/bin/depth_clustering $(readlink -m "$dataset_path_segment") $arguments &
+    ../../install/amd64/depth_clustering/release/bin/depth_clustering $(readlink -m "$dataset_path_segment") $arguments &
 	pids[${i}]=$!
 
 	echo "[INFO]: Launched batch $batch_counter process $process_counter."

@@ -24,7 +24,7 @@ fi
 echo "[INFO]: Setting up for $ARCH architecture..."
 
 # Declare directory variables
-PROJECT_DIR=$(pwd)/..
+PROJECT_DIR=$(pwd)/../..
 SRC_DIR=$PROJECT_DIR/src
 BUILD_DIR=$PROJECT_DIR/build/$ARCH
 INSTALL_DIR=$PROJECT_DIR/install/$ARCH
@@ -60,6 +60,7 @@ OPENCV_URL="https://github.com/opencv/opencv/archive/${OPENCV_VER_MAJ}.${OPENCV_
 OPENCV_CFLAGS="-fPIC"
 
 # Declare Depth Clustering variables
+DC_DIR_SRC=$SRC_DIR/depth_clustering
 DC_DIR_BUILD_DB=$BUILD_DIR/depth_clustering/$(echo ${DB_TYPE,,})
 DC_DIR_BUILD_RL=$BUILD_DIR/depth_clustering/$(echo ${RL_TYPE,,})
 
@@ -199,9 +200,9 @@ if [ ! -d "$DC_DIR_BUILD_DB" ]; then
 	cd "$DC_DIR_BUILD_DB"
 
 	if [ "$ARCH" = "arm64" ]; then
-		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$SRC_DIR"
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$DC_DIR_SRC"
 	else
-		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$SRC_DIR"
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$DC_DIR_SRC"
 	fi
 
 	RETURN=$?
@@ -218,9 +219,9 @@ if [ ! -d "$DC_DIR_BUILD_RL" ]; then
 	cd "$DC_DIR_BUILD_RL"
 
 	if [ "$ARCH" = "arm64" ]; then
-		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$SRC_DIR"
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$PROJECT_DIR/cmake/arm64.toolchain.cmake" -DARCH=$ARCH "$DC_DIR_SRC"
 	else
-		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$SRC_DIR"
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$DC_DIR_SRC"
 	fi
 
 	RETURN=$?
