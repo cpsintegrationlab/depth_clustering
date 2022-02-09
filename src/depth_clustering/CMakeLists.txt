@@ -4,7 +4,7 @@ project(depth_clustering)
 
 # Set CMake parameters
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../../cmake")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../../cmake/depth_clustering")
 
 # Set compiler parameters
 set(CMAKE_C_FLAGS "-Wall -Wextra -static-libc -fPIC")
