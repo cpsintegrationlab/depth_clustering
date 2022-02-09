@@ -1,7 +1,7 @@
 {
     "depth_clustering": {
         "distance_clustering": 5,
-        "score_clustering": 0.2,
+        "score_clustering": 1,
         "angle_clustering": 10,
         "angle_ground_removal": 9,
         "size_cluster_min": 10,
