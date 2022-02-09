@@ -271,13 +271,13 @@ CameraProjection::getBoundingBoxFlat(
 
 	// Enforce image boundary
 	bounding_box_flat_corner_upper_left.x() = std::min<int>(
-			std::max<int>(0, bounding_box_flat_corner_upper_left.x()), parameter_.width);
+			std::max<int>(0, bounding_box_flat_corner_upper_left.x()), parameter_.width - 1);
 	bounding_box_flat_corner_lower_right.x() = std::min<int>(
-			std::max<int>(0, bounding_box_flat_corner_lower_right.x()), parameter_.width);
+			std::max<int>(0, bounding_box_flat_corner_lower_right.x()), parameter_.width - 1);
 	bounding_box_flat_corner_upper_left.y() = std::min<int>(
-			std::max<int>(0, bounding_box_flat_corner_upper_left.y()), parameter_.height);
+			std::max<int>(0, bounding_box_flat_corner_upper_left.y()), parameter_.height - 1);
 	bounding_box_flat_corner_lower_right.y() = std::min<int>(
-			std::max<int>(0, bounding_box_flat_corner_lower_right.y()), parameter_.height);
+			std::max<int>(0, bounding_box_flat_corner_lower_right.y()), parameter_.height - 1);
 
 	// Calculate dimension
 	double bounding_box_flat_width = bounding_box_flat_corner_lower_right.x()
