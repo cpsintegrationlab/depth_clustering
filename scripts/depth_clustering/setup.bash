@@ -21,8 +21,6 @@ if [ "$#" -gt 0 ]; then
 	fi
 fi
 
-echo "[INFO]: Setting up for $ARCH architecture..."
-
 # Declare directory variables
 PROJECT_DIR=$(pwd)/../..
 SRC_DIR=$PROJECT_DIR/src
@@ -31,8 +29,9 @@ INSTALL_DIR=$PROJECT_DIR/install/$ARCH
 TEMP_DIR=$PROJECT_DIR/temp
 
 # Declare Boost variables
-BOOST_DIR_BUILD=$BUILD_DIR/boost
-BOOST_DIR_INSTALL=$INSTALL_DIR/boost
+BOOST=boost
+BOOST_DIR_BUILD=$BUILD_DIR/$BOOST
+BOOST_DIR_INSTALL=$INSTALL_DIR/$BOOST
 BOOST_VER_MAJ=1
 BOOST_VER_MIN=65
 BOOST_VER_PAT=1
@@ -41,18 +40,20 @@ BOOST_CFLAGS="-Wno-maybe-uninitialized -Wno-unused-function -Wno-unused-variable
 BOOST_BOOTSTRAP_FLAGS="--with-libraries=system,filesystem,regex,program_options"
 
 # Declare Eigen variables
-EIGEN_DIR_SRC=$SRC_DIR/eigen
-EIGEN_DIR_BUILD=$BUILD_DIR/eigen
-EIGEN_DIR_INSTALL=$INSTALL_DIR/eigen
+EIGEN=eigen
+EIGEN_DIR_SRC=$SRC_DIR/$EIGEN
+EIGEN_DIR_BUILD=$BUILD_DIR/$EIGEN
+EIGEN_DIR_INSTALL=$INSTALL_DIR/$EIGEN
 EIGEN_VER_MAJ=3
 EIGEN_VER_MIN=3
 EIGEN_VER_PAT=4
 EIGEN_URL="https://gitlab.com/libeigen/eigen/-/archive/$EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT/eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
 
 # Declare OpenCV variables
-OPENCV_DIR_SRC=$SRC_DIR/opencv
-OPENCV_DIR_BUILD=$BUILD_DIR/opencv
-OPENCV_DIR_INSTALL=$INSTALL_DIR/opencv
+OPENCV=opencv
+OPENCV_DIR_SRC=$SRC_DIR/$OPENCV
+OPENCV_DIR_BUILD=$BUILD_DIR/$OPENCV
+OPENCV_DIR_INSTALL=$INSTALL_DIR/$OPENCV
 OPENCV_VER_MAJ=3
 OPENCV_VER_MIN=2
 OPENCV_VER_PAT=0
@@ -61,10 +62,13 @@ OPENCV_CFLAGS="-fPIC"
 OPENCV_FILE_CMAKE_TOOLCHAIN=$OPENCV_DIR_SRC/platforms/linux/aarch64-gnu.toolchain.cmake
 
 # Declare Depth Clustering variables
-DC_DIR_SRC=$SRC_DIR/depth_clustering
-DC_DIR_BUILD_DB=$BUILD_DIR/depth_clustering/$(echo ${DB_TYPE,,})
-DC_DIR_BUILD_RL=$BUILD_DIR/depth_clustering/$(echo ${RL_TYPE,,})
-DC_FILE_CMAKE_TOOLCHAIN=$PROJECT_DIR/cmake/depth_clustering/arm64.toolchain.cmake
+DC=depth_clustering
+DC_DIR_SRC=$SRC_DIR/$DC
+DC_DIR_BUILD_DB=$BUILD_DIR/$DC/$(echo ${DB_TYPE,,})
+DC_DIR_BUILD_RL=$BUILD_DIR/$DC/$(echo ${RL_TYPE,,})
+DC_FILE_CMAKE_TOOLCHAIN=$PROJECT_DIR/cmake/$DC/arm64.toolchain.cmake
+
+echo "[INFO]: Setting up Depth Clustering for $ARCH architecture..."
 
 # Create build and temporary folders
 if [ -d "$TEMP_DIR" ]; then
@@ -76,7 +80,7 @@ mkdir -p "$BUILD_DIR"
 mkdir -p "$TEMP_DIR"
 RETURN=$?
 if [ $RETURN -ne 0 ]; then
-	echo "[ERROR]: Setup failed. Quit."
+	echo "[ERROR]: Setup for Depth Clustering failed. Quit."
 	exit $RETURN
 fi
 
@@ -107,7 +111,7 @@ if [ ! -d "$BOOST_DIR_INSTALL" ]; then
 
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup failed. Quit."
+		echo "[ERROR]: Setup for Depth Clustering failed. Quit."
 		exit $RETURN
 	fi
 else
@@ -141,7 +145,7 @@ if [ ! -d "$EIGEN_DIR_INSTALL" ]; then
 	make -j$CORES install
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup failed. Quit."
+		echo "[ERROR]: Setup for Depth Clustering failed. Quit."
 		exit $RETURN
 	fi
 else
@@ -181,7 +185,7 @@ if [ ! -d "$OPENCV_DIR_INSTALL" ]; then
 	make -j$CORES install
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup failed. Quit."
+		echo "[ERROR]: Setup for Depth Clustering failed. Quit."
 		exit $RETURN
 	fi
 else
@@ -209,7 +213,7 @@ if [ ! -d "$DC_DIR_BUILD_DB" ]; then
 
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup failed. Quit."
+		echo "[ERROR]: Setup for Depth Clustering failed. Quit."
 		exit $RETURN
 	fi
 else
@@ -228,11 +232,11 @@ if [ ! -d "$DC_DIR_BUILD_RL" ]; then
 
 	RETURN=$?
 	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup failed. Quit."
+		echo "[ERROR]: Setup for Depth Clustering failed. Quit."
 		exit $RETURN
 	fi
 else
 	echo "[INFO]: Depth Clustering release project exists. Skip."
 fi
 
-echo "[INFO]: Setup completed for $ARCH architecture."
+echo "[INFO]: Setup for Depth Clustering completed for $ARCH architecture."
