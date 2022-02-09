@@ -113,13 +113,30 @@ public:
 			for (const auto &step : Neighborhood)
 			{
 				PixelCoord neighbor = current + step;
+
 				if (neighbor.row < 0 || neighbor.row >= _label_image.rows)
 				{
 					// point doesn't fit
 					continue;
 				}
-				// if we just went over the borders in horiz direction - wrap around
-				neighbor.col = WrapCols(neighbor.col);
+
+				if (_params.getProjectionParamsRaw()->horizontal_angle_start == 180
+						&& _params.getProjectionParamsRaw()->horizontal_angle_end == -180)
+				{
+					// Wrap around only with full 360 FOV
+					// if we just went over the borders in horiz direction - wrap around
+					neighbor.col = WrapCols(neighbor.col);
+				}
+				else
+				{
+					// Do NOT wrap around with non-full FOVs
+					if (neighbor.col < 0 || neighbor.col >= _label_image.cols)
+					{
+						// point doesn't fit
+						continue;
+					}
+				}
+
 				uint16_t neigh_label = LabelAt(neighbor);
 				if (neigh_label > 0)
 				{
