@@ -97,8 +97,8 @@ if [ ! -d "$BOOST_DIR_BUILD" ]; then
 else
 	echo "[INFO]: Boost build folder exists. Skip."
 fi
+echo "[INFO]: Building Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
 if [ ! -d "$BOOST_DIR_INSTALL" ]; then
-	echo "[INFO]: Building Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
 	cd "$BOOST_DIR_BUILD"
 	./bootstrap.sh "$BOOST_BOOTSTRAP_FLAGS" --prefix="$(printf "%q" "$BOOST_DIR_INSTALL")"
 
@@ -131,16 +131,16 @@ if [ ! -d "$EIGEN_DIR_SRC" ]; then
 else
 	echo "[INFO]: Eigen source folder exists. Skip."
 fi
+echo "[INFO]: Setting up Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
 if [ ! -d "$EIGEN_DIR_BUILD" ]; then
-	echo "[INFO]: Setting up Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
 	mkdir -p "$EIGEN_DIR_BUILD"
 	cd "$EIGEN_DIR_BUILD"
 	cmake -DCMAKE_INSTALL_PREFIX="$EIGEN_DIR_INSTALL" "$EIGEN_DIR_SRC"
 else
 	echo "[INFO]: Eigen build folder exists. Skip."
 fi
+echo "[INFO]: Building Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
 if [ ! -d "$EIGEN_DIR_INSTALL" ]; then
-	echo "[INFO]: Building Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
 	cd "$EIGEN_DIR_BUILD"
 	make -j$CORES install
 	RETURN=$?
@@ -166,8 +166,8 @@ if [ ! -d "$OPENCV_DIR_SRC" ]; then
 else
 	echo "[INFO]: OpenCV source folder exists. Skip."
 fi
+echo "[INFO]: Setting up OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
 if [ ! -d "$OPENCV_DIR_BUILD" ]; then
-	echo "[INFO]: Setting up OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
 	mkdir -p "$OPENCV_DIR_BUILD"
 	cd "$OPENCV_DIR_BUILD"
 
@@ -179,8 +179,8 @@ if [ ! -d "$OPENCV_DIR_BUILD" ]; then
 else
 	echo "[INFO]: OpenCV build folder exists. Skip."
 fi
+echo "[INFO]: Building OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
 if [ ! -d "$OPENCV_DIR_INSTALL" ]; then
-	echo "[INFO]: Building OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
 	cd "$OPENCV_DIR_BUILD"
 	make -j$CORES install
 	RETURN=$?
@@ -198,10 +198,10 @@ if [ -d "$TEMP_DIR" ]; then
 	rm -rf "$TEMP_DIR"
 fi
 
-# Create Depth Clustering project
-echo "[INFO]: Creating Depth Clustering project..."
+# Create Depth Clustering projects
+echo "[INFO]: Creating Depth Clustering projects..."
+echo "[INFO]: Creating Depth Clustering debug project..."
 if [ ! -d "$DC_DIR_BUILD_DB" ]; then
-	echo "[INFO]: Creating Depth Clustering debug project..."
 	mkdir -p "$DC_DIR_BUILD_DB"
 	cd "$DC_DIR_BUILD_DB"
 
@@ -219,8 +219,8 @@ if [ ! -d "$DC_DIR_BUILD_DB" ]; then
 else
 	echo "[INFO]: Depth Clustering debug project exists. Skip."
 fi
+echo "[INFO]: Creating Depth Clustering release project..."
 if [ ! -d "$DC_DIR_BUILD_RL" ]; then
-    echo "[INFO]: Creating Depth Clustering release project..."
 	mkdir -p "$DC_DIR_BUILD_RL"
 	cd "$DC_DIR_BUILD_RL"
 
