@@ -95,14 +95,14 @@ public:
 	setParameter(const DepthClusteringParameter& parameter);
 
 	bool
-	initializeForApollo();
+	initializeForApollo(const std::string& file_path_name_config, const std::string& log_path);
 
 	bool
 	initializeForDataset(const std::string& dataset_path,
 			const std::string& file_path_name_config_global = "",
 			std::string directory_name_lidar_return = "first_return");
 
-	void
+	const std::string
 	processOneFrameForApollo(const std::string& frame_name,
 			const std::vector<Eigen::Vector3f>& point_cloud);
 

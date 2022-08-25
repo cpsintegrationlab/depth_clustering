@@ -425,15 +425,22 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 }
 
 bool
-DepthClustering::initializeForApollo()
+DepthClustering::initializeForApollo(const std::string& file_path_name_config,
+		const std::string& log_path)
 {
-	parameter_projection_lidar_ = ProjectionParams::APOLLO();
+	parameter_factory_ = std::make_shared<ParameterFactory>(file_path_name_config);
+	parameter_ = parameter_factory_->getDepthClusteringParameter();
+	parameter_projection_lidar_ = parameter_factory_->getLidarProjectionParameter();
+	auto logger_parameter = parameter_factory_->getLoggerParameter();
+
+	logger_parameter.log_path = log_path;
+
 	depth_ground_remover_ = std::make_shared<DepthGroundRemover>(*parameter_projection_lidar_,
 			parameter_.angle_ground_removal, parameter_.size_smooth_window);
 	score_ = std::make_shared<Score>(parameter_.score_type_point, parameter_.score_type_cluster,
 			parameter_.score_type_frame);
 	bounding_box_ = std::make_shared<BoundingBox>(score_, parameter_);
-	logger_ = std::make_shared<Logger>();
+	logger_ = std::make_shared<Logger>(logger_parameter);
 
 	ground_truth_cube_tree_ = boost::none;
 	ground_truth_flat_tree_ = boost::none;
@@ -637,13 +644,14 @@ DepthClustering::initializeForDataset(const std::string& dataset_path,
 	return true;
 }
 
-void
+const std::string
 DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 		const std::vector<Eigen::Vector3f>& point_cloud)
 {
+	Timer timer;
+
 	std::cout << "[INFO]: Processing \"" << frame_name << "\"." << std::endl;
 
-	Timer timer;
 	cloud_ = Cloud::Ptr(new Cloud);
 
 	for (const auto &point_eigen : point_cloud)
@@ -658,6 +666,7 @@ DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 	}
 
 	cloud_->InitProjection(*parameter_projection_lidar_);
+
 	bounding_box_->clearFrames();
 
 	std::cout << "[INFO]: Preprocessed: " << timer.measure() << " us." << std::endl;
@@ -669,6 +678,8 @@ DepthClustering::processOneFrameForApollo(const std::string& frame_name,
 	logger_->logBoundingBoxFrame(frame_name, parameter_.bounding_box_type);
 
 	std::cout << "[INFO]: Logged: " << timer.measure() << " us." << std::endl;
+
+	return frame_name;
 }
 
 const std::string
