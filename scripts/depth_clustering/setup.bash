@@ -59,6 +59,42 @@ OPENCV_VER_MIN=2
 OPENCV_VER_PAT=0
 OPENCV_URL="https://github.com/opencv/opencv/archive/${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
 OPENCV_CFLAGS="-fPIC"
+OPENCV_CMAKE_BUILD_OPTIONS="
+	-DBUILD_opencv_core=ON
+	-DBUILD_opencv_highgui=ON
+	-DBUILD_opencv_imgproc=ON
+	-DBUILD_opencv_imgcodecs=ON
+	-DBUILD_opencv_calib3d=OFF
+	-DBUILD_opencv_cudaarithm=OFF
+	-DBUILD_opencv_cudabgsegm=OFF
+	-DBUILD_opencv_cudacodec=OFF
+	-DBUILD_opencv_cudafeatures2d=OFF
+	-DBUILD_opencv_cudafilters=OFF
+	-DBUILD_opencv_cudaimgproc=OFF
+	-DBUILD_opencv_cudalegacy=OFF
+	-DBUILD_opencv_cudaobjdetect=OFF
+	-DBUILD_opencv_cudaoptflow=OFF
+	-DBUILD_opencv_cudastereo=OFF
+	-DBUILD_opencv_cudawarping=OFF
+	-DBUILD_opencv_cudev=OFF
+	-DBUILD_opencv_features2d=OFF
+	-DBUILD_opencv_flann=OFF
+	-DBUILD_opencv_java=OFF
+	-DBUILD_opencv_ml=OFF
+	-DBUILD_opencv_objdetect=OFF
+	-DBUILD_opencv_photo=OFF
+	-DBUILD_opencv_python2=OFF
+	-DBUILD_opencv_python3=OFF
+	-DBUILD_opencv_shape=OFF
+	-DBUILD_opencv_stitching=OFF
+	-DBUILD_opencv_superres=OFF
+	-DBUILD_opencv_ts=OFF
+	-DBUILD_opencv_video=OFF
+	-DBUILD_opencv_videoio=OFF
+	-DBUILD_opencv_videostab=OFF
+	-DBUILD_opencv_viz=OFF
+	-DBUILD_opencv_world=OFF
+"
 OPENCV_FILE_CMAKE_TOOLCHAIN=$OPENCV_DIR_SRC/platforms/linux/aarch64-gnu.toolchain.cmake
 
 # Declare Depth Clustering variables
@@ -172,9 +208,9 @@ if [ ! -d "$OPENCV_DIR_BUILD" ]; then
 	cd "$OPENCV_DIR_BUILD"
 
     if [ "$ARCH" = "arm64" ]; then
-		cmake -DBUILD_SHARED_LIBS="OFF" -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DCMAKE_TOOLCHAIN_FILE="$OPENCV_FILE_CMAKE_TOOLCHAIN" -DWITH_CUDA="0" -DWITH_LAPACK="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+		cmake $OPENCV_CMAKE_BUILD_OPTIONS -DBUILD_SHARED_LIBS="OFF" -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DCMAKE_TOOLCHAIN_FILE="$OPENCV_FILE_CMAKE_TOOLCHAIN" -DWITH_CUDA="0" -DWITH_LAPACK="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
 	else
-		cmake -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DWITH_CUDA="0" -DWITH_LAPACK="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+		cmake $OPENCV_CMAKE_BUILD_OPTIONS -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DWITH_CUDA="0" -DWITH_LAPACK="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
 	fi
 else
 	echo "[INFO]: OpenCV build folder exists. Skip."
