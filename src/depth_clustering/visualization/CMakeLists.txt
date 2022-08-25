@@ -1,3 +1,6 @@
+# Set package parameters
+set(OpenGL_GL_PREFERENCE GLVND)
+
 # Find packages
 find_package(OpenGL QUIET)
 find_package(QGLViewer QUIET)
