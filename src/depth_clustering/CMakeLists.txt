@@ -10,7 +10,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../../cmake/de
 set(CMAKE_C_FLAGS "-Wall -Wextra -static-libc -fPIC")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-int-in-bool-context -Wno-alloc-size-larger-than=9223372036854775807 -static-libstdc++ -fPIC")
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-int-in-bool-context -Wno-alloc-size-larger-than=9223372036854775807 -Wno-deprecated-copy -Wno-class-memaccess -static-libstdc++ -fPIC")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_STANDARD 11)
