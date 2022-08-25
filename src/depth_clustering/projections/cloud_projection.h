@@ -16,8 +16,7 @@
 #ifndef SRC_PROJECTIONS_CLOUD_PROJECTION_H_
 #define SRC_PROJECTIONS_CLOUD_PROJECTION_H_
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
 
 #include <Eigen/Core>
 

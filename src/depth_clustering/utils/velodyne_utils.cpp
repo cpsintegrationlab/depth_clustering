@@ -17,8 +17,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cassert>
 #include <fstream>
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
 

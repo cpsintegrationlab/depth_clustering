@@ -3,7 +3,7 @@
 // Email: igor.bogoslavskyi@uni-bonn.de.
 
 #include <gtest/gtest.h>
-#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
 
 #include <string>
 #include <vector>
