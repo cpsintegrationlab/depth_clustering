@@ -29,9 +29,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/d
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/depth_clustering/${CMAKE_BUILD_TYPE_PATH}/lib)
 
 # Set package parameters
+set(Boost_NO_BOOST_CMAKE TRUE)
 set(Boost_NO_SYSTEM_PATHS TRUE)
 set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/boost)
+set(Boost_USE_STATIC_LIBS ON)
 set(EIGEN_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/eigen/include/eigen3)
+set(OpenCV_STATIC ON)
 
 # Find packages
 find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
