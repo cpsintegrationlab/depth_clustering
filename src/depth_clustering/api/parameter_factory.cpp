@@ -335,7 +335,7 @@ ParameterFactory::getLidarProjectionParameter()
 
 	projection_parameter->setProjectionParamsRaw(projection_parameter_raw);
 
-	return projection_parameter;
+	return std::move(projection_parameter);
 }
 
 CameraProjectionParameter

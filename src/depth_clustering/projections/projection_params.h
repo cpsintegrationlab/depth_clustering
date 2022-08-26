@@ -61,9 +61,9 @@ struct ProjectionParamsRaw
 
 		double horizontal_step_per_degree = horizontal_steps / 360.0;
 
-		horizontal_step_start = std::round(
+		horizontal_step_start = round(
 				0 + (180 - horizontal_angle_start) * horizontal_step_per_degree);
-		horizontal_step_end = std::round(
+		horizontal_step_end = round(
 				horizontal_steps + (-180 - horizontal_angle_end) * horizontal_step_per_degree);
 		horizontal_steps_current = horizontal_step_end - horizontal_step_start;
 	}
