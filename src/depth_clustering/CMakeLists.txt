@@ -29,26 +29,44 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/d
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/depth_clustering/${CMAKE_BUILD_TYPE_PATH}/lib)
 
 # Set package parameters
-set(Boost_NO_BOOST_CMAKE TRUE)
-set(Boost_NO_SYSTEM_PATHS TRUE)
-set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/boost)
-set(Boost_USE_STATIC_LIBS ON)
-set(EIGEN_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/eigen/include/eigen3)
-set(OpenCV_STATIC ON)
+if(${LOCAL})
+	set(Boost_NO_BOOST_CMAKE TRUE)
+	set(Boost_NO_SYSTEM_PATHS TRUE)
+	set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/boost)
+	set(Boost_USE_STATIC_LIBS ON)
+	set(EIGEN3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/eigen/include/eigen3)
+	set(OpenCV_STATIC ON)
+endif()
 
 # Find packages
-find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
-find_package(Eigen3 REQUIRED)
-find_package(OpenCV REQUIRED PATHS ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/opencv NO_DEFAULT_PATH)
+if(${LOCAL})
+	find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
+	find_package(Eigen3 REQUIRED)
+	find_package(OpenCV REQUIRED PATHS ${PROJECT_SOURCE_DIR}/../../install/${ARCH}/opencv NO_DEFAULT_PATH)
+else()
+	find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
+	find_package(Eigen3 REQUIRED)
+	find_package(OpenCV REQUIRED)
+endif()
 
 # Set include directories
-include_directories(
-	${PROJECT_SOURCE_DIR}
-	${PROJECT_BINARY_DIR}
-	${Boost_INCLUDE_DIRS}
-	${EIGEN_INCLUDE_DIRS}
-	${OpenCV_INCLUDE_DIRS}
-)
+if(${LOCAL})
+	include_directories(
+		${PROJECT_SOURCE_DIR}
+		${PROJECT_BINARY_DIR}
+		${Boost_INCLUDE_DIRS}
+		${EIGEN3_INCLUDE_DIR}
+		${OpenCV_INCLUDE_DIRS}
+	)
+else()
+	include_directories(
+		${PROJECT_SOURCE_DIR}
+		${PROJECT_BINARY_DIR}
+		SYSTEM ${Boost_INCLUDE_DIRS}
+		SYSTEM ${EIGEN3_INCLUDE_DIR}
+		SYSTEM ${OpenCV_INCLUDE_DIRS}
+	)
+endif()
 
 # Set installation targets
 install(

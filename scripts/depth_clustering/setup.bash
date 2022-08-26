@@ -5,17 +5,32 @@ ARCH=amd64
 CORES=$(grep -c ^processor /proc/cpuinfo)
 ECLIPSE=4.20.0
 DB_TYPE=Debug
+LOCAL=1
 RL_TYPE=Release
 
 # Parse arguments
 if [ "$#" -gt 0 ]; then
-	if [ "$1" = "--arch=amd64" ]; then
+	if [ "$1" = "--local" ] || [ "$2" = "--local" ]; then
+		LOCAL=1
+	elif [ "$1" = "--system" ] || [ "$2" = "--system" ]; then
+		LOCAL=0
+	fi
+
+	if [ "$1" = "--arch=amd64" ] || [ "$2" = "--arch=amd64" ]; then
 		ARCH=amd64
-	elif [ "$1" = "--arch=arm64" ]; then
+	elif [ "$1" = "--arch=arm64" ] || [ "$2" = "--arch=arm64" ]; then
 		ARCH=arm64
-	else
+		LOCAL=1
+	fi
+
+	if [ "$1" != "--local" ] && [ "$2" != "--local" ] &&
+		   [ "$1" = "--system" ] && [ "$2" = "--system" ] &&
+		   [ "$1" = "--arch=amd64" ] && [ "$2" = "--arch=amd64" ] &&
+		   [ "$1" = "--arch=arm64" ] && [ "$2" = "--arch=arm64" ]; then
 		printf "Usage:\t$0\n"
 		printf "\t$0 --arch=[amd64, arm64]\n"
+		printf "\t$0 --local\n"
+		printf "\t$0 --system\n"
 
 		exit
 	fi
@@ -106,132 +121,134 @@ DC_FILE_CMAKE_TOOLCHAIN=$PROJECT_DIR/cmake/$DC/arm64.toolchain.cmake
 
 echo "[INFO]: Setting up Depth Clustering for $ARCH architecture..."
 
-# Create build and temporary folders
-if [ -d "$TEMP_DIR" ]; then
-	echo "[INFO]: Removing existing temporary folders..."
-	rm -rf "$TEMP_DIR"
-fi
-echo "[INFO]: Creating build and temporary folders..."
-mkdir -p "$BUILD_DIR"
-mkdir -p "$TEMP_DIR"
-RETURN=$?
-if [ $RETURN -ne 0 ]; then
-	echo "[ERROR]: Setup for Depth Clustering failed. Quit."
-	exit $RETURN
-fi
+if [ $LOCAL -eq 1 ]; then
+	# Create build and temporary folders
+	if [ -d "$TEMP_DIR" ]; then
+		echo "[INFO]: Removing existing temporary folders..."
+		rm -rf "$TEMP_DIR"
+	fi
+	echo "[INFO]: Creating build and temporary folders..."
+	mkdir -p "$BUILD_DIR"
+	mkdir -p "$TEMP_DIR"
+	RETURN=$?
+	if [ $RETURN -ne 0 ]; then
+		echo "[ERROR]: Setup for Depth Clustering failed. Quit."
+		exit $RETURN
+	fi
 
-# Install Boost
-echo "[INFO]: Installing Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
-if [ ! -d "$BOOST_DIR_BUILD" ]; then
-	echo "[INFO]: Downloading Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
-	cd "$TEMP_DIR"
-	curl --progress-bar -L -k "$BOOST_URL" -o "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz"
+	# Install Boost
+	echo "[INFO]: Installing Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
+	if [ ! -d "$BOOST_DIR_BUILD" ]; then
+		echo "[INFO]: Downloading Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
+		cd "$TEMP_DIR"
+		curl --progress-bar -L -k "$BOOST_URL" -o "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz"
 
-	echo "[INFO]: Extracting Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
-	tar -xzf "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz"
-	mv "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}" "$BOOST_DIR_BUILD"
-else
-	echo "[INFO]: Boost build folder exists. Skip."
-fi
-echo "[INFO]: Building Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
-if [ ! -d "$BOOST_DIR_INSTALL" ]; then
-	cd "$BOOST_DIR_BUILD"
-	./bootstrap.sh "$BOOST_BOOTSTRAP_FLAGS" --prefix="$(printf "%q" "$BOOST_DIR_INSTALL")"
-
-	if [ "$ARCH" = "arm64" ]; then
-		sed -i "/using gcc ;/c\using gcc : arm : aarch64-linux-gnu-g++ ;" project-config.jam
-		./b2 cxxflags="$BOOST_CFLAGS" cflags="$BOOST_CFLAGS" link=static -j$CORES install
+		echo "[INFO]: Extracting Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
+		tar -xzf "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz"
+		mv "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}" "$BOOST_DIR_BUILD"
 	else
-		./b2 cxxflags="$BOOST_CFLAGS" cflags="$BOOST_CFLAGS" -j$CORES install
+		echo "[INFO]: Boost build folder exists. Skip."
 	fi
+	echo "[INFO]: Building Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
+	if [ ! -d "$BOOST_DIR_INSTALL" ]; then
+		cd "$BOOST_DIR_BUILD"
+		./bootstrap.sh "$BOOST_BOOTSTRAP_FLAGS" --prefix="$(printf "%q" "$BOOST_DIR_INSTALL")"
 
-	RETURN=$?
-	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup for Depth Clustering failed. Quit."
-		exit $RETURN
-	fi
-else
-	echo "[INFO]: Boost install folder exists. Skip."
-fi
+		if [ "$ARCH" = "arm64" ]; then
+			sed -i "/using gcc ;/c\using gcc : arm : aarch64-linux-gnu-g++ ;" project-config.jam
+			./b2 cxxflags="$BOOST_CFLAGS" cflags="$BOOST_CFLAGS" link=static -j$CORES install
+		else
+			./b2 cxxflags="$BOOST_CFLAGS" cflags="$BOOST_CFLAGS" -j$CORES install
+		fi
 
-# Install Eigen
-echo "[INFO]: Installing Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
-if [ ! -d "$EIGEN_DIR_SRC" ]; then
-	echo "[INFO]: Downloading Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
-	cd "$TEMP_DIR"
-	curl --progress-bar -L -k "$EIGEN_URL" -o "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
-
-	echo "[INFO]: Extracting Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
-	tar -xzf "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
-	mv "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}" "$EIGEN_DIR_SRC"
-else
-	echo "[INFO]: Eigen source folder exists. Skip."
-fi
-echo "[INFO]: Setting up Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
-if [ ! -d "$EIGEN_DIR_BUILD" ]; then
-	mkdir -p "$EIGEN_DIR_BUILD"
-	cd "$EIGEN_DIR_BUILD"
-	cmake -DEIGEN_TEST_NO_OPENGL=ON -DCMAKE_INSTALL_PREFIX="$EIGEN_DIR_INSTALL" "$EIGEN_DIR_SRC"
-else
-	echo "[INFO]: Eigen build folder exists. Skip."
-fi
-echo "[INFO]: Building Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
-if [ ! -d "$EIGEN_DIR_INSTALL" ]; then
-	cd "$EIGEN_DIR_BUILD"
-	make -j$CORES install
-	RETURN=$?
-	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup for Depth Clustering failed. Quit."
-		exit $RETURN
-	fi
-else
-	echo "[INFO]: Eigen install folder exists. Skip."
-fi
-
-# Install OpenCV
-echo "[INFO]: Installing OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
-if [ ! -d "$OPENCV_DIR_SRC" ]; then
-	echo "[INFO]: Downloading OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
-	cd "$TEMP_DIR"
-	curl --progress-bar -L -k "$OPENCV_URL" -o "${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
-
-	echo "[INFO]: Extracting OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
-	tar -xzf "${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
-	mv "opencv-${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}" "$OPENCV_DIR_SRC"
-	sed -i "46 i find_program(CMAKE_MAKE_PROGRAM NAMES make)" "$OPENCV_DIR_SRC/platforms/linux/arm.toolchain.cmake"
-else
-	echo "[INFO]: OpenCV source folder exists. Skip."
-fi
-echo "[INFO]: Setting up OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
-if [ ! -d "$OPENCV_DIR_BUILD" ]; then
-	mkdir -p "$OPENCV_DIR_BUILD"
-	cd "$OPENCV_DIR_BUILD"
-
-    if [ "$ARCH" = "arm64" ]; then
-		cmake $OPENCV_CMAKE_BUILD_OPTIONS -DBUILD_SHARED_LIBS="OFF" -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DCMAKE_TOOLCHAIN_FILE="$OPENCV_FILE_CMAKE_TOOLCHAIN" -DWITH_CUDA="0" -DWITH_LAPACK="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+		RETURN=$?
+		if [ $RETURN -ne 0 ]; then
+			echo "[ERROR]: Setup for Depth Clustering failed. Quit."
+			exit $RETURN
+		fi
 	else
-		cmake $OPENCV_CMAKE_BUILD_OPTIONS -DBUILD_SHARED_LIBS="OFF" -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DWITH_CUDA="0" -DWITH_LAPACK="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+		echo "[INFO]: Boost install folder exists. Skip."
 	fi
-else
-	echo "[INFO]: OpenCV build folder exists. Skip."
-fi
-echo "[INFO]: Building OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
-if [ ! -d "$OPENCV_DIR_INSTALL" ]; then
-	cd "$OPENCV_DIR_BUILD"
-	make -j$CORES install
-	RETURN=$?
-	if [ $RETURN -ne 0 ]; then
-		echo "[ERROR]: Setup for Depth Clustering failed. Quit."
-		exit $RETURN
-	fi
-else
-	echo "[INFO]: OpenCV install folder exists. Skip."
-fi
 
-# Remove temporary folder
-if [ -d "$TEMP_DIR" ]; then
-	echo "[INFO]: Removing temporary folder..."
-	rm -rf "$TEMP_DIR"
+	# Install Eigen
+	echo "[INFO]: Installing Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+	if [ ! -d "$EIGEN_DIR_SRC" ]; then
+		echo "[INFO]: Downloading Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+		cd "$TEMP_DIR"
+		curl --progress-bar -L -k "$EIGEN_URL" -o "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
+
+		echo "[INFO]: Extracting Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+		tar -xzf "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
+		mv "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}" "$EIGEN_DIR_SRC"
+	else
+		echo "[INFO]: Eigen source folder exists. Skip."
+	fi
+	echo "[INFO]: Setting up Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+	if [ ! -d "$EIGEN_DIR_BUILD" ]; then
+		mkdir -p "$EIGEN_DIR_BUILD"
+		cd "$EIGEN_DIR_BUILD"
+		cmake -DEIGEN_TEST_NO_OPENGL=ON -DCMAKE_INSTALL_PREFIX="$EIGEN_DIR_INSTALL" "$EIGEN_DIR_SRC"
+	else
+		echo "[INFO]: Eigen build folder exists. Skip."
+	fi
+	echo "[INFO]: Building Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
+	if [ ! -d "$EIGEN_DIR_INSTALL" ]; then
+		cd "$EIGEN_DIR_BUILD"
+		make -j$CORES install
+		RETURN=$?
+		if [ $RETURN -ne 0 ]; then
+			echo "[ERROR]: Setup for Depth Clustering failed. Quit."
+			exit $RETURN
+		fi
+	else
+		echo "[INFO]: Eigen install folder exists. Skip."
+	fi
+
+	# Install OpenCV
+	echo "[INFO]: Installing OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+	if [ ! -d "$OPENCV_DIR_SRC" ]; then
+		echo "[INFO]: Downloading OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+		cd "$TEMP_DIR"
+		curl --progress-bar -L -k "$OPENCV_URL" -o "${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
+
+		echo "[INFO]: Extracting OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+		tar -xzf "${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
+		mv "opencv-${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}" "$OPENCV_DIR_SRC"
+		sed -i "46 i find_program(CMAKE_MAKE_PROGRAM NAMES make)" "$OPENCV_DIR_SRC/platforms/linux/arm.toolchain.cmake"
+	else
+		echo "[INFO]: OpenCV source folder exists. Skip."
+	fi
+	echo "[INFO]: Setting up OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+	if [ ! -d "$OPENCV_DIR_BUILD" ]; then
+		mkdir -p "$OPENCV_DIR_BUILD"
+		cd "$OPENCV_DIR_BUILD"
+
+		if [ "$ARCH" = "arm64" ]; then
+			cmake $OPENCV_CMAKE_BUILD_OPTIONS -DBUILD_SHARED_LIBS="OFF" -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DCMAKE_TOOLCHAIN_FILE="$OPENCV_FILE_CMAKE_TOOLCHAIN" -DWITH_CUDA="0" -DWITH_LAPACK="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+		else
+			cmake $OPENCV_CMAKE_BUILD_OPTIONS -DBUILD_SHARED_LIBS="OFF" -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR_INSTALL" -DCMAKE_CXX_FLAGS="$OPENCV_CFLAGS" -DCMAKE_C_FLAGS="$OPENCV_CFLAGS" -DWITH_CUDA="0" -DWITH_LAPACK="0" -DENABLE_PRECOMPILED_HEADERS=OFF "$OPENCV_DIR_SRC"
+		fi
+	else
+		echo "[INFO]: OpenCV build folder exists. Skip."
+	fi
+	echo "[INFO]: Building OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
+	if [ ! -d "$OPENCV_DIR_INSTALL" ]; then
+		cd "$OPENCV_DIR_BUILD"
+		make -j$CORES install
+		RETURN=$?
+		if [ $RETURN -ne 0 ]; then
+			echo "[ERROR]: Setup for Depth Clustering failed. Quit."
+			exit $RETURN
+		fi
+	else
+		echo "[INFO]: OpenCV install folder exists. Skip."
+	fi
+
+	# Remove temporary folder
+	if [ -d "$TEMP_DIR" ]; then
+		echo "[INFO]: Removing temporary folder..."
+		rm -rf "$TEMP_DIR"
+	fi
 fi
 
 # Create Depth Clustering projects
@@ -242,9 +259,9 @@ if [ ! -d "$DC_DIR_BUILD_DB" ]; then
 	cd "$DC_DIR_BUILD_DB"
 
 	if [ "$ARCH" = "arm64" ]; then
-		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$DC_FILE_CMAKE_TOOLCHAIN" -DARCH=$ARCH "$DC_DIR_SRC"
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$DC_FILE_CMAKE_TOOLCHAIN" -DARCH=$ARCH -DLOCAL=1 "$DC_DIR_SRC"
 	else
-		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$DC_DIR_SRC"
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$DB_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH -DLOCAL=$LOCAL "$DC_DIR_SRC"
 	fi
 
 	RETURN=$?
@@ -261,9 +278,9 @@ if [ ! -d "$DC_DIR_BUILD_RL" ]; then
 	cd "$DC_DIR_BUILD_RL"
 
 	if [ "$ARCH" = "arm64" ]; then
-		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$DC_FILE_CMAKE_TOOLCHAIN" -DARCH=$ARCH "$DC_DIR_SRC"
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DCMAKE_TOOLCHAIN_FILE="$DC_FILE_CMAKE_TOOLCHAIN" -DARCH=$ARCH -DLOCAL=1 "$DC_DIR_SRC"
 	else
-		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH "$DC_DIR_SRC"
+		cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$RL_TYPE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$CORES -DCMAKE_ECLIPSE_VERSION=$ECLIPSE -DARCH=$ARCH -DLOCAL=$LOCAL "$DC_DIR_SRC"
 	fi
 
 	RETURN=$?
