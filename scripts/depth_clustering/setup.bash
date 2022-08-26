@@ -125,7 +125,7 @@ echo "[INFO]: Installing Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
 if [ ! -d "$BOOST_DIR_BUILD" ]; then
 	echo "[INFO]: Downloading Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
 	cd "$TEMP_DIR"
-	wget -q --show-progress "$BOOST_URL" -O "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz"
+	curl --progress-bar -L -k "$BOOST_URL" -o "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz"
 
 	echo "[INFO]: Extracting Boost $BOOST_VER_MAJ.$BOOST_VER_MIN.$BOOST_VER_PAT..."
 	tar -xzf "boost_${BOOST_VER_MAJ}_${BOOST_VER_MIN}_${BOOST_VER_PAT}.tar.gz"
@@ -159,7 +159,7 @@ echo "[INFO]: Installing Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
 if [ ! -d "$EIGEN_DIR_SRC" ]; then
 	echo "[INFO]: Downloading Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
 	cd "$TEMP_DIR"
-	wget -q --show-progress "$EIGEN_URL"
+	curl --progress-bar -L -k "$EIGEN_URL" -o "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
 
 	echo "[INFO]: Extracting Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
 	tar -xzf "eigen-${EIGEN_VER_MAJ}.${EIGEN_VER_MIN}.${EIGEN_VER_PAT}.tar.gz"
@@ -171,7 +171,7 @@ echo "[INFO]: Setting up Eigen $EIGEN_VER_MAJ.$EIGEN_VER_MIN.$EIGEN_VER_PAT..."
 if [ ! -d "$EIGEN_DIR_BUILD" ]; then
 	mkdir -p "$EIGEN_DIR_BUILD"
 	cd "$EIGEN_DIR_BUILD"
-	cmake -DCMAKE_INSTALL_PREFIX="$EIGEN_DIR_INSTALL" "$EIGEN_DIR_SRC"
+	cmake -DEIGEN_TEST_NO_OPENGL=ON -DCMAKE_INSTALL_PREFIX="$EIGEN_DIR_INSTALL" "$EIGEN_DIR_SRC"
 else
 	echo "[INFO]: Eigen build folder exists. Skip."
 fi
@@ -193,7 +193,7 @@ echo "[INFO]: Installing OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT.
 if [ ! -d "$OPENCV_DIR_SRC" ]; then
 	echo "[INFO]: Downloading OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
 	cd "$TEMP_DIR"
-	wget -q --show-progress "$OPENCV_URL"
+	curl --progress-bar -L -k "$OPENCV_URL" -o "${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
 
 	echo "[INFO]: Extracting OpenCV $OPENCV_VER_MAJ.$OPENCV_VER_MIN.$OPENCV_VER_PAT..."
 	tar -xzf "${OPENCV_VER_MAJ}.${OPENCV_VER_MIN}.${OPENCV_VER_PAT}.tar.gz"
