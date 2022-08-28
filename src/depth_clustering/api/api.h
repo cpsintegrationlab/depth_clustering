@@ -94,6 +94,9 @@ public:
 	void
 	setParameter(const DepthClusteringParameter& parameter);
 
+	void
+	disableConsoleLogging();
+
 	bool
 	initializeForApollo(const std::string& file_path_name_config, const std::string& log_path);
 

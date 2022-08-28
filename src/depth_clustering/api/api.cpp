@@ -424,6 +424,13 @@ DepthClustering::setParameter(const DepthClusteringParameter& parameter)
 	clusterer_->AddClient(bounding_box_.get());
 }
 
+void
+DepthClustering::disableConsoleLogging()
+{
+	std::cout.rdbuf(NULL);
+	stdout = freopen("/dev/null", "w", stdout);
+}
+
 bool
 DepthClustering::initializeForApollo(const std::string& file_path_name_config,
 		const std::string& log_path)
